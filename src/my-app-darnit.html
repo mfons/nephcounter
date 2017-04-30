@@ -1,0 +1,138 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="nephcounter-main.html">
+
+<dom-module id="my-app">
+  <template>
+  <style>
+    :host {
+      --app-primary-color: blue;  /* orange */
+      --app-secondary-color: lightblue;  /* teal */
+      --app-primary-text-color: black;
+      --app-secondary-text-color: gray;
+      --app-error-color: red;
+      display: block;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    paper-button[raised] {
+      background-color: var(--app-primary-color);
+      color: black;
+      font-size: 14px;
+    }
+
+    .offline {
+      font-weight: 300;
+      font-size: 18px;
+    }
+
+    .signin-view {
+      color: black;
+      padding-top: 10%;
+      max-width: 400px;
+      margin: auto;
+      text-align: center;
+    }
+
+    .header {
+      height: 350px;
+      overflow: hidden;
+    }
+
+    h1 {
+      letter-spacing: 2px;
+      font-weight: 500;
+    }
+
+    p {
+      font-weight: 300;
+      font-size: 18px;
+    }
+
+    .giant {
+      font-size: 3.4em;
+    }
+
+    .footer {
+      font-size: 13px;
+    }
+
+    a:link, a:visited {
+      color: var(--app-primary-color);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    button {
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      background: var(--app-primary-color);
+      color: white;
+      border: none;
+      border-radius: 3px;
+      text-transform: uppercase;
+      padding: 0.7em 0.57em;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
+
+
+  <div class="signin-view" id="signin" hidden>
+    <div class="header">
+      <div class="giant">Nephcounter</div>
+      <p></p>
+      <br>
+      <!--nephcount-login user="{{user}}" hidden$="[[offline]]"></nephcount-login-->
+      <div hidden$="[[!offline]]" class="offline">We can't log on right now because we are offline.</div>
+    </div>
+
+    <p class="footer"> Made with Google Polymer and Firebase&nbsp; by <a href="https://www.facebook.com/sandra.fons.94?fref=ts">Sandra M. Fons and <a href="https://www.linkedin.com/in/michaelafons">Michael A. Fons.  Consulting Nutritionist: Lesley Cloke, R.D.</a>.
+      Find this on <a href="https://github.com/mfons/nephcount">GitHub</a>.</p>
+  </div>
+
+  <nephcounter-main id="nephcountid" offline="[[offline]]" ></nephcounter-main>
+  </template>
+
+  <script>
+    class MyApp extends Polymer.Element {
+
+      static get is() { return 'my-app'; }
+
+      static get properties() {
+        return {
+          offline: {
+            type: Boolean,
+            value: false
+          },
+        };
+      }
+
+      // static get observers() {
+      //   return [
+      //     '_routePageChanged(routeData.page)',
+      //   ];
+      // }
+
+      // _showPage404() {
+      //   this.page = 'view404';
+      // }
+    }
+
+    window.customElements.define(MyApp.is, MyApp);
+  </script>
+</dom-module>
