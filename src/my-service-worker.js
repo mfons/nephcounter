@@ -11,5 +11,20 @@
 /* eslint no-console: ["error", { allow: ["info"] }] */
 
 console.info(
-  'see /src/my-service-worker.js please!'
+  'I am going to do my own service work thank you very much!'
 );
+self.addEventListener('fetch', function(event){
+    event.respondWith(
+//         new Response('Hello there <b>world</b>!!', {
+//             headers: { 'Content-Type': 'text/HTML'}
+//         })
+        fetch(event.request).then(function(response) {
+            if (response.status === 404) {
+                return new Response('Wow man, this page was not found...');
+            }
+            return response;
+        }).catch(function() {
+            return new Response('Whoa dude!  totally bummed out man... :-( ');
+        })
+    );
+});
