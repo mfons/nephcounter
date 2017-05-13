@@ -11,5 +11,5 @@
 /* eslint no-console: ["error", { allow: ["info"] }] */
 
 console.info(
-  'see /src/my-service-worker.js please!'
+  'see /my-service-worker.js please!'
 );
