@@ -16,10 +16,12 @@
     "iron-selector": "PolymerElements/iron-selector#2.0-preview",
     "paper-icon-button": "PolymerElements/paper-icon-button#2.0-preview",
     "polymer": "Polymer/polymer#^2.0.0-rc.1",
-    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0-rc.4"
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0-rc.4",
+    "polymerfire": "firebase/polymerfire#^0.11.2"
   },
   "resolutions": {
-    "polymer": "^2.0.0-rc.1"
+    "polymer": "^2.0.0-rc.3",
+    "webcomponentsjs": "^1.0.0-rc.4"
   },
   "devDependencies": {
     "web-component-tester": "6.0.0-prerelease.5"

@@ -1,6 +1,8 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="nephcounter-main.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 
 <dom-module id="my-app">
   <template>
@@ -12,13 +14,17 @@
       }
     </style>
 
-    <!-- <div class="card">
-      <div class="circle">0</div>
-      <h1>My App</h1>
-      <p>This page will call the normal page</p>
-      <p>Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Cu mei vide viris gloriatur, at populo eripuit sit.</p>
-    </div> -->
-
+    <firebase-app
+      auth-domain="nephcounter.firebaseapp.com"
+      database-url="https://nephcounter.firebaseio.com"
+      api-key="AIzaSyDbXgNCFBMglr8WWEkZuhMHQohMduiJsUM"
+      storage-bucket="nephcounter.appspot.com"
+      messaging-sender-id="808384625893"
+      project-id="nephcounter">
+    </firebase-app>
+    <firebase-auth id="auth" user="{{user}}" provider="google" >
+    </firebase-auth>
+    <!-- on-error="handleError" -->
     <nephcounter-main></nephcounter-main>
   </template>
 
