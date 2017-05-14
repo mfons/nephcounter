@@ -1,0 +1,51 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<dom-module id="nephcounter-login">
+  <template>
+    <firebase-auth
+       id="auth"
+       user="{{user}}"
+       provider="google"
+       status-known="{{statusKnown}}">
+    </firebase-auth>
+    <template is="dom-if" if="[[user]]">
+       <h1>Welcome [[user.displayName]]</h1>
+    </template>
+
+    <paper-button raised on-tap="login" >Sign In</paper-button>
+    <paper-button raised on-tap="logout" >Sign Out</paper-button>
+  </template>
+
+  <script>
+    class NephcounterLogin extends Polymer.Element {
+      static get is() { return 'nephcounter-login'; }
+
+      static get properties() {
+        return {
+          user: {
+            type: Object,
+            notify: true,
+          },
+        };
+      }
+
+      login() {
+            this.$.auth.signInWithPopup()
+                .then(function(response) {
+                console.log("login succeeded.");
+            })
+                .catch(function(error) {
+                console.log("login failed...");
+            });;
+        }
+
+        logout() {
+            this.$.auth.signOut();
+        }
+    }
+
+    window.customElements.define(NephcounterLogin.is, NephcounterLogin);
+  </script>
+</dom-module>
