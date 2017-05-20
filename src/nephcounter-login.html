@@ -1,6 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="redux-store.html">
 
 <dom-module id="nephcounter-login">
   <template>
@@ -16,10 +17,12 @@
 
     <paper-button raised on-tap="login" >Sign In</paper-button>
     <paper-button raised on-tap="logout" >Sign Out</paper-button>
+
+    <h3>you have [[nutrientCount]] nutrients!</h3>
   </template>
 
   <script>
-    class NephcounterLogin extends Polymer.Element {
+    class NephcounterLogin extends ReduxMixin(Polymer.Element) {
       static get is() { return 'nephcounter-login'; }
 
       static get properties() {
@@ -28,7 +31,24 @@
             type: Object,
             notify: true,
           },
+          nutrients: {
+            type: Array,
+            statePath: 'nutrients',
+          },
+          nutrientCount: {
+            type: Number,
+            computed: 'computeNutrientCount(nutrients)',
+          },
         };
+      }
+
+      connectedCallback() {
+          super.connectedCallback();
+          const state = this.getState();
+      }
+
+      computeNutrientCount(nutrients) {
+        return nutrients.length;
       }
 
       login() {

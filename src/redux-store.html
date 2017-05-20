@@ -1,0 +1,21 @@
+<link rel="import" href="../bower_components/polymer-redux/polymer-redux.html">
+
+<script>
+  const initialState = {
+    nutrients: ['oink']
+  };
+
+  const reducer = (state, action) => {
+    if (!state) return initialState;
+    switch (action.type) {
+      case 'ADD_NUTRIENT' :
+        const nutrients = state.nutrients.slice(0);
+        nutrients.push(action.nutrient);
+        return Object.assign({}, state, { nutrients: nutrients });
+    }
+  };
+
+  const store = Redux.createStore(reducer);
+  //const ReduxBehavior = PolymerRedux(store);
+  const ReduxMixin = PolymerRedux(store);
+</script>

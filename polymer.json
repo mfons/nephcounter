@@ -10,7 +10,8 @@
   "sources": [
     "src/**/*",
     "images/**/*",
-    "bower.json"
+    "bower.json",
+    "node_modules/redux/**/*"
   ],
   "extraDependencies": [
     "manifest.json",
