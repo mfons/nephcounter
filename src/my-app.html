@@ -9,11 +9,82 @@
   <template>
     <style include="shared-styles">
       :host {
+        --app-primary-color: blue;  /* orange */
+        --app-secondary-color: lightblue;  /* teal */
+        --app-primary-text-color: black;
+        --app-secondary-text-color: gray;
+        --app-error-color: red;
         display: block;
+      }
 
-        padding: 10px;
+      [hidden] {
+        display: none !important;
+      }
+
+      paper-button[raised] {
+        background-color: var(--app-primary-color);
+        color: black;
+        font-size: 14px;
+      }
+
+      .offline {
+        font-weight: 300;
+        font-size: 18px;
+      }
+
+      .signin-view {
+        color: black;
+        padding-top: 10%;
+        max-width: 400px;
+        margin: auto;
+        text-align: center;
+      }
+
+      .header {
+        height: 300px;
+        overflow: hidden;
+      }
+
+      h1 {
+        letter-spacing: 2px;
+        font-weight: 500;
+      }
+
+      p {
+        font-weight: 300;
+        font-size: 18px;
+      }
+
+      .giant {
+        font-size: 2.0em;
+      }
+
+      .footer {
+        font-size: 13px;
+      }
+
+      a:link, a:visited {
+        color: var(--app-primary-color);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      button {
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        background: var(--app-primary-color);
+        color: white;
+        border: none;
+        border-radius: 3px;
+        text-transform: uppercase;
+        padding: 0.7em 0.57em;
+        font-size: 14px;
+        cursor: pointer;
       }
     </style>
+
 
     <firebase-app
       auth-domain="nephcounter.firebaseapp.com"
@@ -27,13 +98,35 @@
     <firebase-auth id="auth" user="{{user}}" provider="google" >
     </firebase-auth>
     <!-- on-error="handleError" -->
-      <nephcounter-login user="{{user}}" ></nephcounter-login>
+
+    <div class="signin-view" id="signin" > <!-- hidden -->
+      <div class="header">
+        <div class="giant">Nephcounter</div>
+        <p>A Nutrient Monitoring and Reporting App Specialized for the needs of Dialysis Patients</p>
+        <br>
+        <nephcounter-login user="{{user}}" hidden$="[[offline]]"></nephcounter-login>
+        <!-- <button on-tap="login" raised hidden$="[[offline]]">Sign-in</button> -->
+        <div hidden$="[[!offline]]" class="offline">We can't log on right now because we are offline.</div>
+      </div>
+
+      <p class="footer">Made with Google Polymer/2, Firebase, Redux, and the USDA nutrition database.&nbsp; Created by <a href="https://www.facebook.com/sandra.fons.94?fref=ts">Sandra M. Fons</a>, User Experience Consultant, and <a href="https://www.linkedin.com/in/michaelafons">Michael A. Fons</a>, Applications Developer.  Consulting Nutritionist: Lesley Cloke, R.D.
+        Find this on <a href="https://github.com/mfons/nephcounter">GitHub</a>.</p>
+    </div>
+
           <!-- <nephcounter-main></nephcounter-main> -->
   </template>
 
   <script>
     class MyApp extends Polymer.Element {
       static get is() { return 'my-app'; }
+      static get properties() {
+        return {
+          offline: {
+            type: Boolean,
+            value: true,
+          },
+        };
+      }
     }
 
     window.customElements.define(MyApp.is, MyApp);
