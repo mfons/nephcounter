@@ -55,11 +55,67 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         line-height: 1.5;
         min-height: 100vh;
         background-color: #eeeeee;
+        background: -webkit-linear-gradient(-45deg, rgba(12, 34, 255, 0.05), rgba(222, 12, 255, 0.1));
+        background: linear-gradient(-45deg, rgba(12, 34, 255, 0.05), rgba(222, 12, 255, 0.1));
+      }
+      /* styling for render while resources are loading */
+      .splash {
+        display: block;
+        text-align: center;
+        font-weight: 300;
+        font-size: 18px;
+        color: black;
+        max-width: 400px;
+        margin: auto;
+        padding-top: 10%;
+      }
+
+      .header {
+        height: 350px;
+        overflow: hidden;
+      }
+
+      .loading {
+        animation: blink 1.5s linear infinite;
+        -o-animation: blink 1.5s linear infinite;
+        -moz-animation: blink 1.5s linear infinite;
+        -webkit-animation: blink 1.5s linear infinite;
+      }
+
+      @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
+      @-webkit-keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
+      @-moz-keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
+      @-o-keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
+
+      .footer {
+        font-size: 13px;
+      }
+
+      a:link, a:visited {
+        color: blue;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
       }
     </style>
   </head>
   <body>
-    <my-app>Hi!</my-app>
+    <my-app>
+      Hi!
+      <div class="splash">
+        <div class="header">
+          <div style="font-size: 3.5em;">Nephcounter</div>
+          <p>A Nutrient Monitoring and Reporting App Specialized for the needs of Dialysis Patients</p>
+          <br>
+          <p class="loading"> Loading... </p>
+        </div>
+
+        <p class="footer">Made with Google Polymer/2, Firebase, Redux, and the USDA nutrition database&nbsp; created by <a href="https://www.facebook.com/sandra.fons.94?fref=ts">Sandra M. Fons, Subject Matter Expert and User Experience Consultant, and <a href="https://www.linkedin.com/in/michaelafons">Michael A. Fons, Applications Developer.  Consulting Nutritionist: Lesley Cloke, R.D.</a>.
+          Find this on <a href="https://github.com/mfons/nephcounter">GitHub</a>.</p>
+      </div>
+    </my-app>
     <!-- Built with love using Polymer Starter Kit -->
     <!-- Load and register pre-caching Service Worker -->
     <script>
