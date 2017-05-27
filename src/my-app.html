@@ -4,6 +4,7 @@
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="redux-store.html">
 <!-- START HERE:  YOU MUST NEXT FIND OUT HOW TO TRANSLATE THE MY-APP FIREBASE STUFF (LIKE HOW DO WE DO READY IN 2.0?) AND THEN TRANSLATE IT TO HERE AND TRY IT OUT (GET A BUTTON) -->
 <dom-module id="my-app">
   <template>
@@ -56,7 +57,7 @@
       }
 
       .giant {
-        font-size: 2.0em;
+        font-size: 2.8em;
       }
 
       .footer {
@@ -117,15 +118,32 @@
   </template>
 
   <script>
-    class MyApp extends Polymer.Element {
+    class MyApp extends ReduxMixin(Polymer.Element) {
       static get is() { return 'my-app'; }
       static get properties() {
         return {
           offline: {
             type: Boolean,
-            value: true,
+            statePath: 'offline',
           },
         };
+      }
+      static get actions() {
+        return {
+          goOnline: () => { return { type: 'GO_ONLINE' } },
+          goOffline: () => { return { type: 'GO_OFFLINE' } },
+        };
+      }
+
+      ready () {
+        super.ready();
+        window.addEventListener('online', function() {
+          this.dispatch('goOnline');
+        }.bind(this));
+        window.addEventListener('offline', function() {
+          this.dispatch('goOffline');
+        }.bind(this));
+
       }
     }
 

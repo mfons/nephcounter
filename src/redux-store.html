@@ -2,7 +2,8 @@
 
 <script>
   const initialState = {
-    nutrients: ['oink']
+    nutrients: ['oink'],
+    offline: navigator.onLine === false
   };
 
   const reducer = (state, action) => {
@@ -12,6 +13,10 @@
         const nutrients = state.nutrients.slice(0);
         nutrients.push(action.nutrient);
         return Object.assign({}, state, { nutrients: nutrients });
+      case 'GO_ONLINE' :
+        return Object.assign({}, state, { offline: false });
+      case 'GO_OFFLINE' :
+        return Object.assign({}, state, { offline: true });
     }
   };
 
