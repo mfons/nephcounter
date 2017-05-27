@@ -100,13 +100,12 @@
     </firebase-auth>
     <!-- on-error="handleError" -->
 
-    <div class="signin-view" id="signin" > <!-- hidden -->
+    <div class="signin-view" id="signin" hidden>
       <div class="header">
         <div class="giant">Nephcounter</div>
         <p>A Nutrient Monitoring and Reporting App Specialized for the needs of Dialysis Patients</p>
         <br>
         <nephcounter-login user="{{user}}" hidden$="[[offline]]"></nephcounter-login>
-        <!-- <button on-tap="login" raised hidden$="[[offline]]">Sign-in</button> -->
         <div hidden$="[[!offline]]" class="offline">We can't log on right now because we are offline.</div>
       </div>
 
@@ -114,7 +113,7 @@
         Find this on <a href="https://github.com/mfons/nephcounter">GitHub</a>.</p>
     </div>
 
-          <!-- <nephcounter-main></nephcounter-main> -->
+    <nephcounter-main id="nephcountid"></nephcounter-main>
   </template>
 
   <script>
@@ -137,13 +136,31 @@
 
       ready () {
         super.ready();
+        this.setUpOfflineListeners();
+
+        this.$.auth.auth.onAuthStateChanged(function(user) {
+          if (!!user) {
+//            this.importHref(this.resolveUrl('nephcount-main.html'), function() {
+              //this.$.nephcountid.user = user;
+              this.$.signin.hidden = true;
+              this.$.nephcountid.hidden = false;
+              // We went from hidden to visible, so app-layout needs to recompute its size.
+              this.$.nephcountid.resizeHeader();
+  //          });
+          } else {
+            this.$.signin.hidden = false;
+            this.$.nephcountid.hidden = true;
+          }
+        }.bind(this));
+      }
+
+      setUpOfflineListeners() {
         window.addEventListener('online', function() {
           this.dispatch('goOnline');
         }.bind(this));
         window.addEventListener('offline', function() {
           this.dispatch('goOffline');
         }.bind(this));
-
       }
     }
 

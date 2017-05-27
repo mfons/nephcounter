@@ -5,6 +5,12 @@
 
 <dom-module id="nephcounter-login">
   <template>
+    <style>
+      .welcomebanner {
+        font-weight: bold;
+        font-size: .5em
+      }
+    </style>
     <firebase-auth
        id="auth"
        user="{{user}}"
@@ -12,13 +18,13 @@
        status-known="{{statusKnown}}">
     </firebase-auth>
     <template is="dom-if" if="[[user]]">
-       <h1>Welcome [[user.displayName]]</h1>
+       <div class="welcomebanner">Welcome [[user.displayName]]</div>
     </template>
 
-    <paper-button raised on-tap="login" >Sign In</paper-button>
-    <paper-button raised on-tap="logout" >Sign Out</paper-button>
+    <paper-button raised on-tap="login" hidden$="[[user]]">Sign In</paper-button>
+    <paper-button raised on-tap="logout" hidden$="[[!user]]">Sign Out</paper-button>
 
-    <h3>you have [[nutrientCount]] nutrients!</h3>
+    <!-- <h3>you have [[nutrientCount]] nutrients!</h3> -->
   </template>
 
   <script>

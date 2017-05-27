@@ -10,7 +10,9 @@
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="nephcounter-login.html">
 <link rel="import" href="my-icons.html">
+<link rel="import" href="redux-store.html">
 
 <dom-module id="nephcounter-main">
   <template>
@@ -69,15 +71,19 @@
         <a name="view2" href="/view2">View Two</a>
         <a name="view3" href="/view3">View Three</a>
       </iron-selector>
+      <nephcounter-login hidden$="[[offline]]"></nephcounter-login>
     </app-drawer>
 
     <!-- Main content -->
-    <app-header-layout has-scrolling-region>
+    <app-header-layout has-scrolling-region id="header">
 
       <app-header slot="header" condenses reveals effects="waterfall">
         <app-toolbar>
           <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
-          <div main-title>My App</div>
+          <div main-title>Nephcounter</div>
+          <template is="dom-if" if="[[offline]]">
+            <paper-icon-button icon="my-icons:signal-cellular-connected-no-internet-0-bar"></paper-icon-button>
+          </template>
         </app-toolbar>
       </app-header>
 
@@ -96,7 +102,7 @@
   </template>
 
   <script>
-    class NephcounterMain extends Polymer.Element {
+    class NephcounterMain extends ReduxMixin(Polymer.Element) {
       static get is() { return 'nephcounter-main'; }
 
       static get properties() {
@@ -105,6 +111,10 @@
             type: String,
             reflectToAttribute: true,
             observer: '_pageChanged',
+          },
+          offline: {
+            type: Boolean,
+            statePath: 'offline',
           },
         };
       }
@@ -145,6 +155,11 @@
       _showPage404() {
         this.page = 'view404';
       }
+
+      resizeHeader() {
+        this.$.header.fire('iron-resize');
+      }
+
     }
 
     window.customElements.define(NephcounterMain.is, NephcounterMain);
