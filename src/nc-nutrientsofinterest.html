@@ -1,0 +1,87 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+
+<dom-module id="nc-nutrientsofinterest">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+
+     .item.selected {
+       background: #ccc;
+     }
+
+     .item {
+       background: #fff;
+     }
+    </style>
+
+    <div class="card">
+      <div class="circle">1</div>
+      <paper-icon-button id="helpButton" icon="my-icons:help-outline"></paper-icon-button>
+      <paper-tooltip for="helpButton" position="right">This screen is where you specify the nutrients you want to track.  You must select some nutrients to track before you can start entering food on the "consumption page" -- the next screen to visit and where you will spend most of your time in this app.</paper-tooltip>
+      <h1>Nutrients of Interest</h1>
+
+      <iron-list id="nutrientIronList" items="[[data]]" selected-items="{{selectedItems}}" selection-enabled multi-selection>
+        <template>
+        <div tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]">[[item]]</div>
+        </template>
+      </iron-list>
+
+    </div>
+  </template>
+
+  <script>
+    class NcNutrientsOfInterest extends Polymer.Element {
+      static get is() { return 'nc-nutrientsofinterest'; }
+
+      static get properties() {
+        return {
+          data: {
+            type: Array,
+            value: [
+              'one',
+              'two',
+              'three',
+            ]
+          }
+        };
+      }
+
+      _computedClass(isSelected) {
+        var classes = 'item';
+        if (isSelected) {
+          classes += ' selected';
+        }
+        return classes;
+      }
+
+      iconForItem(isSelected) {
+        return isSelected ? 'my-icons:star' : 'my-icons:star-border';
+      }
+      _computedClass(isSelected) {
+        var classes = 'item';
+        if (isSelected) {
+          classes += ' selected';
+        }
+        return classes;
+      }
+      _unselect(e) {
+        this.$.itemsList.deselectItem(e.model.item);
+      }
+      _getFormattedCount(count) {
+        return count > 0 ? '(' + count + ')' : '';
+      }
+
+
+    }
+
+    window.customElements.define(NcNutrientsOfInterest.is, NcNutrientsOfInterest);
+  </script>
+</dom-module>

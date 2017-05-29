@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>nc-nutrientsofinterest</title>
+
+    <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../node_modules/redux/dist/redux.js"></script>
+    <script src="../bower_components/web-component-tester/browser.js"></script>
+
+    <!-- Import the element to test -->
+    <!-- <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+    <link rel="import" href="../bower_components/polymerfire/firebase-app.html"> -->
+    <link rel="import" href="../src/nc-nutrientsofinterest.html">
+  </head>
+  <body>
+    <test-fixture id="BasicView">
+      <template>
+        <!-- <firebase-app
+          auth-domain="nephcounter.firebaseapp.com"
+          database-url="https://nephcounter.firebaseio.com"
+          api-key="AIzaSyDbXgNCFBMglr8WWEkZuhMHQohMduiJsUM"
+          >
+        </firebase-app> -->
+        <nc-nutrientsofinterest></nc-nutrientsofinterest>
+      </template>
+    </test-fixture>
+
+    <script>
+      suite('nc-nutrientsofinterest tests', function() {
+        test('circle should have a 1 in it.', function() {
+          var ncNutrientsOfInterest = fixture('BasicView');
+          var circle = ncNutrientsOfInterest.shadowRoot.querySelector('.circle');
+          assert.equal(circle.textContent, '1');
+        });
+      });
+    </script>
+  </body>
+</html>

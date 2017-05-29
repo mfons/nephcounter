@@ -21,8 +21,8 @@
        <div class="welcomebanner">Welcome [[user.displayName]]</div>
     </template>
 
-    <paper-button raised on-tap="login" hidden$="[[user]]">Sign In</paper-button>
-    <paper-button raised on-tap="logout" hidden$="[[!user]]">Sign Out</paper-button>
+    <paper-button id="signInButton" raised on-tap="login" hidden$="[[user]]">Sign In</paper-button>
+    <paper-button id="signOutButton" raised on-tap="logout" hidden$="[[!user]]">Sign Out</paper-button>
 
     <!-- <h3>you have [[nutrientCount]] nutrients!</h3> -->
   </template>
