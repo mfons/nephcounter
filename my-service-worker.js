@@ -1,12 +1,3 @@
-/**
- * @license
- * Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
- */
 
 /* eslint no-console: ["error", { allow: ["info"] }] */
 
@@ -28,3 +19,37 @@ self.addEventListener('fetch', function(event){
         })
     );
 });
+
+// self.addEventListener('install', function(event) {
+//   var urlsToCache = [
+//     '/',
+//     'js/main.js',
+//     'css/main.css',
+//     'imgs/icon.png',
+//     'https://fonts.gstatic.com/s/roboto/v15/2UX7WLTfW3W8TclTUvlFyQ.woff',
+//     'https://fonts.gstatic.com/s/roboto/v15/d-6IYplOFocCacKzxwXSOD8E0i7KZn-EPnyo3HZu7kw.woff'
+//   ];
+//
+//   event.waitUntil(
+//     caches.open('nephcounter-static-v1').then(function(cache){
+//       return cache.addAll(urlsToCache).then(function() {
+//         console.log('requests have been added to the cache');
+//       }).catch(function() {
+//         console.log('requests have NOT been added to the cache');
+//       });
+//     })
+//   );
+// });
+//
+// self.addEventListener('fetch', function(event) {
+//   event.respondWith(
+// //     caches.open('wittr-static-v1').then(function(cache){
+// //       return cache.match(event.request).catch(function() {
+// //         return fetch(event.request);
+// //       });
+// //     })
+//     caches.match(event.request).then(function(response) {
+//       return response || fetch(event.request);
+//     })
+//   );
+// });

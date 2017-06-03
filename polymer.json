@@ -28,7 +28,7 @@
        "js": { "compile": true, "minify": true },
        "css": { "minify": true },
        "html": { "minify": true },
-       "addServiceWorker": false,
+       "addServiceWorker": true,
        "insertPrefetchLinks": false
      },
      {
@@ -37,7 +37,7 @@
        "js": { "compile": true, "minify": true },
        "css": { "minify": true },
        "html": { "minify": true },
-       "addServiceWorker": false,
+       "addServiceWorker": true,
        "insertPrefetchLinks": false
      }
    ]
