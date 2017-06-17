@@ -121,9 +121,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
           navigator.serviceWorker.register('/service-worker.js').then(function() { // NB: if you ever want to build your own service worker you already started one at /my-service-worker.js in conjunction with your udacity course.
-            console.log('Service Worker Registered Successfully!');
+            //console.log('Service Worker Registered Successfully!');
           }).catch(function() {
-            console.warn('Service Worker Registration Failed!');
+            //console.warn('Service Worker Registration Failed!');
           });
         });
       }

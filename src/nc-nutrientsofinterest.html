@@ -3,6 +3,9 @@
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="redux-store.html">
 
 <dom-module id="nc-nutrientsofinterest">
   <template>
@@ -22,6 +25,18 @@
      }
     </style>
 
+    <firebase-query
+      id="query"
+      path="/nutrients"
+      data="{{nutrients}}">
+    </firebase-query>
+    <firebase-auth
+       id="auth"
+       user="{{user}}"
+       provider="google" >
+    </firebase-auth>
+
+
     <div class="card">
       <div class="circle">1</div>
       <paper-icon-button id="helpButton" icon="my-icons:help-outline"></paper-icon-button>
@@ -30,28 +45,54 @@
 
       <iron-list id="nutrientIronList" items="[[data]]" selected-items="{{selectedItems}}" selection-enabled multi-selection>
         <template>
-        <div tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]">[[item]]</div>
+        <div tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]">[[item.name]]</div>
         </template>
       </iron-list>
+
+      <!-- <template is="dom-repeat" items="{{nutrients}}" as="nutrient">
+        <p>[[nutrient.id]]</p>
+      </template> -->
 
     </div>
   </template>
 
   <script>
-    class NcNutrientsOfInterest extends Polymer.Element {
+    class NcNutrientsOfInterest extends ReduxMixin(Polymer.Element){
       static get is() { return 'nc-nutrientsofinterest'; }
 
       static get properties() {
         return {
           data: {
             type: Array,
-            value: [
-              'one',
-              'two',
-              'three',
-            ]
-          }
+            statePath: 'nutrients',
+          },
+          nutrients: Array,
         };
+      }
+
+      static get actions() {
+        return {
+          loadAllNutrients: function (allNutrients) {
+              return {
+                  type: 'LOAD_ALL_NUTRIENTS',
+                  nutrients:  allNutrients
+              }
+          },
+        };
+      }
+
+      static get observers() {
+        return ['_nutrientsLoading(nutrients.*)', '_dataLoading(data.*)'];
+      }
+
+      _nutrientsLoading(nutrientsChangeRecord) {
+        if (nutrientsChangeRecord.base.length > 188) {
+          this.dispatch('loadAllNutrients', nutrientsChangeRecord.base);
+        }
+      }
+
+      _dataLoading(dataChangeRecord) {
+        console.log("dataChangeRecord is ", dataChangeRecord);
       }
 
       _computedClass(isSelected) {

@@ -37,14 +37,14 @@
             type: Object,
             notify: true,
           },
-          nutrients: {
-            type: Array,
-            statePath: 'nutrients',
-          },
-          nutrientCount: {
-            type: Number,
-            computed: 'computeNutrientCount(nutrients)',
-          },
+          // nutrients: {
+          //   type: Array,
+          //   statePath: 'nutrients',
+          // },
+          // nutrientCount: {
+          //   type: Number,
+          //   computed: 'computeNutrientCount(nutrients)',
+          // },
         };
       }
 
@@ -53,9 +53,9 @@
           const state = this.getState();
       }
 
-      computeNutrientCount(nutrients) {
-        return nutrients.length;
-      }
+      // computeNutrientCount(nutrients) {
+      //   return nutrients.length;
+      // }
 
       login() {
             this.$.auth.signInWithPopup()

@@ -2,17 +2,19 @@
 
 <script>
   const initialState = {
-    nutrients: ['oink'],
+    nutrients: [ 'oink1', 'oink2', 'oink3' ],
     offline: navigator.onLine === false
   };
 
   const reducer = (state, action) => {
     if (!state) return initialState;
     switch (action.type) {
-      case 'ADD_NUTRIENT' :
-        const nutrients = state.nutrients.slice(0);
-        nutrients.push(action.nutrient);
-        return Object.assign({}, state, { nutrients: nutrients });
+      // case 'ADD_NUTRIENT' :
+      //   const nutrients = state.nutrients.slice(0);
+      //   nutrients.push(action.nutrient);
+      //   return Object.assign({}, state, { nutrients: nutrients });
+      case 'LOAD_ALL_NUTRIENTS' :
+        return Object.assign({}, state, { nutrients: action.nutrients });
       case 'GO_ONLINE' :
         return Object.assign({}, state, { offline: false });
       case 'GO_OFFLINE' :
