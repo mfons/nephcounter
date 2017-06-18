@@ -4,6 +4,7 @@
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../bower_components/iron-list/iron-list.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="redux-store.html">
 
@@ -27,9 +28,9 @@
 
     <firebase-query
       id="query"
-      path="/nutrients"
-      data="{{nutrients}}">
+      path="/nutrients">
     </firebase-query>
+    <app-indexeddb-mirror id="nutrientsIndexedDB" key="nutrients"></app-indexeddb-mirror>
     <firebase-auth
        id="auth"
        user="{{user}}"
@@ -66,7 +67,6 @@
             type: Array,
             statePath: 'nutrients',
           },
-          nutrients: Array,
         };
       }
 
@@ -88,12 +88,23 @@
       ready() {
         super.ready();
 
-        // As soon as possible go get the list of possible nutrients to display.
-        this.$.query.ref.on("value", function(snapshot) {
-          this.dispatch('loadAllNutrients', snapshot.val());
-        }.bind(this), function (errorObject) {
-          console.log("The read failed: " + errorObject.code);
-        });
+        // As soon as possible go get the list of possible nutrients to display, if needed.
+        if (typeof this.data === 'undefined' || this.data.length === 0) {
+          if (typeof this.$.nutrientsIndexedDB.persistedData !== 'undefined' &&
+            this.$.nutrientsIndexedDB.persistedData.length > 0) {
+              this.dispatch('loadAllNutrients', this.$.nutrientsIndexedDB.persistedData);
+            }
+          else {
+            this.$.query.ref.on("value", function(snapshot) {
+              this.dispatch('loadAllNutrients', snapshot.val());
+              // TODO THE FOLLOWING DOES NOT SEEM TO GET INTO INDEXEDDB; MAYBE YOU NEED TO SET THE ATTRIBUTE
+              // RATHER THAN SETTING THE PROPERTY, OR PERHAPS NOTIFYPATH OR NOTIFYSPLICE?
+              this.$.nutrientsIndexedDB.data = snapshot.val();
+            }.bind(this), function (errorObject) {
+              console.log("The read failed: " + errorObject.code);
+            });
+          }
+        }
       }
       _computedClass(isSelected) {
         var classes = 'item';
