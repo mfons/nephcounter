@@ -82,19 +82,19 @@
       }
 
       static get observers() {
-        return ['_nutrientsLoading(nutrients.*)', '_dataLoading(data.*)'];
+        return [];
       }
 
-      _nutrientsLoading(nutrientsChangeRecord) {
-        if (nutrientsChangeRecord.base.length > 188) {
-          this.dispatch('loadAllNutrients', nutrientsChangeRecord.base);
-        }
-      }
+      ready() {
+        super.ready();
 
-      _dataLoading(dataChangeRecord) {
-        console.log("dataChangeRecord is ", dataChangeRecord);
+        // As soon as possible go get the list of possible nutrients to display.
+        this.$.query.ref.on("value", function(snapshot) {
+          this.dispatch('loadAllNutrients', snapshot.val());
+        }.bind(this), function (errorObject) {
+          console.log("The read failed: " + errorObject.code);
+        });
       }
-
       _computedClass(isSelected) {
         var classes = 'item';
         if (isSelected) {
@@ -105,13 +105,6 @@
 
       iconForItem(isSelected) {
         return isSelected ? 'my-icons:star' : 'my-icons:star-border';
-      }
-      _computedClass(isSelected) {
-        var classes = 'item';
-        if (isSelected) {
-          classes += ' selected';
-        }
-        return classes;
       }
       _unselect(e) {
         this.$.itemsList.deselectItem(e.model.item);
