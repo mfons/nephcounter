@@ -28,13 +28,17 @@
 
     <firebase-query
       id="query"
-      path="/nutrients">
+      path="/nutrients"
+      data="{{nutrientsQueried}}">
     </firebase-query>
-    <app-indexeddb-mirror id="nutrientsIndexedDB" key="nutrients"></app-indexeddb-mirror>
+    <app-indexeddb-mirror id="nutrientsIndexedDB" key="nutrients"
+    data="[[nutrientsQueried]]"
+    persisted-data="{{nutrientsPersisted}}"></app-indexeddb-mirror>
     <firebase-auth
        id="auth"
        user="{{user}}"
-       provider="google" >
+       provider="google"
+       signed-in="{{signedIn}}" >
     </firebase-auth>
 
 
@@ -44,7 +48,7 @@
       <paper-tooltip for="helpButton" position="right">This screen is where you specify the nutrients you want to track.  You must select some nutrients to track before you can start entering food on the "consumption page" -- the next screen to visit and where you will spend most of your time in this app.</paper-tooltip>
       <h1>Nutrients of Interest</h1>
 
-      <iron-list id="nutrientIronList" items="[[data]]" selected-items="{{selectedItems}}" selection-enabled multi-selection>
+      <iron-list id="nutrientIronList" items="[[nutrientsPersisted]]" selected-items="{{selectedItems}}" selection-enabled multi-selection>
         <template>
         <div tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]">[[item.name]]</div>
         </template>
@@ -58,7 +62,7 @@
   </template>
 
   <script>
-    class NcNutrientsOfInterest extends ReduxMixin(Polymer.Element){
+      class NcNutrientsOfInterest extends ReduxMixin(Polymer.Element){
       static get is() { return 'nc-nutrientsofinterest'; }
 
       static get properties() {
@@ -67,6 +71,9 @@
             type: Array,
             statePath: 'nutrients',
           },
+          nutrientsQueried : Array,
+          nutrientsPersisted : Array,
+          signedIn: Boolean,
         };
       }
 
@@ -82,29 +89,11 @@
       }
 
       static get observers() {
-        return [];
+        return [ '_signedInChanged(signedIn)']; //  , '_nutrientsPersistedChanged(nutrientsPersisted.*)'  '_nutrientsQueriedChanged(nutrientsQueried.*)'
       }
 
       ready() {
         super.ready();
-
-        // As soon as possible go get the list of possible nutrients to display, if needed.
-        if (typeof this.data === 'undefined' || this.data.length === 0) {
-          if (typeof this.$.nutrientsIndexedDB.persistedData !== 'undefined' &&
-            this.$.nutrientsIndexedDB.persistedData.length > 0) {
-              this.dispatch('loadAllNutrients', this.$.nutrientsIndexedDB.persistedData);
-            }
-          else {
-            this.$.query.ref.on("value", function(snapshot) {
-              this.dispatch('loadAllNutrients', snapshot.val());
-              // TODO THE FOLLOWING DOES NOT SEEM TO GET INTO INDEXEDDB; MAYBE YOU NEED TO SET THE ATTRIBUTE
-              // RATHER THAN SETTING THE PROPERTY, OR PERHAPS NOTIFYPATH OR NOTIFYSPLICE?
-              this.$.nutrientsIndexedDB.data = snapshot.val();
-            }.bind(this), function (errorObject) {
-              console.log("The read failed: " + errorObject.code);
-            });
-          }
-        }
       }
       _computedClass(isSelected) {
         var classes = 'item';
@@ -124,7 +113,39 @@
         return count > 0 ? '(' + count + ')' : '';
       }
 
+      _nutrientsQueriedChanged(changeRecord) {
+        console.log("here is the nutrientsQueried base: ", changeRecord.base);
+      }
 
+      // _nutrientsPersistedChanged(changeRecord) {
+      //   console.log("in nutrientsPersistedChanged...");
+      // }
+
+      _signedInChanged(newValue, oldValue) {
+        console.log("new value:", newValue);
+        console.log("old value:", oldValue);
+        // if (newValue && (this.persistedData === null || this.persistedData.size() === 0)) {
+        //   // // TODO HOW COME ON FIREBASEAPP THIS IS STILL COMING UP BLANK AFTER A NEW LOGIN????
+        //   // // As soon as possible go get the list of possible nutrients to display, if needed.
+        //   // if (typeof this.data === 'undefined' || this.data.length === 0) {
+        //   //   if (typeof this.$.nutrientsIndexedDB.persistedData !== 'undefined' &&
+        //   //     this.$.nutrientsIndexedDB.persistedData.length > 0) {
+        //   //       this.dispatch('loadAllNutrients', this.$.nutrientsIndexedDB.persistedData);
+        //   //     }
+        //   //   else {
+              if (!newValue) {
+                return;
+              }
+              this.$.query.ref.on("value", function(snapshot) {
+                this.dispatch('loadAllNutrients', snapshot.val());
+                console.log("inside the manual nutrient log...");
+                this.$.nutrientsIndexedDB.data = snapshot.val();
+                //this.set('nutrientsFromFirebase', snapshot.val());
+              }.bind(this), function (errorObject) {
+                console.log("The read failed: " + errorObject.code);
+              });
+        //   }
+      }
     }
 
     window.customElements.define(NcNutrientsOfInterest.is, NcNutrientsOfInterest);
