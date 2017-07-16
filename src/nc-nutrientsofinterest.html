@@ -26,14 +26,14 @@
      }
     </style>
 
+    <app-indexeddb-mirror id="nutrientsIndexedDB" key="nutrients"
+    data="[[nutrientsQueried]]"
+    persisted-data="{{nutrientsPersisted}}"></app-indexeddb-mirror>
     <firebase-query
       id="query"
       path="/nutrients"
       data="{{nutrientsQueried}}">
     </firebase-query>
-    <app-indexeddb-mirror id="nutrientsIndexedDB" key="nutrients"
-    data="[[nutrientsQueried]]"
-    persisted-data="{{nutrientsPersisted}}"></app-indexeddb-mirror>
     <firebase-auth
        id="auth"
        user="{{user}}"
@@ -133,19 +133,54 @@
         //   //       this.dispatch('loadAllNutrients', this.$.nutrientsIndexedDB.persistedData);
         //   //     }
         //   //   else {
-              if (!newValue) {
-                return;
-              }
-              this.$.query.ref.on("value", function(snapshot) {
-                this.dispatch('loadAllNutrients', snapshot.val());
-                console.log("inside the manual nutrient log...");
-                this.$.nutrientsIndexedDB.data = snapshot.val();
-                //this.set('nutrientsFromFirebase', snapshot.val());
-              }.bind(this), function (errorObject) {
-                console.log("The read failed: " + errorObject.code);
-              });
+                    if (!newValue) {
+                      return;
+                    }
+                    this.$.query.ref.on("value", function(snapshot) {
+                      this.dispatch('loadAllNutrients', snapshot.val());
+                      console.log("inside the manual nutrient log...");
+                      this.$.nutrientsIndexedDB.data = snapshot.val();
+                      this.takeTheArrayAndWriteItToMyOwnIndexedDBStore(snapshot.val());
+                      //this.set('nutrientsFromFirebase', snapshot.val());
+                    }.bind(this), function (errorObject) {
+                      console.log("The read failed: " + errorObject.code);
+                    });
         //   }
       }
+
+
+      takeTheArrayAndWriteItToMyOwnIndexedDBStore (possibleNutrients) {
+        // Let us open our database
+        var db;
+        var request = window.indexedDB.open("NephcounterOffLineDB");
+        request.onerror = function(event) {
+          // Do something with request.errorCode!
+          console.log("NephcounterOffLineDB creation failed!")
+        };
+        request.onsuccess = function(event) {
+          // Do something with request.result!
+          console.log("NephcounterOffLineDB creation succeeded!")
+          db = event.target.result;
+        };
+        // This event is only implemented in recent browsers
+        request.onupgradeneeded = function(event) {
+          console.log("NephcounterOffLineDB needs an upgrade!")
+          var db = event.target.result;
+
+          // Create an objectStore for this database
+          var objectStore = db.createObjectStore("possibleNutrients", { keyPath: "allNutrientsListKey" });
+          // Use transaction oncomplete to make sure the objectStore creation is
+          // finished before adding data into it.
+          objectStore.transaction.oncomplete = function(event) {
+            // Store values in the newly created objectStore.
+            var customerObjectStore = db.transaction("possibleNutrients", "readwrite").objectStore("possibleNutrients");
+            //for (var i in customerData) {
+              customerObjectStore.add({allNutrientsListKey: 1, allNutrientsList: possibleNutrients});
+            // }
+          };
+        };
+      }
+
     }
 
     window.customElements.define(NcNutrientsOfInterest.is, NcNutrientsOfInterest);
