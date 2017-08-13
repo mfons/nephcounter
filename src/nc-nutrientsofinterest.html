@@ -26,9 +26,9 @@
      }
     </style>
 
-    <app-indexeddb-mirror id="nutrientsIndexedDB" key="nutrients"
+    <!-- <app-indexeddb-mirror  id="nutrientsIndexedDB" key="nutrients"
     data="[[nutrientsQueried]]"
-    persisted-data="{{nutrientsPersisted}}"></app-indexeddb-mirror>
+    persisted-data="{{nutrientsPersisted}}"></app-indexeddb-mirror> -->
     <firebase-query
       id="query"
       path="/nutrients"
@@ -94,7 +94,130 @@
 
       ready() {
         super.ready();
+        let thisWebComponent = this;
+        this.waitForIndexedDbToOpenAndReadOrFail()
+          .then(() => {console.log("waitForIndexedDbToOpenAndReadOrFail success!")})
+          .catch(errMsg => { 
+            console.log("in catch with error message of ", errMsg);
+            return new Promise((resolve, reject) => {
+              thisWebComponent.$.query.ref.on("value", function(snapshot) {
+                resolve(snapshot.val());
+              }.bind(this), function (errorObject) {
+                console.log("The read failed: " + errorObject.code);
+                reject("The read failed: " + errorObject.code);
+              });            
+            });
+          })
+            .then((nutrientArray) => { 
+              console.log("go work with nutrient array: ", nutrientArray);
+              thisWebComponent.waitForIndexedDbToOpenAndReadOrFail(nutrientArray)
+              .then(() => {console.log("waitForIndexedDbToOpenAndReadOrFail call 2 succeeded.")})
+              .catch(() => { 
+                console.warn("waitForIndexedDbToOpenAndReadOrFail failed again...time to delete the db and try a third time with the array in hand.");
+                thisWebComponent.deleteDB()
+                .then(thisWebComponent.waitForIndexedDbToOpenAndReadOrFail(nutrientArray))
+                .catch(() => {console.warn("NephcounterOffLineDB database delete failed.")});
+              });
+            });
+//  pseudo code in ready()
+//  wait for indexed db to open
+//    then wait for read of indexed db to occur
+//      then assign value to list variable
+//      catch wait for sign in to firebase
+//        then wait for open of index db
+//          then create the table with list
+//            then assign value of list variable
+
       }
+
+      deleteDB() {
+        var thisWebComponent = this;
+        return new Promise((resolve, reject) => {
+          var DBDeleteRequest = window.indexedDB.deleteDatabase("NephcounterOffLineDB");
+
+          DBDeleteRequest.onerror = function(event) {
+            console.log("Error deleting database.");
+            reject();
+          };
+          
+          DBDeleteRequest.onsuccess = function(event) {
+            console.log("Database deleted successfully");
+              
+            console.log(event.result); // should be undefined
+            resolve();
+          };          
+        });
+      }
+
+      waitForIndexedDbToOpenAndReadOrFail(nutrientsArrayFromDB) {
+        var thisWebComponent = this;
+        return new Promise((resolve, reject) => {
+          var db;
+          var request = window.indexedDB.open("NephcounterOffLineDB");
+          request.onerror = function(event) {
+            // Do something with request.errorCode!
+            console.log("NephcounterOffLineDB creation failed!", event)
+          };
+          // This is done once/if the database exists with the data in it.
+          request.onsuccess = function(event) {
+            // Do something with request.result!
+            console.log("NephcounterOffLineDB creation succeeded!")
+            db = event.target.result;
+            var transaction; 
+            try {
+              transaction = db.transaction(["possibleNutrients"], "readonly");
+            } catch (e) {
+              // thisWebComponent.getPossibleNutrientsFromFirebaseAndStoreToIndexedDB();
+              console.warn("Why did creating the transaction fail??", e);
+              reject("get data from database");
+              return;
+            }
+            // report on the success of the transaction completing, when everything is done
+            transaction.oncomplete = function(event) {
+              //console.log("everything is completed in the transaction.", event);
+            };
+
+            transaction.onerror = function(event) {
+              console.warn("transaction not opened due to error", event);
+            };
+
+            var objectStore = transaction.objectStore("possibleNutrients");
+            // TODO write first and then try retrieving to make sure it is there before you try to get it...
+            var dataRequest = objectStore.get(1);
+            dataRequest.onerror = function(event) {
+              // Handle errors!
+              console.warn("The data request ended in an error...", event);
+            };
+            dataRequest.onsuccess = function(event) {
+              // Do something with the request.result!
+              //console.log("Here is the data for allNutrientsListKey = 1...", dataRequest.result);
+              thisWebComponent.nutrientsPersisted = dataRequest.result.allNutrientsList;
+              resolve();
+            };
+          };
+
+          // This is done only if there is no database and one needs to be created before we read from it.
+          request.onupgradeneeded = function(event) {
+              console.log("an upgrade is needed...");
+              var db = event.target.result;
+              if (!db.objectStoreNames.contains('possibleNutrients') && nutrientsArrayFromDB) {
+                  // Create an objectStore for this database
+                  var objectStore = db.createObjectStore("possibleNutrients", { keyPath: "allNutrientsListKey" });
+                  // Use transaction oncomplete to make sure the objectStore creation is
+                  // finished before adding data into it.
+                  objectStore.transaction.oncomplete = function(event) {
+                    // Store values in the newly created objectStore.
+                    var possibleNutrientsObjectStore = db.transaction("possibleNutrients", "readwrite").objectStore("possibleNutrients");
+                        possibleNutrientsObjectStore.add({allNutrientsListKey: 1, allNutrientsList: nutrientsArrayFromDB});
+                    thisWebComponent.nutrientsPersisted = nutrientsArrayFromDB;
+                  };
+              }
+              console.log("NephcounterOffLineDB needs an upgrade!")
+          };
+        });
+      }
+
+
       _computedClass(isSelected) {
         var classes = 'item';
         if (isSelected) {
@@ -133,53 +256,132 @@
         //   //       this.dispatch('loadAllNutrients', this.$.nutrientsIndexedDB.persistedData);
         //   //     }
         //   //   else {
-                    if (!newValue) {
-                      return;
-                    }
-                    this.$.query.ref.on("value", function(snapshot) {
-                      this.dispatch('loadAllNutrients', snapshot.val());
-                      console.log("inside the manual nutrient log...");
-                      this.$.nutrientsIndexedDB.data = snapshot.val();
-                      this.takeTheArrayAndWriteItToMyOwnIndexedDBStore(snapshot.val());
-                      //this.set('nutrientsFromFirebase', snapshot.val());
-                    }.bind(this), function (errorObject) {
-                      console.log("The read failed: " + errorObject.code);
-                    });
+        if (!newValue) {
+          return;
+        }
+        //this.getPossibleNutrientsFromFirebaseAndStoreToIndexedDB();
+        // // Is there a list of nutrients on an indexeddb store?
+ // TODO work on Promise usage in ready() instead.
+ //       this.tryToGetPossibleNutrientsFromIndexedDB();
+
         //   }
       }
 
 
-      takeTheArrayAndWriteItToMyOwnIndexedDBStore (possibleNutrients) {
-        // Let us open our database
+      // takeTheArrayAndWriteItToMyOwnIndexedDBStore (possibleNutrients) {
+      //   // Let us open our database
+      //   var db;
+      //   var request = window.indexedDB.open("NephcounterOffLineDB");
+      //   var thisWebComponent = this;
+      //   request.onerror = function(event) {
+      //     // Do something with request.errorCode!
+      //     console.log("NephcounterOffLineDB creation failed!")
+      //   };
+      //   request.onsuccess = function(event) {
+      //     // Do something with request.result!
+      //     console.log("NephcounterOffLineDB creation succeeded!")
+      //     db = event.target.result;
+      //     thisWebComponent.tryToGetPossibleNutrientsFromIndexedDB();
+      //   };
+      //   // This event is only implemented in recent browsers
+      //   request.onupgradeneeded = function(event) {
+      //     console.log("NephcounterOffLineDB needs an upgrade!")
+      //     var db = event.target.result;
+
+      //     // Create an objectStore for this database
+      //     var objectStore = db.createObjectStore("possibleNutrients", { keyPath: "allNutrientsListKey" });
+      //     // Use transaction oncomplete to make sure the objectStore creation is
+      //     // finished before adding data into it.
+      //     objectStore.transaction.oncomplete = function(event) {
+      //       // Store values in the newly created objectStore.
+      //       var customerObjectStore = db.transaction("possibleNutrients", "readwrite").objectStore("possibleNutrients");
+      //       //for (var i in customerData) {
+      //         customerObjectStore.add({allNutrientsListKey: 1, allNutrientsList: possibleNutrients});
+      //       // }
+      //     };
+      //   };
+      // }
+
+      tryToGetPossibleNutrientsFromIndexedDB () {
         var db;
         var request = window.indexedDB.open("NephcounterOffLineDB");
+        var thisWebComponent = this;
         request.onerror = function(event) {
           // Do something with request.errorCode!
           console.log("NephcounterOffLineDB creation failed!")
         };
+        // This is done once/if the database exists with the data in it.
         request.onsuccess = function(event) {
           // Do something with request.result!
           console.log("NephcounterOffLineDB creation succeeded!")
           db = event.target.result;
-        };
-        // This event is only implemented in recent browsers
-        request.onupgradeneeded = function(event) {
-          console.log("NephcounterOffLineDB needs an upgrade!")
-          var db = event.target.result;
-
-          // Create an objectStore for this database
-          var objectStore = db.createObjectStore("possibleNutrients", { keyPath: "allNutrientsListKey" });
-          // Use transaction oncomplete to make sure the objectStore creation is
-          // finished before adding data into it.
-          objectStore.transaction.oncomplete = function(event) {
-            // Store values in the newly created objectStore.
-            var customerObjectStore = db.transaction("possibleNutrients", "readwrite").objectStore("possibleNutrients");
-            //for (var i in customerData) {
-              customerObjectStore.add({allNutrientsListKey: 1, allNutrientsList: possibleNutrients});
-            // }
+          var transaction; 
+          try {
+            transaction = db.transaction(["possibleNutrients"], "readonly");
+          } catch (e) {
+            // thisWebComponent.getPossibleNutrientsFromFirebaseAndStoreToIndexedDB();
+            console.warn("Why did creating the transaction fail??", e);
+            return;
+          }
+          // report on the success of the transaction completing, when everything is done
+          transaction.oncomplete = function(event) {
+            //console.log("everything is completed in the transaction.", event);
           };
+
+          transaction.onerror = function(event) {
+             console.warn("transaction not opened due to error", event);
+          };
+
+          var objectStore = transaction.objectStore("possibleNutrients");
+          // TODO write first and then try retrieving to make sure it is there before you try to get it...
+          var dataRequest = objectStore.get(1);
+          dataRequest.onerror = function(event) {
+            // Handle errors!
+            console.warn("The data request ended in an error...", event);
+          };
+          dataRequest.onsuccess = function(event) {
+            // Do something with the request.result!
+            //console.log("Here is the data for allNutrientsListKey = 1...", dataRequest.result);
+            thisWebComponent.nutrientsPersisted = dataRequest.result.allNutrientsList;
+          };
+       };
+
+       // This is done only if there is no database and one needs to be created before we read from it.
+       request.onupgradeneeded = function(event) {
+          console.log("an upgrade is needed...");
+          var db = event.target.result;
+          if (!db.objectStoreNames.contains('possibleNutrients')) {
+            thisWebComponent.$.query.ref.on("value", function(snapshot) {
+              var db = this.evt.target.result;
+              // Create an objectStore for this database
+              var objectStore = db.createObjectStore("possibleNutrients", { keyPath: "allNutrientsListKey" });
+              // Use transaction oncomplete to make sure the objectStore creation is
+              // finished before adding data into it.
+              objectStore.transaction.oncomplete = function(event) {
+                // Store values in the newly created objectStore.
+                var possibleNutrientsObjectStore = db.transaction("possibleNutrients", "readwrite").objectStore("possibleNutrients");
+                possibleNutrientsObjectStore.add({allNutrientsListKey: 1, allNutrientsList: snapshot.val()});
+                this.twc.nutrientsPersisted = snapshot.val();
+              };
+            }.bind({twc: thisWebComponent, evt: event}), function (errorObject) {
+              console.log("The read failed: " + errorObject.code);
+            });            
+          }
+          console.log("NephcounterOffLineDB needs an upgrade!")
+
+          
         };
       }
+
+      // getPossibleNutrientsFromFirebaseAndStoreToIndexedDB() {
+      //   this.$.query.ref.on("value", function(snapshot) {
+      //     // this.dispatch('loadAllNutrients', snapshot.val());
+      //     console.log("inside the manual nutrient log...");
+      //     this.takeTheArrayAndWriteItToMyOwnIndexedDBStore(snapshot.val());
+      //   }.bind(this), function (errorObject) {
+      //     console.log("The read failed: " + errorObject.code);
+      //   });
+      // }
 
     }
 
