@@ -84,6 +84,9 @@
           <template is="dom-if" if="[[offline]]">
             <paper-icon-button icon="my-icons:signal-cellular-connected-no-internet-0-bar"></paper-icon-button>
           </template>
+          <template is="dom-if" if="[[!nutrientsOfInterestIsEmpty]]">
+            <div>yay</div>
+          </template>
         </app-toolbar>
       </app-header>
 
@@ -116,6 +119,14 @@
             type: Boolean,
             statePath: 'offline',
           },
+          nutrientsOfInterest: {
+            type: Array,
+            statePath: 'nutrientsOfInterest',
+          },
+          nutrientsOfInterestIsEmpty: {
+            type: Boolean,
+            statePath: 'nutrientsOfInterestIsEmpty'
+          }
         };
       }
 

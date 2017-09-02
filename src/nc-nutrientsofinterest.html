@@ -76,7 +76,7 @@
 
       static get actions() {
         return {
-          loadAllNutrients: function (allNutrients) {
+          loadAllNutrients: (allNutrients) => {
             return {
                 type: 'LOAD_ALL_NUTRIENTS',
                 nutrients:  allNutrients
@@ -85,7 +85,7 @@
           loadAllNutrientsOfInterest: (allNutrientsOfInterest) => {
               return {
                 type: 'LOAD_ALL_NUTRIENTS_OF_INTEREST',
-                allNutrientsOnInterest:  allNutrientsOfInterest
+                allNutrientsOfInterest:  allNutrientsOfInterest
               }
           },
         };
@@ -108,7 +108,7 @@
         // 1.  write to firebase if logged in and online
         // 2.  write to indexeddb
         // 3.  update redux  
-        this.dispatch('loadAllNutrientsOfInterest', changeRecord.base)      
+        this.dispatch('loadAllNutrientsOfInterest', changeRecord.base);      
       }
 
       doOffLineNutrientStuff() {

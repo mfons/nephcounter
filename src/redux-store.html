@@ -3,7 +3,9 @@
 <script>
   const initialState = {
     nutrients: [ 'oink1', 'oink2', 'oink3' ],
-    offline: navigator.onLine === false
+    offline: navigator.onLine === false,
+    nutrientsOfInterest: [],
+    nutrientsOfInterestIsEmpty: true
   };
 
   const reducer = (state, action) => {
@@ -19,6 +21,13 @@
         return Object.assign({}, state, { offline: false });
       case 'GO_OFFLINE' :
         return Object.assign({}, state, { offline: true });
+      case 'LOAD_ALL_NUTRIENTS_OF_INTEREST' :
+        return Object.assign({}, state, { 
+          nutrientsOfInterest: action.allNutrientsOfInterest,
+          nutrientsOfInterestIsEmpty: action.allNutrientsOfInterest.length === 0 
+        });
+      default :
+        console.warn("Invalid action type in redux store:", action.type);
     }
   };
 
