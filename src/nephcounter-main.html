@@ -10,6 +10,7 @@
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-badge/paper-badge.html">
 <link rel="import" href="nephcounter-login.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="redux-store.html">
@@ -84,8 +85,9 @@
           <template is="dom-if" if="[[offline]]">
             <paper-icon-button icon="my-icons:signal-cellular-connected-no-internet-0-bar"></paper-icon-button>
           </template>
-          <template is="dom-if" if="[[!nutrientsOfInterestIsEmpty]]">
-            <div>yay</div>
+          <paper-icon-button id="nutrientsOfInterestHaveBeenEnteredId" icon="my-icons:local-pharmacy"></paper-icon-button>
+          <template is="dom-if" if="[[nutrientsOfInterestIsEmpty]]">
+            <paper-badge for="nutrientsOfInterestHaveBeenEnteredId" label="[[nutrientsOfInterestCount]]!" ></paper-badge>   
           </template>
         </app-toolbar>
       </app-header>
@@ -126,13 +128,17 @@
           nutrientsOfInterestIsEmpty: {
             type: Boolean,
             statePath: 'nutrientsOfInterestIsEmpty'
+          },
+          nutrientsOfInterestCount: {
+            type: Number,
+            statePath:  'nutrientsOfInterestCount'
           }
         };
       }
 
       static get observers() {
         return [
-          '_routePageChanged(routeData.page)',
+          '_routePageChanged(routeData.page)'
         ];
       }
 

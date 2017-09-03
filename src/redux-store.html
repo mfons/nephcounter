@@ -5,7 +5,8 @@
     nutrients: [ 'oink1', 'oink2', 'oink3' ],
     offline: navigator.onLine === false,
     nutrientsOfInterest: [],
-    nutrientsOfInterestIsEmpty: true
+    nutrientsOfInterestIsEmpty: true,
+    nutrientsOfInterestCount: 0
   };
 
   const reducer = (state, action) => {
@@ -24,7 +25,8 @@
       case 'LOAD_ALL_NUTRIENTS_OF_INTEREST' :
         return Object.assign({}, state, { 
           nutrientsOfInterest: action.allNutrientsOfInterest,
-          nutrientsOfInterestIsEmpty: action.allNutrientsOfInterest.length === 0 
+          nutrientsOfInterestIsEmpty: action.allNutrientsOfInterest.length === 0,
+          nutrientsOfInterestCount: action.allNutrientsOfInterest.length
         });
       default :
         console.warn("Invalid action type in redux store:", action.type);
