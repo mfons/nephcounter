@@ -14,8 +14,10 @@
 <link rel="import" href="nephcounter-login.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="redux-store.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
 
-<dom-module id="nephcounter-main">
+<dom-module id="nephcounter-main" >
   <template>
   <style>
     :host {
@@ -85,10 +87,33 @@
           <template is="dom-if" if="[[offline]]">
             <paper-icon-button icon="my-icons:signal-cellular-connected-no-internet-0-bar"></paper-icon-button>
           </template>
-          <paper-icon-button id="nutrientsOfInterestHaveBeenEnteredId" icon="my-icons:local-pharmacy"></paper-icon-button>
+          <paper-icon-button id="nutrientsOfInterestHeaderId" icon="my-icons:local-pharmacy"></paper-icon-button>
+          <paper-tooltip for="nutrientsOfInterestHeaderId" position="left"> 
+              <template id="kittens" is="dom-repeat" items="[[nutrientsOfInterest]]">
+                  <div>[[item.name]]</div>
+              </template>
+          </paper-tooltip>
+
+          <!-- <iron-list id="nutrientOfInterestHeaderList" items="[[nutrientsOfInterest]]">
+              <template >
+              <div tabindex$="[[tabIndex]]" style="color:black">[[item.name]]</div>
+              </template>
+            </iron-list> -->
+
           <template is="dom-if" if="[[nutrientsOfInterestIsEmpty]]">
-            <paper-badge for="nutrientsOfInterestHaveBeenEnteredId" label="[[nutrientsOfInterestCount]]!" ></paper-badge>   
+            <paper-badge for="nutrientsOfInterestHeaderId" label="[[nutrientsOfInterestCount]]!" ></paper-badge>   
           </template>
+          <template is="dom-if" if="[[!nutrientsOfInterestIsEmpty]]">
+            <paper-badge for="nutrientsOfInterestHeaderId" label="[[nutrientsOfInterestCount]]" class="green"></paper-badge>   
+          </template>
+
+          <custom-style>
+              <style is="custom-style">
+                .green {
+                  --paper-badge-background: var(--paper-green-300);
+                }
+              </style>
+          </custom-style>
         </app-toolbar>
       </app-header>
 
@@ -140,6 +165,19 @@
         return [
           '_routePageChanged(routeData.page)'
         ];
+      }
+
+      ready () {
+        super.ready();
+        this.addEventListener('state-changed', e => this._reduxStoreStateChanged(e));
+      }
+
+      // _nutrientsOfInterestOutput(item, length) {
+      //   return item.name;
+      // }
+
+      _reduxStoreStateChanged (e) {
+        this.$.kittens.render();
       }
 
       _routePageChanged(page) {

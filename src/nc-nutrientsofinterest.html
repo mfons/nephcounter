@@ -1,9 +1,9 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../bower_components/iron-list/iron-list.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="redux-store.html">
@@ -93,7 +93,7 @@
 
       static get observers() {
         return [ '_signedInChanged(signedIn)', '_selectedItemsChanged(selectedItems.*)'
-        ]; //  , '_nutrientsPersistedChanged(nutrientsPersisted.*)'  '_nutrientsQueriedChanged(nutrientsQueried.*)'
+        ]; 
       }
 
       ready() {
