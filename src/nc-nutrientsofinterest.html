@@ -107,8 +107,74 @@
         // What could I do here?
         // 1.  write to firebase if logged in and online
         // 2.  write to indexeddb
+        this.saveNutrientsOfInterestToIndexedDb(changeRecord.base)
+          .catch((errTxt) => { console.warn("The following error was caught from saveNutrientsOfInterestToIndexedDb call: ", errTxt); });
         // 3.  update redux  
         this.dispatch('loadAllNutrientsOfInterest', changeRecord.base);      
+      }
+
+      saveNutrientsOfInterestToIndexedDb (nutrientsOfInterestList) {
+          
+        return new Promise((resolve, reject) => {
+          var db;
+          var request = window.indexedDB.open("NephcounterOffLineDB");
+          request.onerror = function(event) {
+              // Do something with request.errorCode!
+              console.log("NephcounterOffLineDB creation failed!", event)
+              reject("open of database failed with error!");
+          }; // end of onerror
+          request.onsuccess = function(event) { 
+            console.log("NephcounterOffLineDB open succeeded!");
+            db = event.target.result;
+            if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
+              reject("nutrientsOfInterest object store has not been created yet to save");
+              console.warn("nutrientsOfInterest object store has not been created yet to save", db.objectStoreNames);
+              return;
+            }
+            var objectStore = db.transaction(["nutrientsOfInterest"], "readwrite").objectStore("nutrientsOfInterest");
+            var request = objectStore.get(1);
+            request.onerror = function(event) {
+                // assuming that 1 was not found so it needs to be added
+                console.warn("Caught querying record 1 from nutrientsOfInterest from error in event: ", event);
+                reject("Caught querying record 1 from nutrientsOfInterest; check for console warning for specifics");
+            };
+            request.onsuccess = function(event) {
+              // Get the old value that we want to update
+              var data = event.target.result;
+              
+              if (typeof data === "undefined") {  // Then there is no record yet and we must add rather than update.
+                var possibleNutrientsObjectStore = db.transaction("nutrientsOfInterest", "readwrite").objectStore("nutrientsOfInterest");
+                var request = possibleNutrientsObjectStore.add({allNutrientsOfInterestListKey: 1, allNutrientsOfInterestList: nutrientsOfInterestList});
+                request.onsuccess = (event) => { 
+                  console.log("added nutrients of interest to indexeddb");
+                  resolve();
+                }
+                return;
+              }
+
+              // update the value(s) in the object that you want to change
+              data.allNutrientsOfInterestList = nutrientsOfInterestList;
+
+              // Put this updated object back into the database.
+              var requestUpdate = objectStore.put(data);
+              requestUpdate.onerror = function(event) {
+                console.warn("rejecting nutrient of interest indexeddb update due to event:", event);
+                reject("rejecting nutrient of interest indexeddb update");
+              };
+              requestUpdate.onsuccess = function(event) {
+                console.log("updated nutrients of interest in indexeddb");
+                resolve();
+              };
+            };
+
+          }; // end of onsuccess
+
+          // This is done only if there is no database and one needs to be created before we read from it.
+          request.onupgradeneeded = function(event) {   
+              console.log("an upgrade is needed...");
+              var db = event.target.result;
+          }; // end of onupgradeneeded
+        });
       }
 
       doOffLineNutrientStuff() {
@@ -180,7 +246,8 @@
           var request = window.indexedDB.open("NephcounterOffLineDB");
           request.onerror = function(event) {
             // Do something with request.errorCode!
-            console.log("NephcounterOffLineDB creation failed!", event)
+            console.log("NephcounterOffLineDB creation failed!", event);
+            reject("NephcounterOffLineDB creation failed!");
           };
           // This is done once/if the database exists with the data in it.
           request.onsuccess = function(event) {
@@ -202,6 +269,7 @@
 
             transaction.onerror = function(event) {
               console.warn("transaction not opened due to error", event);
+              reject("transaction open came back with an error");
             };
 
             var objectStore = transaction.objectStore("possibleNutrients");
@@ -209,11 +277,18 @@
             dataRequest.onerror = function(event) {
               // Handle errors!
               console.warn("The data request ended in an error...", event);
+              reject("The data request ended in an error...");
             };
             dataRequest.onsuccess = function(event) {
+              if (!dataRequest || !dataRequest.result) {
+                reject("somehow objectStore record has not been created yet...");
+                return;
+              }
               thisWebComponent.nutrientsPersisted = dataRequest.result.allNutrientsList;
               resolve();
             };
+
+
           };
 
           // This is done only if there is no database and one needs to be created before we read from it.
@@ -221,8 +296,14 @@
               console.log("an upgrade is needed...");
               var db = event.target.result;
               if (!db.objectStoreNames.contains('possibleNutrients') && nutrientsArrayFromDB) {
-                  // Create an objectStore for this database
-                  var objectStore = db.createObjectStore("possibleNutrients", { keyPath: "allNutrientsListKey" });
+                  // // Create all objectStores for this database[
+                  // thisWebComponent.createAndPopulateObjectStore([
+                  //   {db:db, initArray: nutrientsArrayFromDB, context: thisWebComponent, objectStoreName: "possibleNutrients", keyPath: "allNutrientsListKey", dataPath: "allNutrientsList"},
+                  //   {db:db, initArray: [], context: thisWebComponent, objectStoreName: "nutrientsOfInterest", keyPath: "allNutrientsOfInterestListKey", dataPath: "allNutrientsOfInterestList"}
+                  // ])
+                  //   .then(thisWebComponent.createAndPopulateObjectStore)
+                  //   .catch((errTxt) => {console.warn(errTxt);});
+                  let objectStore = db.createObjectStore("possibleNutrients", { keyPath: "allNutrientsListKey" });
                   // Use transaction oncomplete to make sure the objectStore creation is
                   // finished before adding data into it.
                   objectStore.transaction.oncomplete = function(event) {
@@ -231,12 +312,47 @@
                         possibleNutrientsObjectStore.add({allNutrientsListKey: 1, allNutrientsList: nutrientsArrayFromDB});
                     thisWebComponent.nutrientsPersisted = nutrientsArrayFromDB;
                   };
+                  // //It seems we cannot do multiple transactions in onupgradeneeded??
+                  // nutrientsOfInterestObjectStore.transaction.oncomplete = function(event) {
+                  //   // Store values in the newly created objectStore.
+                  //   var possibleNutrientsObjectStore = db.transaction("nutrientsOfInterest", "readwrite").objectStore("nutrientsOfInterest");
+                  //       possibleNutrientsObjectStore.add({allNutrientsOfInterestListKey: 1, allNutrientsOfInterestList: []});
+                  // };
               }
-              console.log("NephcounterOffLineDB needs an upgrade!")
+              if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
+                let nutrientsOfInterestObjectStore = db.createObjectStore("nutrientsOfInterest", { keyPath: "allNutrientsOfInterestListKey" });
+              }
+              console.log("NephcounterOffLineDB has finished its upgrade.")
           };
         });
       }
 
+      // This did not work because it did not contain an opening of the db where you have onupgradeneeded.
+      // params example:  {db:db, initArray: nutrientsArrayFromDB, context: thisWebComponent, objectStoreName: "possibleNutrients", keyPath: "allNutrientsListKey", dataPath: "allNutrientsList"}
+      createAndPopulateObjectStore(paramsArray) {
+        var params = paramsArray.shift();
+        if (!params) {
+          return;
+        }
+        return new Promise ((resolve, reject) => {
+          if (!params || params.length === 0) {
+            resolve(null);
+            return;
+          }
+          var objectStore = params.db.createObjectStore(params.objectStoreName, { keyPath: params.keyPath });
+          // Use transaction oncomplete to make sure the objectStore creation is
+          // finished before adding data into it.
+          objectStore.transaction.oncomplete = function(event) {
+            // Store values in the newly created objectStore.
+            var targetObjectStore = params.db.transaction(params.objectStoreName, "readwrite").objectStore(params.objectStoreName);
+            var dataObject = {};
+            dataObject[params.keyPath] = 1;
+            dataObject[params.dataPath] = params.initArray;
+            targetObjectStore.add(dataObject);
+            resolve(paramsArray);
+          };
+        });
+      }
 
       _computedClass(isSelected) {
         var classes = 'item';

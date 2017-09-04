@@ -94,12 +94,6 @@
               </template>
           </paper-tooltip>
 
-          <!-- <iron-list id="nutrientOfInterestHeaderList" items="[[nutrientsOfInterest]]">
-              <template >
-              <div tabindex$="[[tabIndex]]" style="color:black">[[item.name]]</div>
-              </template>
-            </iron-list> -->
-
           <template is="dom-if" if="[[nutrientsOfInterestIsEmpty]]">
             <paper-badge for="nutrientsOfInterestHeaderId" label="[[nutrientsOfInterestCount]]!" ></paper-badge>   
           </template>
@@ -171,10 +165,6 @@
         super.ready();
         this.addEventListener('state-changed', e => this._reduxStoreStateChanged(e));
       }
-
-      // _nutrientsOfInterestOutput(item, length) {
-      //   return item.name;
-      // }
 
       _reduxStoreStateChanged (e) {
         this.$.nutrientsOfInterestHeaderListId.render();
