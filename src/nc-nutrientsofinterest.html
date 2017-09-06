@@ -34,6 +34,11 @@
       path="/nutrients"
       data="{{nutrientsQueried}}">
     </firebase-query>
+    <firebase-query
+      id="nutrientsOfInterestQuery"
+      path="/users/[[user.uid]]/nutrientsOfInterest"
+      data="{{nutrientsOfInterestQueried}}">
+    </firebase-query>
     <firebase-auth
        id="auth"
        user="{{user}}"
@@ -66,6 +71,10 @@
           data: {
             type: Array,
             statePath: 'nutrients',
+          },
+          offline: {
+            type: Boolean,
+            statePath: 'offline'
           },
           nutrientsQueried : Array,
           nutrientsPersisted : Array,
@@ -102,15 +111,20 @@
       }
 
       _selectedItemsChanged (changeRecord) {
-        console.log('path: ' + changeRecord.path);
-        console.log('value: ' + changeRecord.value);
-        // What could I do here?
         // 1.  write to firebase if logged in and online
+        if (!this.offline && this.signedIn) {
+          this.writeNutrientsOfInterestToFirebase(changeRecord.base);
+        }
         // 2.  write to indexeddb
         this.saveNutrientsOfInterestToIndexedDb(changeRecord.base)
           .catch((errTxt) => { console.warn("The following error was caught from saveNutrientsOfInterestToIndexedDb call: ", errTxt); });
         // 3.  update redux  
         this.dispatch('loadAllNutrientsOfInterest', changeRecord.base);      
+      }
+
+      writeNutrientsOfInterestToFirebase(nutrientsOfInterestList) {
+        let updateRef = this.$.nutrientsOfInterestQuery.ref;// TODO test this.
+        updateRef.set(nutrientsOfInterestList);
       }
 
       saveNutrientsOfInterestToIndexedDb (nutrientsOfInterestList) {
@@ -296,13 +310,6 @@
               console.log("an upgrade is needed...");
               var db = event.target.result;
               if (!db.objectStoreNames.contains('possibleNutrients') && nutrientsArrayFromDB) {
-                  // // Create all objectStores for this database[
-                  // thisWebComponent.createAndPopulateObjectStore([
-                  //   {db:db, initArray: nutrientsArrayFromDB, context: thisWebComponent, objectStoreName: "possibleNutrients", keyPath: "allNutrientsListKey", dataPath: "allNutrientsList"},
-                  //   {db:db, initArray: [], context: thisWebComponent, objectStoreName: "nutrientsOfInterest", keyPath: "allNutrientsOfInterestListKey", dataPath: "allNutrientsOfInterestList"}
-                  // ])
-                  //   .then(thisWebComponent.createAndPopulateObjectStore)
-                  //   .catch((errTxt) => {console.warn(errTxt);});
                   let objectStore = db.createObjectStore("possibleNutrients", { keyPath: "allNutrientsListKey" });
                   // Use transaction oncomplete to make sure the objectStore creation is
                   // finished before adding data into it.
@@ -312,44 +319,11 @@
                         possibleNutrientsObjectStore.add({allNutrientsListKey: 1, allNutrientsList: nutrientsArrayFromDB});
                     thisWebComponent.nutrientsPersisted = nutrientsArrayFromDB;
                   };
-                  // //It seems we cannot do multiple transactions in onupgradeneeded??
-                  // nutrientsOfInterestObjectStore.transaction.oncomplete = function(event) {
-                  //   // Store values in the newly created objectStore.
-                  //   var possibleNutrientsObjectStore = db.transaction("nutrientsOfInterest", "readwrite").objectStore("nutrientsOfInterest");
-                  //       possibleNutrientsObjectStore.add({allNutrientsOfInterestListKey: 1, allNutrientsOfInterestList: []});
-                  // };
               }
               if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
                 let nutrientsOfInterestObjectStore = db.createObjectStore("nutrientsOfInterest", { keyPath: "allNutrientsOfInterestListKey" });
               }
               console.log("NephcounterOffLineDB has finished its upgrade.")
-          };
-        });
-      }
-
-      // This did not work because it did not contain an opening of the db where you have onupgradeneeded.
-      // params example:  {db:db, initArray: nutrientsArrayFromDB, context: thisWebComponent, objectStoreName: "possibleNutrients", keyPath: "allNutrientsListKey", dataPath: "allNutrientsList"}
-      createAndPopulateObjectStore(paramsArray) {
-        var params = paramsArray.shift();
-        if (!params) {
-          return;
-        }
-        return new Promise ((resolve, reject) => {
-          if (!params || params.length === 0) {
-            resolve(null);
-            return;
-          }
-          var objectStore = params.db.createObjectStore(params.objectStoreName, { keyPath: params.keyPath });
-          // Use transaction oncomplete to make sure the objectStore creation is
-          // finished before adding data into it.
-          objectStore.transaction.oncomplete = function(event) {
-            // Store values in the newly created objectStore.
-            var targetObjectStore = params.db.transaction(params.objectStoreName, "readwrite").objectStore(params.objectStoreName);
-            var dataObject = {};
-            dataObject[params.keyPath] = 1;
-            dataObject[params.dataPath] = params.initArray;
-            targetObjectStore.add(dataObject);
-            resolve(paramsArray);
           };
         });
       }
