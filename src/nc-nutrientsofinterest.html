@@ -108,6 +108,72 @@
       ready() {
         super.ready();
         this.doOffLineNutrientStuff();
+        this._readNutrientsOfInterest();
+      }
+
+      _readNutrientsOfInterest() {
+          let thisWebComponent = this;
+          this._getNutrientsOfInterestFromIndexedDbIfAvailable()
+            .then(() => {/* do nothing yet here */})
+            .catch((errorText) => {
+              console.log("_getNutrientsOfInterestFromIndexedDbIfAvailable promise rejected with error text...", errorText);
+              if (!thisWebComponent.offline && thisWebComponent.signedIn) {
+                thisWebComponent.selectedItems = thisWebComponent.nutrientsOfInterestQueried;
+                // TODO if the errorText indicates the indexeddb database had no records or was undefined
+                // and the firebase queried version shows some records then we need to update the indexeddb database,
+                // perhaps by iterating over each element in the nutrients of interest's iron-lists list item
+                // "option" elements and programmatically clicking on each one.
+              }
+            });
+      }
+
+      _getNutrientsOfInterestFromIndexedDbIfAvailable () {
+          let thisWebComponent = this;
+          return new Promise((resolve, reject) => {
+            var db;
+            var request = window.indexedDB.open("NephcounterOffLineDB");
+            request.onerror = function(event) {
+                // Do something with request.errorCode!
+                console.warn("NephcounterOffLineDB creation failed in _getNutrientsOfInterestFromIndexedDbIfAvailable!", event)
+                reject("open of database failed with error in _getNutrientsOfInterestFromIndexedDbIfAvailable!");
+            }; // end of onerror
+            request.onsuccess = function(event) { 
+              console.log("NephcounterOffLineDB open succeeded in _getNutrientsOfInterestFromIndexedDbIfAvailable!");
+              db = event.target.result;
+              if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
+                reject("nutrientsOfInterest object store has not been created yet to retrieve");
+                console.warn("nutrientsOfInterest object store has not been created yet to retrieve", db.objectStoreNames);
+                return;
+              }
+              var objectStore = db.transaction(["nutrientsOfInterest"], "readonly").objectStore("nutrientsOfInterest");
+              var request = objectStore.get(1);
+              request.onerror = function(event) {
+                  // assuming that 1 was not found so it needs to be added
+                  console.warn("Caught querying record 1 from nutrientsOfInterest from error in event: ", event);
+                  reject("Caught querying record 1 from nutrientsOfInterest; check for console warning for specifics");
+              };
+              request.onsuccess = function(event) {
+                // Get the old value that we want to update
+                var data = event.target.result;
+                
+                if (typeof data === "undefined") {  // Then there is no record yet .
+                  reject("there is no record yet in indexedDB");
+                  return;
+                }
+                  // update the value(s) in the object that you want to change
+                thisWebComponent.selectedItems = data.allNutrientsOfInterestList;
+                resolve();
+              };
+  
+            }; // end of onsuccess
+  
+            // This is done only if there is no database and one needs to be created before we read from it.
+            request.onupgradeneeded = function(event) {   
+              console.log("an upgrade is needed...");
+              var db = event.target.result;
+              reject("There is no offline database yet for nutrientsOfInterest");
+            }; // end of onupgradeneeded
+          });
       }
 
       _selectedItemsChanged (changeRecord) {
