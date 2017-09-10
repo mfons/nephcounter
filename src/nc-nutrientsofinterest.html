@@ -177,6 +177,11 @@
       }
 
       _selectedItemsChanged (changeRecord) {
+        if (
+          typeof changeRecord === "undefined" || 
+          typeof changeRecord.base === "undefined" ||
+          changeRecord.base.length === 0
+        ) {  return; }
         // 1.  write to firebase if logged in and online
         if (!this.offline && this.signedIn) {
           this.writeNutrientsOfInterestToFirebase(changeRecord.base);
