@@ -6,6 +6,7 @@
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymer/lib/utils/render-status.html">
 <link rel="import" href="redux-store.html">
 
 <dom-module id="nc-nutrientsofinterest">
@@ -29,16 +30,6 @@
     <!-- <app-indexeddb-mirror  id="nutrientsIndexedDB" key="nutrients"
     data="[[nutrientsQueried]]"
     persisted-data="{{nutrientsPersisted}}"></app-indexeddb-mirror> -->
-    <firebase-query
-      id="query"
-      path="/nutrients"
-      data="{{nutrientsQueried}}">
-    </firebase-query>
-    <firebase-query
-      id="nutrientsOfInterestQuery"
-      path="/users/[[user.uid]]/nutrientsOfInterest"
-      data="{{nutrientsOfInterestQueried}}">
-    </firebase-query>
     <firebase-auth
        id="auth"
        user="{{user}}"
@@ -46,6 +37,16 @@
        signed-in="{{signedIn}}" >
     </firebase-auth>
 
+    <firebase-query
+      id="query"
+      path="/nutrients"
+      data="{{nutrientsQueried}}">
+    </firebase-query>
+    <firebase-query
+      id="nutrientsOfInterestQuery"
+      path="[[_getNutrientsOfInterestPath(user)]]"
+      data="{{nutrientsOfInterestQueried}}">
+    </firebase-query>
 
     <div class="card">
       <div class="circle">1</div>
@@ -77,9 +78,14 @@
             statePath: 'offline'
           },
           nutrientsQueried : Array,
+          nutrientsOfInterestQueried: Array,
           nutrientsPersisted : Array,
           signedIn: Boolean,
           selectedItems: Array,
+          refreshingSelectedItemsList: {
+            type: Boolean,
+            value: false
+          },
         };
       }
 
@@ -101,30 +107,66 @@
       }
 
       static get observers() {
-        return [ '_signedInChanged(signedIn)', '_selectedItemsChanged(selectedItems.*)'
+        return [ 
+          '_signedInChanged(signedIn)', 
+           '_selectedItemsChanged(selectedItems.*)' //,
+          // '_nutrientsOfInterestQueriedChanged(nutrientsOfInterestQueried.*)'
         ]; 
       }
 
       ready() {
         super.ready();
         this.doOffLineNutrientStuff();
-        this._readNutrientsOfInterest();
+      }
+
+      _getNutrientsOfInterestPath(theUser) {
+        if (!theUser) { return '';}
+        return '/users/' + theUser.uid + '/nutrientsOfInterest';
       }
 
       _readNutrientsOfInterest() {
+          if (!this.nutrientsPersisted || this.nutrientsPersisted.length === 0) { console.warn("_readNutrientsOfInterest() called when nutrients list was still empty!"); return;}
           let thisWebComponent = this;
           this._getNutrientsOfInterestFromIndexedDbIfAvailable()
-            .then(() => {/* do nothing yet here */})
+            .then(() => {/* do nothing yet here */
+                console.log("we got nutrients of interest from indexed db!");
+            })
             .catch((errorText) => {
               console.log("_getNutrientsOfInterestFromIndexedDbIfAvailable promise rejected with error text...", errorText);
               if (!thisWebComponent.offline && thisWebComponent.signedIn) {
-                thisWebComponent.selectedItems = thisWebComponent.nutrientsOfInterestQueried;
+                thisWebComponent._setNutrientsOfInterestSelectedItemsFromFirebaseStore();
+
                 // TODO if the errorText indicates the indexeddb database had no records or was undefined
                 // and the firebase queried version shows some records then we need to update the indexeddb database,
                 // perhaps by iterating over each element in the nutrients of interest's iron-lists list item
                 // "option" elements and programmatically clicking on each one.
               }
             });
+      }
+
+      _setNutrientsOfInterestSelectedItemsFromFirebaseStore() {
+        var thisWebComponent = this;
+        return new Promise((resolve, reject) => {
+          thisWebComponent.$.nutrientsOfInterestQuery.ref.on("value", function(snapshot) {
+            console.log("the nutrients of interest firebase read came back successfully!");
+            thisWebComponent._selectGivenNutrientsOfInterest(snapshot.val());
+            //this.selectedItems = snapshot.val();
+            resolve(snapshot.val());
+          }.bind(thisWebComponent), function (errorObject) {
+            console.warn("The nutrients of interest firebase read failed: " + errorObject.code);
+            reject("The nutrients of interest firebase read failed: " + errorObject.code);
+          });            
+        });
+      }
+
+      _selectGivenNutrientsOfInterest(theList) {
+        this.refreshingSelectedItemsList = true;
+        var thisWebComponent = this;
+        theList.forEach((item) => {
+          thisWebComponent.$.nutrientIronList.selectIndex(item.offset);
+          this.dispatch('loadAllNutrientsOfInterest', theList);      
+        });
+        this.refreshingSelectedItemsList = false;
       }
 
       _getNutrientsOfInterestFromIndexedDbIfAvailable () {
@@ -160,8 +202,9 @@
                   reject("there is no record yet in indexedDB");
                   return;
                 }
-                  // update the value(s) in the object that you want to change
-                thisWebComponent.selectedItems = data.allNutrientsOfInterestList;
+
+                thisWebComponent._selectGivenNutrientsOfInterest(data.allNutrientsOfInterestList);
+                //thisWebComponent.selectedItems = data.allNutrientsOfInterestList;
                 resolve();
               };
   
@@ -176,8 +219,14 @@
           });
       }
 
+      _nutrientsOfInterestQueriedChanged (changeRecord) {
+        if (!changeRecord || !changeRecord.base) { return; }
+        console.log('nutrients of interest queried has ' + changeRecord.base.length + ' records!');
+      }
+
       _selectedItemsChanged (changeRecord) {
         if (
+          this.refreshingSelectedItemsList ||
           typeof changeRecord === "undefined" || 
           typeof changeRecord.base === "undefined" ||
           changeRecord.base.length === 0
@@ -265,7 +314,10 @@
       doOffLineNutrientStuff() {
         let thisWebComponent = this;
         this.waitForIndexedDbToOpenAndReadOrFail()
-          .then(() => {console.log("waitForIndexedDbToOpenAndReadOrFail success!")})
+          .then(() => {
+            console.log("waitForIndexedDbToOpenAndReadOrFail success!");
+            thisWebComponent._doStuffOnceNutrientsHaveLoaded();
+          })
           .catch(errMsg => { 
             console.log("in catch with error message of ", errMsg);
             return new Promise((resolve, reject) => {
@@ -286,13 +338,19 @@
             .then((nutrientArray) => { 
               console.log("go work with nutrient array: ", nutrientArray);
               thisWebComponent.waitForIndexedDbToOpenAndReadOrFail(nutrientArray)
-              .then(() => {console.log("waitForIndexedDbToOpenAndReadOrFail call 2 succeeded.");})
+              .then(() => {
+                console.log("waitForIndexedDbToOpenAndReadOrFail call 2 succeeded.");
+                thisWebComponent._doStuffOnceNutrientsHaveLoaded();
+              })
               .catch(() => { 
                 console.warn("waitForIndexedDbToOpenAndReadOrFail failed again...time to delete the db and try a third time with the array in hand.");
                 thisWebComponent.deleteDB()
                 .then(() => {
                   thisWebComponent.waitForIndexedDbToOpenAndReadOrFail(nutrientArray)
-                    .then(() => {console.log("waitForIndexedDbToOpenAndReadOrFail call 3 succeeded.")})
+                    .then(() => {
+                      console.log("waitForIndexedDbToOpenAndReadOrFail call 3 succeeded.");
+                      thisWebComponent._doStuffOnceNutrientsHaveLoaded();
+                    })
                     .catch(() => {console.log("waitForIndexedDbToOpenAndReadOrFail call 3 failed.")});
                 })
                 .catch(() => {console.warn("NephcounterOffLineDB database delete failed.")});
@@ -300,6 +358,15 @@
             })
             .catch(() => {console.warn("In promise catch section.");});
       }
+
+      _doStuffOnceNutrientsHaveLoaded() {
+        //this._readNutrientsOfInterest(); // TODO -- this did not work...even though the 
+        // nutrients array is populated, iron-list is still not showing anything yet.  
+        // Need to find a way to make sure that has happened...call this method afterNextRender from here??
+        Polymer.RenderStatus.afterNextRender(this, function() {
+          this._readNutrientsOfInterest();
+        });
+     }
 
       deleteDB() {
         var thisWebComponent = this;
