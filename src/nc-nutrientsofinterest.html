@@ -363,9 +363,20 @@
         //this._readNutrientsOfInterest(); // TODO -- this did not work...even though the 
         // nutrients array is populated, iron-list is still not showing anything yet.  
         // Need to find a way to make sure that has happened...call this method afterNextRender from here??
-        Polymer.RenderStatus.afterNextRender(this, function() {
-          this._readNutrientsOfInterest();
-        });
+//         Polymer.RenderStatus.afterNextRender(this, function() {
+//           this._readNutrientsOfInterest();
+//         });
+
+      // OK:  this is more an act of irritation than anything else:
+      // there is the initial loading stuff with the nutrients list.  
+      // This can in fact interact with the loading of the nutrients of 
+      // interest through the nutrientsOfInterest-changed method...something
+      // this long pause separates all the stuff at the beginning from the
+      // later loading of the selected items.  A hail Mary in other words.  Sorry.  But this works. :-D
+        var thisWebComponent = this;
+        setTimeout(function() {
+          thisWebComponent._readNutrientsOfInterest();
+        }, 5000);
      }
 
       deleteDB() {
