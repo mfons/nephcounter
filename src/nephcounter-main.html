@@ -258,7 +258,12 @@
         // Deault to 'consumption' in that case.
         //this.page = page || 'consumption';
         // NOW:  the follow function call sets "page" property
-        this.page = page || this._decideWhichPageToGoTo(page);
+        if (page) {
+          this.page = page;
+        }
+        else {
+          this._decideWhichPageToGoTo(page);
+        }
 
         // Close a non-persistent drawer when the page & route are changed.
         if (!this.$.drawer.persistent) {
