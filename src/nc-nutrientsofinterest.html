@@ -160,6 +160,7 @@
       }
 
       _selectGivenNutrientsOfInterest(theList) {
+        if (!theList) { return; }
         this.refreshingSelectedItemsList = true;
         var thisWebComponent = this;
         theList.forEach((item) => {

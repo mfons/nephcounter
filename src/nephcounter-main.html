@@ -161,10 +161,87 @@
         ];
       }
 
+      static get actions() {
+        return {
+          loadAllNutrientsOfInterest: (allNutrientsOfInterest) => {
+              return {
+                type: 'LOAD_ALL_NUTRIENTS_OF_INTEREST',
+                allNutrientsOfInterest:  allNutrientsOfInterest
+              }
+          },
+        };
+      }
+
       ready () {
         super.ready();
         this.addEventListener('state-changed', e => this._reduxStoreStateChanged(e));
       }
+
+      _decideWhichPageToGoTo(page) {
+        var thisWebComponent = this;
+        this._getNutrientsOfInterestFromIndexedDbIfAvailable()
+          .then((nutrientsOfInterestList) => {
+            if (nutrientsOfInterestList.length === 0) {
+              thisWebComponent.page = 'nutrientsofinterest';
+            }
+            else {
+              thisWebComponent.page = 'consumption';              
+              thisWebComponent.dispatch('loadAllNutrientsOfInterest', nutrientsOfInterestList);    
+            }
+          })
+          .catch(() => {
+            thisWebComponent.page = 'nutrientsofinterest';
+          });
+      }
+
+      // Copied from nc-nutrientsofinterest.html on 9/17/17 11:29am
+      _getNutrientsOfInterestFromIndexedDbIfAvailable () {
+        let thisWebComponent = this;
+        return new Promise((resolve, reject) => {
+          var db;
+          var request = window.indexedDB.open("NephcounterOffLineDB");
+          request.onerror = function(event) {
+              // Do something with request.errorCode!
+              console.warn("NephcounterOffLineDB creation failed in _getNutrientsOfInterestFromIndexedDbIfAvailable!", event)
+              reject("open of database failed with error in _getNutrientsOfInterestFromIndexedDbIfAvailable!");
+          }; // end of onerror
+          request.onsuccess = function(event) { 
+            console.log("NephcounterOffLineDB open succeeded in _getNutrientsOfInterestFromIndexedDbIfAvailable!");
+            db = event.target.result;
+            if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
+              reject("nutrientsOfInterest object store has not been created yet to retrieve");
+              console.warn("nutrientsOfInterest object store has not been created yet to retrieve", db.objectStoreNames);
+              return;
+            }
+            var objectStore = db.transaction(["nutrientsOfInterest"], "readonly").objectStore("nutrientsOfInterest");
+            var request = objectStore.get(1);
+            request.onerror = function(event) {
+                // assuming that 1 was not found so it needs to be added
+                console.warn("Caught querying record 1 from nutrientsOfInterest from error in event: ", event);
+                reject("Caught querying record 1 from nutrientsOfInterest; check for console warning for specifics");
+            };
+            request.onsuccess = function(event) {
+              // Get the old value that we want to update
+              var data = event.target.result;
+              
+              if (typeof data === "undefined") {  // Then there is no record yet .
+                reject("there is no record yet in indexedDB");
+                return;
+              }
+              resolve(data.allNutrientsOfInterestList);
+            };
+
+          }; // end of onsuccess
+
+          // This is done only if there is no database and one needs to be created before we read from it.
+          request.onupgradeneeded = function(event) {   
+            console.log("an upgrade is needed...");
+            var db = event.target.result;
+            reject("There is no offline database yet for nutrientsOfInterest");
+          }; // end of onupgradeneeded
+        });
+    }
+
 
       _reduxStoreStateChanged (e) {
         this.$.nutrientsOfInterestHeaderListId.render();
@@ -177,9 +254,11 @@
           return;
         }
 
-        // If no page was found in the route data, page will be an empty string.
-        // Deault to 'nutrientsofinterest' in that case.
-        this.page = page || 'nutrientsofinterest';
+        // AS WAS:  If no page was found in the route data, page will be an empty string.
+        // Deault to 'consumption' in that case.
+        //this.page = page || 'consumption';
+        // NOW:  the follow function call sets "page" property
+        this._decideWhichPageToGoTo(page);
 
         // Close a non-persistent drawer when the page & route are changed.
         if (!this.$.drawer.persistent) {
