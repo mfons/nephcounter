@@ -134,13 +134,12 @@
             .catch((errorText) => {
               console.log("_getNutrientsOfInterestFromIndexedDbIfAvailable promise rejected with error text...", errorText);
               if (!thisWebComponent.offline && thisWebComponent.signedIn) {
-                thisWebComponent._setNutrientsOfInterestSelectedItemsFromFirebaseStore();
-
-                // TODO if the errorText indicates the indexeddb database had no records or was undefined
-                // and the firebase queried version shows some records then we need to update the indexeddb database,
-                // perhaps by iterating over each element in the nutrients of interest's iron-lists list item
-                // "option" elements and programmatically clicking on each one.
-              }
+                thisWebComponent._setNutrientsOfInterestSelectedItemsFromFirebaseStore()
+                  .then(thisWebComponent.saveNutrientsOfInterestToIndexedDb)
+                  .catch((errorText) => {
+                    console.warn("_setNutrientsOfInterestSelectedItemsFromFirebaseStore failed: ", errorObject.code);
+                  });
+               }
             });
       }
 
@@ -153,7 +152,7 @@
             //this.selectedItems = snapshot.val();
             resolve(snapshot.val());
           }.bind(thisWebComponent), function (errorObject) {
-            console.warn("The nutrients of interest firebase read failed: " + errorObject.code);
+            console.warn("The nutrients of interest firebase read failed: ", errorObject.code);
             reject("The nutrients of interest firebase read failed: " + errorObject.code);
           });            
         });
