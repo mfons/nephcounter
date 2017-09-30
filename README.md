@@ -1,7 +1,6 @@
 # Nephcounter TODO list
-- [X] Mercury
 - [ ] think about wording of Standard Reference versus Name Brand
-- [ ] on refresh sometimes redux nutrients-of-interest count does not get updated
+- [X] on refresh sometimes redux nutrients-of-interest count does not get updated
 - [ ] when you are typing stuff into the food list make the search less picky about spelling and capitalization
 
 # Polymer App Toolbox - Starter Kit
