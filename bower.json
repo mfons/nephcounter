@@ -28,7 +28,9 @@
     "paper-styles": "PolymerElements/paper-styles#^2.0.0",
     "paper-badge": "PolymerElements/paper-badge#^2.0.0",
     "polymerfire": "firebase/polymerfire#2.0.0",
-    "app-storage": "PolymerElements/app-storage#^2.0.2"
+    "app-storage": "PolymerElements/app-storage#^2.0.2",
+    "paper-toggle-button": "PolymerElements/paper-toggle-button#^2.0.0",
+    "paper-input": "PolymerElements/paper-input#^2.0.2"
   },
   "resolutions": {
     "polymer": "^2.0.0-rc.3",

@@ -1,5 +1,8 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="nc-consumption-form.html">
 
 <dom-module id="nc-consumption">
   <template>
@@ -13,9 +16,20 @@
 
     <div class="card">
       <div class="circle">2</div>
-      <h1>View Two</h1>
-      <p>Ea duis bonorum nec, falli paulo aliquid ei eum.</p>
-      <p>Id nam odio natum malorum, tibique copiosae expetenda mel ea.Detracto suavitate repudiandae no eum. Id adhuc minim soluta nam.Id nam odio natum malorum, tibique copiosae expetenda mel ea.</p>
+      <paper-icon-button id="helpButton" icon="my-icons:help-outline"></paper-icon-button>
+      <paper-tooltip for="helpButton" position="right">
+        This screen is where you will spend most of your time in this app.
+        <br/><br/>
+        Here, you enter something you have eaten or drank, or intend to eat and drink, 
+        for the purpose of recording this act or for inspecting this item's nutrient content.
+        <br/><br/>
+        <div style="font-weight: bold;">"Standard Reference"</div>
+        You will want to turn off standard reference if you are looking 
+        for a name brand -- for all other lookups, keep it on, otherwise you will see too many 
+        items in "Food/Fluid" list.       
+      </paper-tooltip>
+      <h1>Consumption</h1>
+      <nc-consumption-form></nc-consumption-form>
     </div>
   </template>
 

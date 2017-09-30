@@ -1,0 +1,54 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+
+<dom-module id="nc-consumption-form">
+    <template>
+        <style include="shared-styles">
+        :host {
+            display: block;
+    
+            padding: 10px;
+        }
+        </style>
+        <paper-toggle-button checked="{{isStandardReference}}">
+            Use Standard Reference
+        </paper-toggle-button>
+        <paper-input id="foodFluidSearchStringId" name="foodFluidSearch" 
+            label="Search Food/Fluid" value="{{foodFluidSearchString}}" required 
+            autocapitalize="off"></paper-input>
+    </template>
+    
+    <script>
+        class NcConsumptionForm extends Polymer.Element {
+            static get is() { return 'nc-consumption-form'; }
+
+            static get properties() {
+                return {
+                    isStandardReference: {
+                        type: Boolean,
+                        value: true
+                    },
+                    foodFluidSearchString: {
+                        type: String,
+                        observer: '_foodFluidSearchStringChanged'
+                    },
+                    textSearch: {
+                        type: String,
+                        value: "butter"
+                    }
+                };
+            }
+
+            _foodFluidSearchStringChanged(newString, oldString) {
+                this.set('textSearch', newString);
+            }
+
+        }
+    
+    
+        window.customElements.define(NcConsumptionForm.is, NcConsumptionForm);
+    </script>
+</dom-module>
+    
