@@ -1,3 +1,8 @@
+# Nephcounter TODO list
+- [ ] think about wording of Standard Reference versus Name Brand
+- [X] on refresh sometimes redux nutrients-of-interest count does not get updated
+- [ ] when you are typing stuff into the food list make the search less picky about spelling and capitalization
+
 # Polymer App Toolbox - Starter Kit
 
 [![Build Status](https://travis-ci.org/PolymerElements/polymer-starter-kit.svg?branch=master)](https://travis-ci.org/PolymerElements/polymer-starter-kit)
