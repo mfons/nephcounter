@@ -2,6 +2,11 @@
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="nc-foods-by-text-search.html">
+<link rel="import" href="redux-store.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
 
 <dom-module id="nc-consumption-form">
     <template>
@@ -12,12 +17,24 @@
             padding: 10px;
         }
         </style>
+
+        <nc-foods-by-text-search text-search="[[textSearch]]" 
+        id="foodsByTextSearch" is-standard-reference="[[isStandardReference]]">
+        </nc-foods-by-text-search>
+
         <paper-toggle-button checked="{{isStandardReference}}">
             Use Standard Reference
         </paper-toggle-button>
         <paper-input id="foodFluidSearchStringId" name="foodFluidSearch" 
             label="Search Food/Fluid" value="{{foodFluidSearchString}}" required 
-            autocapitalize="off"></paper-input>
+            autocapitalize="off" spellcheck="true" on-blur="_getFoodData"></paper-input>
+        <paper-dropdown-menu required  label="Food/Fluid" id="foodSelectionMenu"> <!-- on-tap="_foodSelectionMenuTapped" -->
+            <paper-listbox class="dropdown-content" selected="{{selectedFood}}" id="foodSelectionListbox">
+                <template is="dom-repeat" items='[[foods]]' as="foodItem" initial-count="10">
+                    <paper-item>[[foodItem.name]]</paper-item>
+                </template>
+            </paper-listbox>
+        </paper-dropdown-menu>
     </template>
     
     <script>
@@ -32,21 +49,24 @@
                     },
                     foodFluidSearchString: {
                         type: String,
-                        observer: '_foodFluidSearchStringChanged'
                     },
                     textSearch: {
                         type: String,
                         value: "butter"
+                    },
+                    foods: {
+                        type: Array,
+                        statePath:  'latestFoodList'
                     }
                 };
             }
 
-            _foodFluidSearchStringChanged(newString, oldString) {
-                this.set('textSearch', newString);
+            _getFoodData() {
+//                this.set('textSearch', newString);
+                this.textSearch = this.foodFluidSearchString;
             }
 
         }
-    
     
         window.customElements.define(NcConsumptionForm.is, NcConsumptionForm);
     </script>

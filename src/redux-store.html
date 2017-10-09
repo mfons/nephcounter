@@ -6,7 +6,8 @@
     offline: navigator.onLine === false,
     nutrientsOfInterest: [{name: "loading..."}],
     nutrientsOfInterestIsEmpty: true,
-    nutrientsOfInterestCount: 0
+    nutrientsOfInterestCount: 0,
+    latestFoodList: []
   };
 
   const reducer = (state, action) => {
@@ -28,6 +29,8 @@
           nutrientsOfInterestIsEmpty: action.allNutrientsOfInterest.length === 0,
           nutrientsOfInterestCount: action.allNutrientsOfInterest.length
         });
+      case 'SAVE_FOOD_LIST' :
+        return Object.assign({}, state, { latestFoodList: action.latestFoodList });
       default :
         console.warn("Invalid action type in redux store:", action.type);
     }

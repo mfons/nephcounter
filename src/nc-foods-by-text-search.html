@@ -1,0 +1,94 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="nc-foods-by-text-search">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+        
+                padding: 10px;
+            }
+        </style>
+        <iron-ajax
+        auto
+        id="ajaxNutrientsList"
+        method="GET"
+        url="https://api.nal.usda.gov/ndb/search/"
+        handle-as="json"
+        params="[[ajaxParams]]"
+        on-response="_tasksLoaded">
+    </iron-ajax>
+</template>
+
+    <script>
+        class NcFoodsByTextSearch extends ReduxMixin(Polymer.Element) {
+            static get is() { return 'nc-foods-by-text-search'; }
+
+            static get properties() {
+                return {
+                    // ds=Standard+Referece limits to just a basic set of foods
+                    // that the USDA has a full set of nutrient information
+                    // on.  Without ds param set like this, you get lots of
+                    // brand name foods, most of which do not have nutrient information
+                    // against them.  Some do however, so you may want to opt in
+                    // occasionally...hence this boolean control.
+                    isStandardReference: Boolean,
+                    customFoods: {
+                        type: Array,
+                        statePath: ''
+                    },
+                    foods: {
+                        type: Array,
+                        statePath: ''
+                    },
+                    textSearch: {
+                        type: String,
+                        observer:  '_textSearchChanged'
+                    },
+                    ajaxParams: {
+                        type: Object,
+                        value: {"format":"json", "q":"butter", "sort":"n", 
+                            "max":"500", "offset":"0", "api_key":"JrBeMt1k9YsrhBrqfbt2GmmQJAu7XVgt3ttjAxJt",
+                            "ds" : "Standard Reference"}
+                    }
+                };
+            }
+
+            _textSearchChanged(newTextSearch, oldTextSearch) {
+               this.set('ajaxParams.q', newTextSearch);
+            }
+
+            _isStandardReferenceChanged(newValue, oldValue) {
+                if (newValue) {
+                    this.set('ajaxParams.ds', 'Standard Reference');
+                }
+                else {
+                    this.set('ajaxParams.ds', '');
+                }
+            }
+
+            _tasksLoaded(data) {
+                if (typeof data.detail.response.list !== 'undefined' &&
+                    typeof data.detail.response.list.item !== 'undefined') {
+                    this.foods = data.detail.response.list.item;
+                    this.dispatch('saveFoodList', this.foods);
+                }
+            }
+
+            static get actions() {
+                return {
+                    saveFoodList: (latestFoodList) => {
+                        return {
+                            type: 'SAVE_FOOD_LIST',
+                            latestFoodList:  latestFoodList
+                        }
+                    },
+                };
+            }
+        }
+
+        window.customElements.define(NcFoodsByTextSearch.is, NcFoodsByTextSearch);
+    </script>
+</dom-module>
