@@ -7,6 +7,7 @@
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
 
 <dom-module id="nc-consumption-form">
     <template>
@@ -30,15 +31,20 @@
             autocapitalize="off" spellcheck="true" on-blur="_getFoodData"></paper-input>
         <paper-dropdown-menu required  label="Food/Fluid" id="foodSelectionMenu"> <!-- on-tap="_foodSelectionMenuTapped" -->
             <paper-listbox class="dropdown-content" selected="{{selectedFood}}" id="foodSelectionListbox">
-                <template is="dom-repeat" items='[[foods]]' as="foodItem" initial-count="10">
+                <!-- <template is="dom-repeat" items='[[foods]]' as="foodItem" initial-count="10" id="foodListId">
                     <paper-item>[[foodItem.name]]</paper-item>
-                </template>
+                </template> -->
+                <iron-list id="nutrientIronList" items="[[_foodsChanged(foods.*)]]" selected-items="{{selectedFood}}" selection-enabled >
+                    <template>
+                        <div >[[item.name]]</div>  <!-- tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]" -->
+                    </template>
+                </iron-list>                
             </paper-listbox>
         </paper-dropdown-menu>
     </template>
     
     <script>
-        class NcConsumptionForm extends Polymer.Element {
+        class NcConsumptionForm extends ReduxMixin(Polymer.Element) {
             static get is() { return 'nc-consumption-form'; }
 
             static get properties() {
@@ -57,13 +63,32 @@
                     foods: {
                         type: Array,
                         statePath:  'latestFoodList'
-                    }
+                    },
+                    selectedFood: {
+                        type: Object
+                        // observer: 'selectedFoodChanged'
+                    },
                 };
             }
 
+            ready () {
+                super.ready();
+                this.addEventListener('state-changed', (e) => {this._reduxStoreStateChanged(e);});
+            }
+
             _getFoodData() {
-//                this.set('textSearch', newString);
                 this.textSearch = this.foodFluidSearchString;
+            }
+
+            _reduxStoreStateChanged (e) {
+                console.log("redux store state changed...in nc-consumption-form", this.foods);
+                //this.$.foodListId.render();
+            }
+
+            _foodsChanged (changeRecord) {
+                if (changeRecord) {
+                    return changeRecord.base;
+                }
             }
 
         }

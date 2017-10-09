@@ -1,6 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="redux-store.html">
 
 <dom-module id="nc-foods-by-text-search">
     <template>
@@ -12,8 +13,7 @@
             }
         </style>
         <iron-ajax
-        auto
-        id="ajaxNutrientsList"
+        id="foodSearchAjaxId"
         method="GET"
         url="https://api.nal.usda.gov/ndb/search/"
         handle-as="json"
@@ -37,15 +37,12 @@
                     isStandardReference: Boolean,
                     customFoods: {
                         type: Array,
-                        statePath: ''
                     },
                     foods: {
                         type: Array,
-                        statePath: ''
-                    },
+                     },
                     textSearch: {
-                        type: String,
-                        observer:  '_textSearchChanged'
+                        type: String
                     },
                     ajaxParams: {
                         type: Object,
@@ -56,8 +53,16 @@
                 };
             }
 
-            _textSearchChanged(newTextSearch, oldTextSearch) {
-               this.set('ajaxParams.q', newTextSearch);
+            static get observers() {
+                return [
+                    '_textSearchChanged(textSearch)'
+                ]
+            }
+
+            _textSearchChanged(newValue) {
+               this.set('ajaxParams.q', newValue);
+               console.info("nc foods by text search got in text-search attribute", newValue);
+               this.$.foodSearchAjaxId.generateRequest();
             }
 
             _isStandardReferenceChanged(newValue, oldValue) {
@@ -67,6 +72,7 @@
                 else {
                     this.set('ajaxParams.ds', '');
                 }
+                this.$.foodSearchAjaxId.generateRequest();
             }
 
             _tasksLoaded(data) {
@@ -84,7 +90,7 @@
                             type: 'SAVE_FOOD_LIST',
                             latestFoodList:  latestFoodList
                         }
-                    },
+                    }
                 };
             }
         }
