@@ -30,16 +30,17 @@
             label="Search Food/Fluid" value="{{foodFluidSearchString}}" required 
             autocapitalize="off" spellcheck="true" on-blur="_getFoodData"></paper-input>
         <paper-dropdown-menu required  label="Food/Fluid" id="foodSelectionMenu"> <!-- on-tap="_foodSelectionMenuTapped" -->
-            <paper-listbox class="dropdown-content" selected="{{selectedFood}}" id="foodSelectionListbox">
-                <!-- <template is="dom-repeat" items='[[foods]]' as="foodItem" initial-count="10" id="foodListId">
+            <paper-listbox class="dropdown-content" slot="dropdown-content" selected="{{selectedFood}}" id="foodSelectionListbox">
+                <template is="dom-repeat" items="[[_foodsChanged(foods.*)]]" as="foodItem" 
+                initial-count="10" id="foodListId">
                     <paper-item>[[foodItem.name]]</paper-item>
-                </template> -->
-                <iron-list id="nutrientIronList" items="[[_foodsChanged(foods.*)]]" selected-items="{{selectedFood}}" selection-enabled >
-                    <template>
-                        <div >[[item.name]]</div>  <!-- tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]" -->
-                    </template>
-                </iron-list>                
+                </template>
             </paper-listbox>
+            <!-- <iron-list id="nutrientIronList" items="[[_foodsChanged(foods.*)]]" selected-items="{{selectedFood}}" selection-enabled >
+                    <template>
+                         <div >[[item.name]]</div>   <!--tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]" -->
+                    </template>
+                </iron-list>                 -->
         </paper-dropdown-menu>
     </template>
     
@@ -82,7 +83,7 @@
 
             _reduxStoreStateChanged (e) {
                 console.log("redux store state changed...in nc-consumption-form", this.foods);
-                //this.$.foodListId.render();
+                this.$.foodListId.render();
             }
 
             _foodsChanged (changeRecord) {
