@@ -17,6 +17,11 @@
     
             padding: 10px;
         }
+
+        iron-list {
+          height: 100vh; /* don't use % values unless the parent element is sized. */
+        }
+
         </style>
 
         <nc-foods-by-text-search text-search="[[textSearch]]" 
@@ -29,18 +34,12 @@
         <paper-input id="foodFluidSearchStringId" name="foodFluidSearch" 
             label="Search Food/Fluid" value="{{foodFluidSearchString}}" required 
             autocapitalize="off" spellcheck="true" on-blur="_getFoodData"></paper-input>
-        <paper-dropdown-menu required  label="Food/Fluid" id="foodSelectionMenu"> <!-- on-tap="_foodSelectionMenuTapped" -->
-            <paper-listbox class="dropdown-content" slot="dropdown-content" selected="{{selectedFood}}" id="foodSelectionListbox">
-                <template is="dom-repeat" items="[[_foodsChanged(foods.*)]]" as="foodItem" 
-                initial-count="10" id="foodListId">
-                    <paper-item>[[foodItem.name]]</paper-item>
+        <paper-dropdown-menu required   label="Food/Fluid" id="foodSelectionMenu" on-opened-changed="_foodFluidListOpenedChanged" > <!-- on-tap="_foodSelectionMenuTapped" -->
+            <iron-list id="foodFluidIronList" items="[[_foodsChanged(foods.*)]]" selected-item="{{selectedFood}}" selection-enabled >
+                <template>
+                            <div >[[item.name]]</div>   <!-- tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]"  -->
                 </template>
-            </paper-listbox>
-            <!-- <iron-list id="nutrientIronList" items="[[_foodsChanged(foods.*)]]" selected-items="{{selectedFood}}" selection-enabled >
-                    <template>
-                         <div >[[item.name]]</div>   <!--tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]" -->
-                    </template>
-                </iron-list>                 -->
+            </iron-list>
         </paper-dropdown-menu>
     </template>
     
@@ -77,13 +76,21 @@
                 this.addEventListener('state-changed', (e) => {this._reduxStoreStateChanged(e);});
             }
 
+            _foodFluidListOpenedChanged() {
+                console.log("food/fluid list opened property changed", this.$.foodSelectionMenu.opened);
+                if (this.$.foodSelectionMenu.opened) {
+                    this.$.foodFluidIronList.notifyResize();
+                }
+            }
+            
             _getFoodData() {
                 this.textSearch = this.foodFluidSearchString;
             }
 
             _reduxStoreStateChanged (e) {
                 console.log("redux store state changed...in nc-consumption-form", this.foods);
-                this.$.foodListId.render();
+                //this.$.foodListId.render(); // this only applies to dom-repeat sometimes...not iron-list
+                //this.$.foodSelectionMenu.opened = true; // TODO not sure about this??
             }
 
             _foodsChanged (changeRecord) {

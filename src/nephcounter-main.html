@@ -260,6 +260,7 @@
         // NOW:  the follow function call sets "page" property
         if (page) {
           this.page = page;
+          this._resetBadge();
         }
         else {
           this._decideWhichPageToGoTo(page);
@@ -269,6 +270,17 @@
         if (!this.$.drawer.persistent) {
           this.$.drawer.close();
         }
+      }
+
+      _resetBadge() {
+        var thisWebComponent = this;
+        this._getNutrientsOfInterestFromIndexedDbIfAvailable()
+          .then((nutrientsOfInterestList) => {
+            if (nutrientsOfInterestList.length > 0) {
+              thisWebComponent.dispatch('loadAllNutrientsOfInterest', nutrientsOfInterestList);    
+            }
+          })
+          .catch((err) => { console.error("error occurred getting nutrients of interest:", err)});
       }
 
       _pageChanged(page) {
