@@ -254,21 +254,23 @@
           return;
         }
 
-        // AS WAS:  If no page was found in the route data, page will be an empty string.
-        // Deault to 'consumption' in that case.
-        //this.page = page || 'consumption';
-        // NOW:  the follow function call sets "page" property
-        if (page) {
-          this.page = page;
-          this._resetBadge();
-        }
-        else {
-          this._decideWhichPageToGoTo(page);
-        }
+        this._directToCorrectPage(page);
 
         // Close a non-persistent drawer when the page & route are changed.
         if (!this.$.drawer.persistent) {
           this.$.drawer.close();
+        }
+      }
+
+      _directToCorrectPage(page) {
+        if (page) {
+          this.page = page;
+          if (this.page !== 'nutrientsofinterest') { // ...because badge is set up already in nutrientsofinterest page...so no need to do it again.
+            this._resetBadge();
+          }
+        }
+        else {
+          this._decideWhichPageToGoTo(page);
         }
       }
 
