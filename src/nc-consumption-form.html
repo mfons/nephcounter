@@ -4,6 +4,7 @@
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="nc-foods-by-text-search.html">
 <link rel="import" href="redux-store.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
@@ -19,7 +20,7 @@
         }
 
         iron-list {
-          height: 100vh; /* don't use % values unless the parent element is sized. */
+          height: 65vh; /* don't use % values unless the parent element is sized. */
         }
 
         </style>
@@ -34,13 +35,29 @@
         <paper-input id="foodFluidSearchStringId" name="foodFluidSearch" 
             label="Search Food/Fluid" value="{{foodFluidSearchString}}" required 
             autocapitalize="off" spellcheck="true" on-blur="_getFoodData"></paper-input>
-        <paper-dropdown-menu required   label="Food/Fluid" id="foodSelectionMenu" on-opened-changed="_foodFluidListOpenedChanged" > <!-- on-tap="_foodSelectionMenuTapped" -->
-            <iron-list id="foodFluidIronList" items="[[_foodsChanged(foods.*)]]" selected-item="{{selectedFood}}" selection-enabled >
-                <template>
-                            <div >[[item.name]]</div>   <!-- tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]"  -->
-                </template>
-            </iron-list>
+        <paper-dropdown-menu required style="width:100%;"  label="Food/Fluid" id="foodSelectionMenu"  vertical-align="bottom" horizontal-align="left"> <!--on-opened-changed="_foodFluidListOpenedChanged" on-tap="_foodSelectionMenuTapped"-->
+            <div class="dropdown-content" slot="dropdown-content"  style="width: 90vw; height: 65vh; ">
+                <iron-list id="foodFluidIronList" items="[[_foodsChanged(foods.*)]]" selected-item="{{selectedFood}}" selection-enabled >
+                    <template>
+                        <div >[[item.name]]</div>   <!-- tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]"  -->
+                    </template>
+                </iron-list>
+            </div>
         </paper-dropdown-menu>
+
+        <!--
+            <paper-dropdown-menu label="{{title}}">
+      <div class="dropdown-content" style="width: 100px; height: 100px; position: relative">
+          <iron-selector  on-iron-select="selectItem" selected="{{selectedItem}}">
+            <iron-list items="[[items]]" as="item">
+              <template>
+                <paper-item value="{{item}}">{{item.name}}</paper-item>
+              </template>
+            </iron-list>
+          </iron-selector>
+      </div>
+</paper-dropdown-menu>
+         -->
     </template>
     
     <script>
