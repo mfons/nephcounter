@@ -17,5 +17,10 @@ module.exports = {
     '/bower_components/webcomponentsjs/*',
   ],
   navigateFallback: 'index.html',
-  navigateFallbackWhitelist: [ /^(?!\/__)/, ' /getProjectConfig/' ]
+  navigateFallbackWhitelist: [ /^(?!\/__)/, ' /getProjectConfig/' ],
+  runtimeCaching : [{
+    urlPattern: /^https:\/\/api\.nal\.usda\.gov\/ndb\/search/,
+    handler: 'cacheFirst'
+  }]
+
 };

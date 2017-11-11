@@ -19,8 +19,19 @@
             padding: 10px;
         }
 
+    .item.selected {
+       background: black;
+       color: white;
+     }
+
+     .item {
+        background: white;
+        padding: 10px;
+        border-bottom: 1px solid #ccc; 
+     }
         iron-list {
-          height: 65vh; /* don't use % values unless the parent element is sized. */
+          height: 72vh; /* don't use % values unless the parent element is sized. */
+          width: 75vw; 
         }
 
         </style>
@@ -35,29 +46,15 @@
         <paper-input id="foodFluidSearchStringId" name="foodFluidSearch" 
             label="Search Food/Fluid" value="{{foodFluidSearchString}}" required 
             autocapitalize="off" spellcheck="true" on-blur="_getFoodData"></paper-input>
-        <paper-dropdown-menu required style="width:100%;"  label="Food/Fluid" id="foodSelectionMenu"  vertical-align="bottom" horizontal-align="left"> <!--on-opened-changed="_foodFluidListOpenedChanged" on-tap="_foodSelectionMenuTapped"-->
-            <div class="dropdown-content" slot="dropdown-content"  style="width: 90vw; height: 65vh; ">
+        <paper-dropdown-menu on-iron-select="_foodSelectionMenuIronSelectHandler" required style="width:100%;"  label="Food/Fluid" id="foodSelectionMenu"  vertical-align="bottom" horizontal-align="left"> <!--on-opened-changed="_foodFluidListOpenedChanged" on-tap="_foodSelectionMenuTapped"-->
+            <div id="foodSelectionDropdownContentId" class="dropdown-content" slot="dropdown-content"  style="width: 75vw; height: 72vh; ">
                 <iron-list id="foodFluidIronList" items="[[_foodsChanged(foods.*)]]" selected-item="{{selectedFood}}" selection-enabled >
                     <template>
-                        <div >[[item.name]]</div>   <!-- tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]"  -->
+                        <div on-click="_foodFluidItemToggled" tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]">[[item.name]]</div>   <!--   -->
                     </template>
                 </iron-list>
             </div>
         </paper-dropdown-menu>
-
-        <!--
-            <paper-dropdown-menu label="{{title}}">
-      <div class="dropdown-content" style="width: 100px; height: 100px; position: relative">
-          <iron-selector  on-iron-select="selectItem" selected="{{selectedItem}}">
-            <iron-list items="[[items]]" as="item">
-              <template>
-                <paper-item value="{{item}}">{{item.name}}</paper-item>
-              </template>
-            </iron-list>
-          </iron-selector>
-      </div>
-</paper-dropdown-menu>
-         -->
     </template>
     
     <script>
@@ -93,6 +90,18 @@
                 this.addEventListener('state-changed', (e) => {this._reduxStoreStateChanged(e);});
             }
 
+            _foodFluidItemToggled(e) {
+                //console.log("food/fluid click: ", this.selectedFood);
+                if (this.selectedFood !== null) {
+                   this.$.foodSelectionDropdownContentId.dispatchEvent(new CustomEvent('iron-select', {bubbles: true, composed: true, detail: {item: e.currentTarget /*this.selectedFood*/}}));
+                }
+               // this.$.foodSelectionMenu.opened = false;
+            }
+
+            _foodSelectionMenuIronSelectHandler(e) {
+                console.info("in _foodSelectionMenuIronSelectHandler: ", e);
+            }
+
             _foodFluidListOpenedChanged() {
                 console.log("food/fluid list opened property changed", this.$.foodSelectionMenu.opened);
                 if (this.$.foodSelectionMenu.opened) {
@@ -114,6 +123,14 @@
                 if (changeRecord) {
                     return changeRecord.base;
                 }
+            }
+
+            _computedClass(isSelected) {
+                var classes = 'item';
+                if (isSelected) {
+                classes += ' selected';
+                }
+                return classes;
             }
 
         }
