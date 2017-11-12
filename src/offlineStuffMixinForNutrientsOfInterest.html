@@ -1,0 +1,145 @@
+<script>
+
+// var SizeEnum = {
+//   SMALL: 1,
+//   MEDIUM: 2,
+//   LARGE: 3,
+// };
+
+
+    // (function() {
+    //     'use strict';    
+    OfflineStuffMixinForNutientsOfInterest = (superClass) => class extends superClass {
+        constructor() {
+          super();
+          //this.addEventListener('keypress', e => this.handlePress(e));
+        }
+    
+        static get properties() {
+          return {
+            bar: {
+              type: Object
+            }
+          };
+        }
+    
+        static get observers() {
+          return [ /*'_barChanged(bar.*)'*/ ];
+        }
+    
+        //_barChanged(bar) { ... }
+    
+        //handlePress(e) { console.log('key pressed: ' + e.charCode); }
+        doNewOfflineNutrientStuff() {
+            // Note: we assume we are signed in already.
+            let thisWebComponent = this;
+            this.testIfNutrientsOfInterestOffLineExists().catch((errorText)=>{
+                console.info("testIfNutrientsOfInterestOffLineExists caught ", errorText);
+            });
+        }
+
+        useDatabase(db, whatToDo) {
+            // Make sure to add a handler to be notified if another page requests a version
+            // change. We must close the database. This allows the other page to upgrade the database.
+            // If you don't do this then the upgrade won't happen until the user closes the tab.
+            db.onversionchange = (event) => {
+                db.close();
+                alert("A new version of this page is ready. Please reload!");
+            };
+
+            // Do stuff with the database.
+            whatToDo();
+
+            db.close(); // TODO do something besides closing.
+        }
+
+
+        testIfNutrientsOfInterestOffLineExists () {
+            var thisWebComponent = this;
+            return new Promise((resolve, reject) => {
+                var db;
+                console.log("in testIfNutrientsOfInterestOffLineExists...");
+                var openReq = window.indexedDB.open("NephcounterOffLineDB");
+                openReq.onblocked = function(event) {
+                    // If some other tab is loaded with the database, then it needs to be closed
+                    // before we can proceed.
+                    alert("Please close all other tabs with this site open!");
+                    };
+                    
+                openReq.onupgradeneeded = (event) => {
+                    // All other databases have been closed. Set everything up.
+                    console.log("an upgrade is needed...");
+                    var db = event.target.result;
+                    if (!db.objectStoreNames.contains('possibleNutrients') && nutrientsArrayFromDB) {
+                        let objectStore = db.createObjectStore("possibleNutrients", { keyPath: "allNutrientsListKey" });
+                        // Use transaction oncomplete to make sure the objectStore creation is
+                        // finished before adding data into it.
+                        objectStore.transaction.oncomplete = (event) => {
+                        // Store values in the newly created objectStore.
+                        var possibleNutrientsObjectStore = db.transaction("possibleNutrients", "readwrite").objectStore("possibleNutrients");
+                            possibleNutrientsObjectStore.add({allNutrientsListKey: 1, allNutrientsList: nutrientsArrayFromDB});
+                        thisWebComponent.nutrientsPersisted = nutrientsArrayFromDB;
+                        };
+                    }
+                    if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
+                    let nutrientsOfInterestObjectStore = db.createObjectStore("nutrientsOfInterest", { keyPath: "allNutrientsOfInterestListKey" });
+                    }
+                    console.log("NephcounterOffLineDB has finished its upgrade.")
+                    thisWebComponent.useDatabase(db, _ => {});  // I did not think you were supposed to do anything but "upgrade" in this event handler!  But if you do put it in the following function called next...
+                };
+                    
+                openReq.onsuccess = function(event) {
+                    var db = event.target.result;
+                    thisWebComponent.useDatabase(db, () => {
+                        // This is done once/if the database exists with the data in it.
+                        console.log("NephcounterOffLineDB creation succeeded!")
+                        db = event.target.result;
+                        var transaction; 
+                        try {
+                            transaction = db.transaction(["possibleNutrients"], "readonly");
+                        } catch (e) {
+                            console.warn("Why did creating the transaction fail??", e);
+                            reject("get data from database");
+                            return;
+                        }
+
+                        // report on the success of the transaction completing, when everything is done
+                        transaction.oncomplete = function(event) {
+                            console.log("everything is completed in the transaction.", event);
+                        };
+            
+                        transaction.onerror = function(event) {
+                            console.warn("transaction not opened due to error", event);
+                            reject("transaction open came back with an error");
+                        };
+            
+                        var objectStore = transaction.objectStore("possibleNutrients");
+                            var dataRequest = objectStore.get(1);
+                        dataRequest.onerror = function(event) {
+                            // Handle errors!
+                            console.warn("The data request ended in an error...", event);
+                            reject("The data request ended in an error...");
+                        };
+                        dataRequest.onsuccess = function(event) {
+                            if (!dataRequest || !dataRequest.result) {
+                                reject("somehow objectStore record has not been created yet...");
+                                return;
+                            }
+                            thisWebComponent.nutrientsPersisted = dataRequest.result.allNutrientsList;
+                            resolve();
+                        };                        
+                    });
+                    return;
+                };
+
+                openReq.onerror = function(event) {
+                    // Do something with request.errorCode!
+                    console.log("NephcounterOffLineDB creation failed!", event);
+                    reject("NephcounterOffLineDB open(/creation?) failed!");
+                };
+            });
+        }
+      }
+    
+    // })();
+    </script>

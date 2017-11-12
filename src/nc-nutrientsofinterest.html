@@ -8,6 +8,7 @@
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymer/lib/utils/render-status.html">
 <link rel="import" href="redux-store.html">
+<link rel="import" href="offlineStuffMixinForNutrientsOfInterest.html">
 
 <dom-module id="nc-nutrientsofinterest">
   <template>
@@ -67,9 +68,13 @@
 
     </div>
   </template>
-
   <script>
-      class NcNutrientsOfInterest extends ReduxMixin(Polymer.Element){
+      class NcNutrientsOfInterest extends 
+      OfflineStuffMixinForNutientsOfInterest(
+        ReduxMixin(
+          Polymer.Element
+        )
+      ){
       static get is() { return 'nc-nutrientsofinterest'; }
 
       static get properties() {
@@ -121,7 +126,10 @@
 
       ready() {
         super.ready();
-        this.doOffLineNutrientStuff();
+        if (this.signedIn) {
+          this.doNewOfflineNutrientStuff();
+        }
+//        this.doOffLineNutrientStuff();
       }
 
       _getNutrientsOfInterestPath(theUser) {
@@ -407,10 +415,10 @@
       }
 
       waitForIndexedDbToOpenAndReadOrFail(nutrientsArrayFromDB) {
-        var thisWebComponent = this;
+       var thisWebComponent = this;
         return new Promise((resolve, reject) => {
           if (typeof thisWebComponent.signedIn === "undefined" || !thisWebComponent.signedIn) {
-              reject("not signed in yet");
+               reject("not signed in yet");
               return;
           }
           var db;
@@ -513,7 +521,10 @@
         if (!newValue) {
           return;
         }
-        this.doOffLineNutrientStuff();
+        if (this.signedIn) {
+          this.doNewOfflineNutrientStuff();
+        }
+        //this.doOffLineNutrientStuff();
        }
 
     }
