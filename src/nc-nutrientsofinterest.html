@@ -276,6 +276,7 @@
             if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
               reject("nutrientsOfInterest object store has not been created yet to save");
               console.warn("nutrientsOfInterest object store has not been created yet to save", db.objectStoreNames);
+              db.close();
               return;
             }
             var objectStore = db.transaction(["nutrientsOfInterest"], "readwrite").objectStore("nutrientsOfInterest");
@@ -284,6 +285,7 @@
                 // assuming that 1 was not found so it needs to be added
                 console.warn("Caught querying record 1 from nutrientsOfInterest from error in event: ", event);
                 reject("Caught querying record 1 from nutrientsOfInterest; check for console warning for specifics");
+                db.close();
             };
             request.onsuccess = function(event) {
               // Get the old value that we want to update
@@ -295,6 +297,7 @@
                 request.onsuccess = (event) => { 
                   console.log("added nutrients of interest to indexeddb");
                   resolve();
+                  db.close()
                 }
                 return;
               }
@@ -307,10 +310,12 @@
               requestUpdate.onerror = function(event) {
                 console.warn("rejecting nutrient of interest indexeddb update due to event:", event);
                 reject("rejecting nutrient of interest indexeddb update");
+                db.close();
               };
               requestUpdate.onsuccess = function(event) {
                 console.log("updated nutrients of interest in indexeddb");
                 resolve();
+                db.close();
               };
             };
 
@@ -322,54 +327,6 @@
               var db = event.target.result;
           }; // end of onupgradeneeded
         });
-      }
-
-      doOffLineNutrientStuff() {
-        let thisWebComponent = this;
-        this.waitForIndexedDbToOpenAndReadOrFail()
-          .then(() => {
-            console.log("waitForIndexedDbToOpenAndReadOrFail success!");
-            thisWebComponent._doStuffOnceNutrientsHaveLoaded();
-          })
-          .catch(errMsg => { 
-            console.log("in catch with error message of ", errMsg);
-            return new Promise((resolve, reject) => {
-              console.log("entered into the promise being returned in the catch...", thisWebComponent.signedIn);
-              if (!thisWebComponent.signedIn) { // not good to query if not signed in.
-                reject("Don't query if not signed in");
-                return;
-              }
-              thisWebComponent.$.query.ref.on("value", function(snapshot) {
-                console.log("the firebase read came back successfully!");
-                resolve(snapshot.val());
-              }.bind(this), function (errorObject) {
-                console.warn("The read failed: " + errorObject.code);
-                reject("The read failed: " + errorObject.code);
-              });            
-            });
-          })
-            .then((nutrientArray) => { 
-              console.log("go work with nutrient array: ", nutrientArray);
-              thisWebComponent.waitForIndexedDbToOpenAndReadOrFail(nutrientArray)
-              .then(() => {
-                console.log("waitForIndexedDbToOpenAndReadOrFail call 2 succeeded.");
-                thisWebComponent._doStuffOnceNutrientsHaveLoaded();
-              })
-              .catch(() => { 
-                console.warn("waitForIndexedDbToOpenAndReadOrFail failed again...time to delete the db and try a third time with the array in hand.");
-                thisWebComponent.deleteDB()
-                .then(() => {
-                  thisWebComponent.waitForIndexedDbToOpenAndReadOrFail(nutrientArray)
-                    .then(() => {
-                      console.log("waitForIndexedDbToOpenAndReadOrFail call 3 succeeded.");
-                      thisWebComponent._doStuffOnceNutrientsHaveLoaded();
-                    })
-                    .catch(() => {console.log("waitForIndexedDbToOpenAndReadOrFail call 3 failed.")});
-                })
-                .catch(() => {console.warn("NephcounterOffLineDB database delete failed.")});
-              });
-            })
-            .catch(() => {console.warn("In promise catch section.");});
       }
 
       _doStuffOnceNutrientsHaveLoaded() {
@@ -411,85 +368,6 @@
             console.log(event.result); // should be undefined
             resolve();
           };          
-        });
-      }
-
-      waitForIndexedDbToOpenAndReadOrFail(nutrientsArrayFromDB) {
-       var thisWebComponent = this;
-        return new Promise((resolve, reject) => {
-          if (typeof thisWebComponent.signedIn === "undefined" || !thisWebComponent.signedIn) {
-               reject("not signed in yet");
-              return;
-          }
-          var db;
-          var request = window.indexedDB.open("NephcounterOffLineDB");
-          request.onerror = function(event) {
-            // Do something with request.errorCode!
-            console.log("NephcounterOffLineDB creation failed!", event);
-            reject("NephcounterOffLineDB creation failed!");
-          };
-          // This is done once/if the database exists with the data in it.
-          request.onsuccess = function(event) {
-            // Do something with request.result!
-            console.log("NephcounterOffLineDB creation succeeded!")
-            db = event.target.result;
-            var transaction; 
-            try {
-              transaction = db.transaction(["possibleNutrients"], "readonly");
-            } catch (e) {
-              console.warn("Why did creating the transaction fail??", e);
-              reject("get data from database");
-              return;
-            }
-            // report on the success of the transaction completing, when everything is done
-            transaction.oncomplete = function(event) {
-              //console.log("everything is completed in the transaction.", event);
-            };
-
-            transaction.onerror = function(event) {
-              console.warn("transaction not opened due to error", event);
-              reject("transaction open came back with an error");
-            };
-
-            var objectStore = transaction.objectStore("possibleNutrients");
-             var dataRequest = objectStore.get(1);
-            dataRequest.onerror = function(event) {
-              // Handle errors!
-              console.warn("The data request ended in an error...", event);
-              reject("The data request ended in an error...");
-            };
-            dataRequest.onsuccess = function(event) {
-              if (!dataRequest || !dataRequest.result) {
-                reject("somehow objectStore record has not been created yet...");
-                return;
-              }
-              thisWebComponent.nutrientsPersisted = dataRequest.result.allNutrientsList;
-              resolve();
-            };
-
-
-          };
-
-          // This is done only if there is no database and one needs to be created before we read from it.
-          request.onupgradeneeded = function(event) {
-              console.log("an upgrade is needed...");
-              var db = event.target.result;
-              if (!db.objectStoreNames.contains('possibleNutrients') && nutrientsArrayFromDB) {
-                  let objectStore = db.createObjectStore("possibleNutrients", { keyPath: "allNutrientsListKey" });
-                  // Use transaction oncomplete to make sure the objectStore creation is
-                  // finished before adding data into it.
-                  objectStore.transaction.oncomplete = function(event) {
-                    // Store values in the newly created objectStore.
-                    var possibleNutrientsObjectStore = db.transaction("possibleNutrients", "readwrite").objectStore("possibleNutrients");
-                        possibleNutrientsObjectStore.add({allNutrientsListKey: 1, allNutrientsList: nutrientsArrayFromDB});
-                    thisWebComponent.nutrientsPersisted = nutrientsArrayFromDB;
-                  };
-              }
-              if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
-                let nutrientsOfInterestObjectStore = db.createObjectStore("nutrientsOfInterest", { keyPath: "allNutrientsOfInterestListKey" });
-              }
-              console.log("NephcounterOffLineDB has finished its upgrade.")
-          };
         });
       }
 
