@@ -47,7 +47,7 @@
                 thisWebComponent.$.query.ref.on("value", function(snapshot) {
                     console.log("the firebase read came back successfully!");
                     resolve(snapshot.val());
-                }.bind(this), function (errorObject) {
+                }.bind(this), (errorObject) => {
                     console.warn("The read failed: " + errorObject.code);
                     reject("The read failed: " + errorObject.code);
                 });            
@@ -60,8 +60,8 @@
                     console.log("_waitForIndexedDbToOpenAndReadOrFail call 2 succeeded.");
                     thisWebComponent._doStuffOnceNutrientsHaveLoaded();
                 })
-                .catch(() => { 
-                    console.warn("_waitForIndexedDbToOpenAndReadOrFail failed again...time to delete the db and try a third time with the array in hand.");
+                .catch((errTxt) => { 
+                    console.warn("_waitForIndexedDbToOpenAndReadOrFail failed again...time to delete the db and try a third time with the array in hand.", errTxt);
                     thisWebComponent.deleteDB()
                     .then(() => {
                     thisWebComponent._waitForIndexedDbToOpenAndReadOrFail(nutrientArray)
@@ -69,12 +69,12 @@
                         console.log("_waitForIndexedDbToOpenAndReadOrFail call 3 succeeded.");
                         thisWebComponent._doStuffOnceNutrientsHaveLoaded();
                         })
-                        .catch(() => {console.log("_waitForIndexedDbToOpenAndReadOrFail call 3 failed.")});
+                        .catch((errTxt) => {console.warn("_waitForIndexedDbToOpenAndReadOrFail call 3 failed.", errTxt)});
                     })
-                    .catch(() => {console.warn("NephcounterOffLineDB database delete failed.")});
+                    .catch((errTxt) => {console.warn("NephcounterOffLineDB database delete failed.", errTxt)});
                 });
                 })
-                .catch(() => {console.warn("In promise catch section.");});
+                .catch((errTxt) => {console.warn("In promise catch section.", errTxt);});
         }
 
         useDatabase(db, whatToDo) {
@@ -137,7 +137,15 @@
                         console.log("NephcounterOffLineDB creation succeeded!")
                         var transaction; 
                         try {
-                            transaction = db.transaction(["possibleNutrients"], "readonly");
+                            if (db.objectStoreNames.contains('possibleNutrients')) {
+                                transaction = db.transaction(["possibleNutrients"], "readonly");
+                            }
+                            else {
+                                console.warn("PossibleNutrients object store does not exist in db");
+                                reject("object store possibleNutrients does not yet exist.");
+                                db.close();
+                                return;
+                            }
                         } catch (e) {
                             console.warn("Why did creating the transaction fail??", e);
                             reject("get data from database");

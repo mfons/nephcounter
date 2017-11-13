@@ -145,7 +145,7 @@
                 console.log("we got nutrients of interest from indexed db!");
             })
             .catch((errorText) => {
-              console.log("_getNutrientsOfInterestFromIndexedDbIfAvailable promise rejected with error text...", errorText);
+              console.warn("_getNutrientsOfInterestFromIndexedDbIfAvailable promise rejected with error text...", errorText);
               if (!thisWebComponent.offline && thisWebComponent.signedIn) {
                 thisWebComponent._setNutrientsOfInterestSelectedItemsFromFirebaseStore()
                   .then(thisWebComponent.saveNutrientsOfInterestToIndexedDb)
@@ -198,6 +198,7 @@
               if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
                 reject("nutrientsOfInterest object store has not been created yet to retrieve");
                 console.warn("nutrientsOfInterest object store has not been created yet to retrieve", db.objectStoreNames);
+                db.close();
                 return;
               }
               var objectStore = db.transaction(["nutrientsOfInterest"], "readonly").objectStore("nutrientsOfInterest");
@@ -206,6 +207,7 @@
                   // assuming that 1 was not found so it needs to be added
                   console.warn("Caught querying record 1 from nutrientsOfInterest from error in event: ", event);
                   reject("Caught querying record 1 from nutrientsOfInterest; check for console warning for specifics");
+                  db.close();
               };
               request.onsuccess = function(event) {
                 // Get the old value that we want to update
@@ -213,6 +215,7 @@
                 
                 if (typeof data === "undefined") {  // Then there is no record yet .
                   reject("there is no record yet in indexedDB");
+                  db.close();
                   return;
                 }
 
@@ -225,9 +228,10 @@
   
             // This is done only if there is no database and one needs to be created before we read from it.
             request.onupgradeneeded = function(event) {   
-              console.log("an upgrade is needed...");
+              console.warn("an upgrade is needed...");
               var db = event.target.result;
               reject("There is no offline database yet for nutrientsOfInterest");
+              db.close();
             }; // end of onupgradeneeded
           });
       }
