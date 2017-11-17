@@ -7,7 +7,9 @@
     nutrientsOfInterest: [{name: "loading..."}],
     nutrientsOfInterestIsEmpty: true,
     nutrientsOfInterestCount: 0,
-    latestFoodList: []
+    latestFoodList: [],
+    latestQueryBroughtBackNoFoodList: true,
+    latestFoodListQueryString: ""
   };
 
   const reducer = (state, action) => {
@@ -30,7 +32,11 @@
           nutrientsOfInterestCount: action.allNutrientsOfInterest.length
         });
       case 'SAVE_FOOD_LIST' :
-        return Object.assign({}, state, { latestFoodList: action.latestFoodList });
+        return Object.assign({}, state, { 
+          latestFoodList: action.latestFoodList,
+          latestQueryBroughtBackNoFoodList: action.latestQueryBroughtBackNoFoodList,
+          latestFoodListQueryString: action.latestFoodListQueryString 
+        });
       default :
         console.warn("Invalid action type in redux store:", action.type);
     }

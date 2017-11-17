@@ -76,19 +76,25 @@
             }
 
             _tasksLoaded(data) {
+                console.log("nc-foods-by-text-search._tasksLoaded() data was: ", data.detail.response);
                 if (typeof data.detail.response.list !== 'undefined' &&
                     typeof data.detail.response.list.item !== 'undefined') {
                     this.foods = data.detail.response.list.item;
-                    this.dispatch('saveFoodList', this.foods);
+                    this.dispatch('saveFoodList', this.foods, false, data.detail.response.q);
+                }
+                else if (typeof data.detail.response.errors !== "undefined" && data.detail.response.errors.error[0].status === 400) {
+                    this.dispatch('saveFoodList', [], true, data.detail.response.q);
                 }
             }
 
             static get actions() {
                 return {
-                    saveFoodList: (latestFoodList) => {
+                    saveFoodList: (latestFoodList, latestQueryBroughtBackNoFoodList, latestFoodListQueryString) => {
                         return {
                             type: 'SAVE_FOOD_LIST',
-                            latestFoodList:  latestFoodList
+                            latestFoodList:  latestFoodList,
+                            latestQueryBroughtBackNoFoodList: latestQueryBroughtBackNoFoodList,
+                            latestFoodListQueryString: latestFoodListQueryString 
                         }
                     }
                 };

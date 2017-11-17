@@ -9,6 +9,7 @@
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 
 <dom-module id="nc-consumption-form">
     <template>
@@ -55,6 +56,8 @@
                 </iron-list>
             </div>
         </paper-dropdown-menu>
+
+        <paper-toast id="noResultsFoundToastId" text="We did not find any foods for '[[textSearch]]'...try another search?"></paper-toast>
     </template>
     
     <script>
@@ -77,6 +80,14 @@
                     foods: {
                         type: Array,
                         statePath:  'latestFoodList'
+                    },
+                    queryBroughtBackNoFoodList: {
+                        type: Boolean,
+                        statePath:   'latestQueryBroughtBackNoFoodList'
+                    },
+                    lastQueryString: {
+                        type: String,
+                        statePath:  'latestFoodListQueryString'
                     },
                     selectedFood: {
                         type: Object
@@ -102,12 +113,12 @@
                 console.info("in _foodSelectionMenuIronSelectHandler: ", e);
             }
 
-            _foodFluidListOpenedChanged() {
-                console.log("food/fluid list opened property changed", this.$.foodSelectionMenu.opened);
-                if (this.$.foodSelectionMenu.opened) {
-                    this.$.foodFluidIronList.notifyResize();
-                }
-            }
+            // _foodFluidListOpenedChanged_foodFluidListOpenedChanged() {
+            //     console.log("food/fluid list opened property changed", this.$.foodSelectionMenu.opened);
+            //     if (this.$.foodSelectionMenu.opened) {
+            //         this.$.foodFluidIronList.notifyResize();
+            //     }
+            // }
             
             _getFoodData() {
                 this.textSearch = this.foodFluidSearchString;
@@ -115,6 +126,13 @@
 
             _reduxStoreStateChanged (e) {
                 console.log("redux store state changed...in nc-consumption-form", this.foods);
+                if (this.queryBroughtBackNoFoodList) {
+                    this.$.noResultsFoundToastId.opened = true;
+                    this.$.foodSelectionMenu.disabled = true;
+                }
+                else {
+                    this.$.foodSelectionMenu.disabled = false;
+                }
                 //this.$.foodListId.render(); // this only applies to dom-repeat sometimes...not iron-list
                 //this.$.foodSelectionMenu.opened = true; // TODO not sure about this??
             }
