@@ -9,7 +9,8 @@
     nutrientsOfInterestCount: 0,
     latestFoodList: [],
     latestQueryBroughtBackNoFoodList: true,
-    latestFoodListQueryString: ""
+    latestFoodListQueryString: "",
+    foodNutrientsForCurrentlySelectedFood: {}
   };
 
   const reducer = (state, action) => {
@@ -31,11 +32,15 @@
           nutrientsOfInterestIsEmpty: action.allNutrientsOfInterest.length === 0,
           nutrientsOfInterestCount: action.allNutrientsOfInterest.length
         });
-      case 'SAVE_FOOD_LIST' :
+        case 'SAVE_FOOD_LIST' :
         return Object.assign({}, state, { 
           latestFoodList: action.latestFoodList,
           latestQueryBroughtBackNoFoodList: action.latestQueryBroughtBackNoFoodList,
           latestFoodListQueryString: action.latestFoodListQueryString 
+        });
+        case 'SAVE_FOOD_NUTRIENTS_FOR_CURRENTLY_SELECTED_FOOD' :
+        return Object.assign({}, state, { 
+          foodNutrientsForCurrentlySelectedFood: action.foodNutrientsForCurrentlySelectedFood
         });
       default :
         console.warn("Invalid action type in redux store:", action.type);

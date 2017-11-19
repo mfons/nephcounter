@@ -3,6 +3,7 @@
 <link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="nc-foods-by-text-search.html">
+<link rel="import" href="nc-nutrients-for-a-food.html">
 <link rel="import" href="redux-store.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
@@ -10,6 +11,7 @@
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/iron-list/iron-list.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 
 <dom-module id="nc-consumption-form">
     <template>
@@ -35,11 +37,19 @@
           width: 75vw; 
         }
 
+        .yellow-button {
+            text-transform: none;
+            color: #eeff41;
+        }
+
         </style>
 
         <nc-foods-by-text-search text-search="[[textSearch]]" 
         id="foodsByTextSearch" is-standard-reference="[[isStandardReference]]">
         </nc-foods-by-text-search>
+
+        <nc-nutrients-for-a-food food-id="[[foodId]]" food-name="[[foodName]]"> <!-- custom-foods="[[customFoods]]" -->
+        </nc-nutrients-for-a-food>
 
         <paper-toggle-button checked="{{isStandardReference}}">
             Use Standard Reference
@@ -56,8 +66,12 @@
                 </iron-list>
             </div>
         </paper-dropdown-menu>
+        <paper-input name="measure" label="Serving size" readonly="true" value="[[_getMeasure(foodNutrients.*)]]"></paper-input>
+        
 
-        <paper-toast id="noResultsFoundToastId" text="We did not find any foods for '[[textSearch]]'...try another search?"></paper-toast>
+        <paper-toast duration="0" id="noResultsFoundToastId" text="We did not find any foods for '[[textSearch]]'?">
+            <paper-button on-click="_hideTheToast" class="yellow-button">Close now!</paper-button>
+        </paper-toast>
     </template>
     
     <script>
@@ -90,10 +104,37 @@
                         statePath:  'latestFoodListQueryString'
                     },
                     selectedFood: {
-                        type: Object
-                        // observer: 'selectedFoodChanged'
+                        type: Object,
+                        observer: '_selectedFoodChanged'
                     },
+                    foodId: {
+                        type: String
+                    },
+                    foodName: {
+                        type: String
+                    },
+                    foodNutrients: {
+                        type: Object,
+                        statePath: 'foodNutrientsForCurrentlySelectedFood'
+                    },
+                    measure: String
                 };
+            }
+
+            _getMeasure (changeRecord) {
+                if (changeRecord.base.length > 0) {
+                this.set('measure', changeRecord.base[0].measure);
+                return changeRecord.base[0].measure;
+                }
+            }
+
+            _hideTheToast() {
+                this.$.noResultsFoundToastId.opened = false;
+            }
+
+            _standardReferenceChanged (standardReferenceValue) {
+                console.info("standard reference was changed to ", standardReferenceValue);
+                return standardReferenceValue;
             }
 
             ready () {
@@ -149,6 +190,15 @@
                 classes += ' selected';
                 }
                 return classes;
+            }
+
+            _selectedFoodChanged(selectedIndex,oldObject) {
+                console.log("my-consumption:  selectedFood has changed: " + selectedIndex);
+                if (typeof selectedIndex === "undefined" || selectedIndex === null) {
+                    return;
+                }
+                this.set('foodId',selectedIndex.ndbno);
+                this.set('foodName', selectedIndex.name);
             }
 
         }
