@@ -11,9 +11,7 @@ item number from the usda database    -->
     <template>
         <style include="shared-styles">
             :host {
-                display: block;
-        
-                padding: 10px;
+                display: none;
             }
         </style>
         <iron-ajax
@@ -93,12 +91,13 @@ item number from the usda database    -->
             }
 
             tasksLoaded(data) {
+                console.log('nc-nutrients-for-a-food came back with ', data.detail.response);
                 if (!data.detail.response.report) {
                         return;
                 }
                 this.foodNutrients = data.detail.response.report.foods;
                 this.dispatch('saveFoodNutrients', this.foodNutrients);
-                console.log('nutrients-for-food-service came back with ' + data.detail.response);
+                console.log('food nutrient save dispatched');
             }
 
             nutrientsOfInterestAndFoodIdChanged(changeRecord, newFoodId, newFoodName) {
@@ -113,9 +112,11 @@ item number from the usda database    -->
                     }
                 }
                 else {
+                    console.log("about to set nutrients param with ", changeRecord.base);
                     this.set('ajaxParams.nutrients',
                              this.generateNutrientIdsOfInterest(changeRecord.base));
                     this.set('ajaxParams.ndbno', newFoodId);
+                    console.log("about to get food nutrients for food id ", newFoodId);
                     this.$.ajaxNutrientsList.generateRequest();
                 }
             }
@@ -130,6 +131,7 @@ item number from the usda database    -->
                 for (var i = 0; i < arrayLength; i++) {
                     returnArray.push(detailArray[i].id);
                 }
+                console.log("altered array into nutrient id list ", returnArray);
                 return returnArray;
             }
 

@@ -7,7 +7,7 @@
   "dependencies": {
     "app-layout": "PolymerElements/app-layout#^2.0.0",
     "app-route": "PolymerElements/app-route#^2.0.0",
-    "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.0",
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.1",
     "iron-icon": "PolymerElements/iron-icon#^2.0.0",
     "iron-iconset-svg": "PolymerElements/iron-iconset-svg#^2.0.0",
     "iron-localstorage": "PolymerElements/iron-localstorage#^2.0.0",
@@ -33,7 +33,8 @@
     "paper-input": "PolymerElements/paper-input#^2.0.2",
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.0.0",
     "paper-listbox": "PolymerElements/paper-listbox#^2.0.0",
-    "paper-toast": "PolymerElements/paper-toast#^2.0.0"
+    "paper-toast": "PolymerElements/paper-toast#^2.0.0",
+    "iron-form": "PolymerElements/iron-form#^2.0.1"
   },
   "resolutions": {
     "polymer": "^2.0.0-rc.3",

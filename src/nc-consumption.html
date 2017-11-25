@@ -18,17 +18,27 @@
       <div class="circle">2</div>
       <paper-icon-button id="helpButton" icon="my-icons:help-outline"></paper-icon-button>
       <paper-tooltip for="helpButton" position="right">
-        This screen is where you will spend most of your time in this app.
-        <br/><br/>
-        Here, you enter something you have eaten or drank, or intend to eat and drink, 
-        for the purpose of recording this act or for inspecting this item's nutrient content.
-        <br/><br/>
-        <div style="font-weight: bold;">"Standard Reference"</div>
-        You will want to turn off standard reference if you are looking 
-        for a name brand -- for all other lookups, keep it on, otherwise you will see too many 
-        items in "Food/Fluid" list.       
+        <div style="height: 100px; overflow-y: scroll;">
+          On this screen:<br />
+          1. type in 1 or 2 words to search for a food<br />
+          2. pick from the search results which food you are eating/going to eat<br />
+          3. type how many servings you will eat (.5, 1, 2, ...)<br />
+          <br/><br/>
+          After step 2 you will see serving size, and a serving's gram weight of what you have chosen.
+          <br/><br/>
+          After step 3 you will see how many grams you have/will eat, given what you have entered.
+          <br/><br/>
+          After step 3 you can also see the nutritional breakdown below that, before you press the save/eat button.
+          <br/><br/>
+          The save/eat button looks like a knife and a spoon crossed with each other.  This will save what you have entered as 
+          something you have eaten for the day, and then clear the screen to be ready to allow you to enter/eat the next thing.
+          <br/><br/>
+          <div style="font-weight: bold;">"Only Search Generic Food List"</div>
+          With this switched on, you will only search a set of generic foods.  To increase your
+          search to include brand name items, you will need to switch this off.   
+        </div>    
       </paper-tooltip>
-      <h1>Consumption</h1>
+      <h1 style="margin-bottom: 0px;">Eat!</h1>
       <nc-consumption-form></nc-consumption-form>
     </div>
   </template>

@@ -12,37 +12,56 @@
 <link rel="import" href="../bower_components/iron-list/iron-list.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="my-icons.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/paper-styles/color.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 
 <dom-module id="nc-consumption-form">
     <template>
-        <style include="shared-styles">
-        :host {
-            display: block;
-    
-            padding: 10px;
-        }
+        <custom-style >
+            <style include="shared-styles">
+            :host {
+                display: block;
+                
+                padding: 10px;
+            }
 
-    .item.selected {
-       background: black;
-       color: white;
-     }
+            .horizontal {
+                @apply --layout-horizontal;
+            }
 
-     .item {
-        background: white;
-        padding: 10px;
-        border-bottom: 1px solid #ccc; 
-     }
-        iron-list {
-          height: 72vh; /* don't use % values unless the parent element is sized. */
-          width: 75vw; 
-        }
+            .item.selected {
+            background: black;
+            color: white;
+            }
 
-        .yellow-button {
-            text-transform: none;
-            color: #eeff41;
-        }
+            .item {
+                background: white;
+                padding: 10px;
+                border-bottom: 1px solid #ccc; 
+            }
+            iron-list {
+            height: 72vh; /* don't use % values unless the parent element is sized. */
+            width: 75vw; 
+            }
+
+            .yellow-button {
+                text-transform: none;
+                color: #eeff41;
+            }
+            paper-icon-button.blue {
+                --paper-icon-button-ink-color: var(--paper-orange-500);
+                background-color: var(--paper-light-blue-500);
+                color: white;
+                border-radius: 3px;
+                padding: 2px;
+              }
 
         </style>
+    </custom-style>
 
         <nc-foods-by-text-search text-search="[[textSearch]]" 
         id="foodsByTextSearch" is-standard-reference="[[isStandardReference]]">
@@ -51,23 +70,33 @@
         <nc-nutrients-for-a-food food-id="[[foodId]]" food-name="[[foodName]]"> <!-- custom-foods="[[customFoods]]" -->
         </nc-nutrients-for-a-food>
 
-        <paper-toggle-button checked="{{isStandardReference}}">
-            Use Standard Reference
-        </paper-toggle-button>
-        <paper-input id="foodFluidSearchStringId" name="foodFluidSearch" 
-            label="Search Food/Fluid" value="{{foodFluidSearchString}}" required 
-            autocapitalize="off" spellcheck="true" on-blur="_getFoodData"></paper-input>
-        <paper-dropdown-menu on-iron-select="_foodSelectionMenuIronSelectHandler" required style="width:100%;"  label="Food/Fluid" id="foodSelectionMenu"  vertical-align="bottom" horizontal-align="left"> <!--on-opened-changed="_foodFluidListOpenedChanged" on-tap="_foodSelectionMenuTapped"-->
-            <div id="foodSelectionDropdownContentId" class="dropdown-content" slot="dropdown-content"  style="width: 75vw; height: 72vh; ">
-                <iron-list id="foodFluidIronList" items="[[_foodsChanged(foods.*)]]" selected-item="{{selectedFood}}" selection-enabled >
-                    <template>
-                        <div on-click="_foodFluidItemToggled" tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]">[[item.name]]</div>   <!--   -->
-                    </template>
-                </iron-list>
+        <form is="iron-form" method="get" action="/" id="presubmit">
+            <paper-input id="foodFluidSearchStringId" name="foodFluidSearch" 
+            label="1. Search for a Food" value="{{foodFluidSearchString}}" required 
+            autocapitalize="off" spellcheck="true" on-blur="_getFoodData" ></paper-input>
+            <paper-toggle-button checked="{{isStandardReference}}">
+                (Only Search Generic Food List)
+            </paper-toggle-button>
+            <paper-dropdown-menu on-iron-select="_foodSelectionMenuIronSelectHandler" required style="width:100%;"  
+            label="2. Pick a specific food" id="foodSelectionMenu"  vertical-align="bottom" horizontal-align="left"> <!--on-opened-changed="_foodFluidListOpenedChanged" on-tap="_foodSelectionMenuTapped"-->
+                <div id="foodSelectionDropdownContentId" class="dropdown-content" slot="dropdown-content"  style="width: 75vw; height: 72vh; ">
+                    <iron-list id="foodFluidIronList" items="[[_foodsChanged(foods.*)]]" selected-item="{{selectedFood}}" selection-enabled >
+                        <template>
+                            <div on-click="_foodFluidItemToggled" tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]">[[item.name]]</div>   <!--   -->
+                        </template>
+                    </iron-list>
+                </div>
+            </paper-dropdown-menu>
+            <div class="horizontal">
+                <paper-input name="measure" label="(Serving size)" readonly="true" value="[[_getMeasure(foodNutrients.*)]]"></paper-input>
+                <paper-input name="weight" label="(Weight in grams)" readonly="true" value="[[_getWeight(foodNutrients.*)]]"></paper-input>        
             </div>
-        </paper-dropdown-menu>
-        <paper-input name="measure" label="Serving size" readonly="true" value="[[_getMeasure(foodNutrients.*)]]"></paper-input>
-        
+            <paper-input name="multiplier" type="number" step="any" label="3. How many servings?" value="{{multiplier}}" required></paper-input>
+            <paper-input name="consumedGrams" label="(Total grams)" value="{{consumedGrams}}" readonly="true"></paper-input>
+            <paper-icon-button icon="my-icons:local-dining" raised on-tap="_submit" title="Consume" class="blue"></paper-icon-button>
+            <paper-icon-button icon="my-icons:clear" raised on-tap="_reset" title="Reset" class="blue"></paper-icon-button>
+        </form>
+    
 
         <paper-toast duration="0" id="noResultsFoundToastId" text="We did not find any foods for '[[textSearch]]'?">
             <paper-button on-click="_hideTheToast" class="yellow-button">Close now!</paper-button>
@@ -121,6 +150,13 @@
                 };
             }
 
+            _getWeight (changeRecord) {
+                if (changeRecord.base.length > 0) {
+                this.set('weight', changeRecord.base[0].weight);
+                return changeRecord.base[0].weight;
+                }
+            }
+
             _getMeasure (changeRecord) {
                 if (changeRecord.base.length > 0) {
                 this.set('measure', changeRecord.base[0].measure);
@@ -151,7 +187,7 @@
             }
 
             _foodSelectionMenuIronSelectHandler(e) {
-                console.info("in _foodSelectionMenuIronSelectHandler: ", e);
+                console.debug("in _foodSelectionMenuIronSelectHandler: ", e);
             }
 
             // _foodFluidListOpenedChanged_foodFluidListOpenedChanged() {
@@ -162,7 +198,9 @@
             // }
             
             _getFoodData() {
-                this.textSearch = this.foodFluidSearchString;
+                if (this.foodFluidSearchString && this.foodFluidSearchString !== '') {
+                    this.textSearch = this.foodFluidSearchString;
+                }
             }
 
             _reduxStoreStateChanged (e) {
