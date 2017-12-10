@@ -5,7 +5,6 @@
 <link rel="import" href="nc-foods-by-text-search.html">
 <link rel="import" href="nc-nutrients-for-a-food.html">
 <link rel="import" href="redux-store.html">
-<link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
@@ -19,84 +18,88 @@
 <link rel="import" href="../bower_components/paper-styles/color.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
 
 <dom-module id="nc-consumption-form">
     <template>
-        <custom-style >
+        <custom-style>
             <style include="shared-styles">
-            :host {
-                display: block;
-                
-                padding: 10px;
-            }
+                :host {
+                    display: block;
 
-            .horizontal {
-                @apply --layout-horizontal;
-            }
+                    padding: 10px;
+                }
 
-            .item.selected {
-            background: black;
-            color: white;
-            }
+                .horizontal {
+                    @apply --layout-horizontal;
+                }
 
-            .item {
-                background: white;
-                padding: 10px;
-                border-bottom: 1px solid #ccc; 
-            }
-            iron-list {
-            height: 72vh; /* don't use % values unless the parent element is sized. */
-            width: 75vw; 
-            }
+                .item.selected {
+                    background: black;
+                    color: white;
+                }
 
-            .yellow-button {
-                text-transform: none;
-                color: #eeff41;
-            }
-            paper-icon-button.blue, paper-button.blue {
-                --paper-icon-button-ink-color: var(--paper-orange-500);
-                background-color: var(--paper-light-blue-500);
-                color: white;
-                border-radius: 3px;
-                padding: 2px;
-              }
-            
-            .gram-weight-field {
-                width: 80px;
-                margin-left: 3px;
-            }
+                .item {
+                    background: white;
+                    padding: 10px;
+                    border-bottom: 1px solid #ccc;
+                }
 
-        </style>
-    </custom-style>
+                iron-list {
+                    height: 72vh;
+                    /* don't use % values unless the parent element is sized. */
+                    width: 75vw;
+                }
 
-        <nc-foods-by-text-search text-search="[[textSearch]]" 
-        id="foodsByTextSearch" is-standard-reference="[[isStandardReference]]">
+                .yellow-button {
+                    text-transform: none;
+                    color: #eeff41;
+                }
+
+                paper-icon-button.blue,
+                paper-button.blue {
+                    --paper-icon-button-ink-color: var(--paper-orange-500);
+                    background-color: var(--paper-light-blue-500);
+                    color: white;
+                    border-radius: 3px;
+                    padding: 2px;
+                }
+
+                .gram-weight-field {
+                    width: 80px;
+                    margin-left: 3px;
+                }
+            </style>
+        </custom-style>
+
+        <nc-foods-by-text-search text-search="[[textSearch]]" id="foodsByTextSearch" is-standard-reference="[[isStandardReference]]">
         </nc-foods-by-text-search>
 
-        <nc-nutrients-for-a-food food-id="[[foodId]]" food-name="[[foodName]]"> <!-- custom-foods="[[customFoods]]" -->
+        <nc-nutrients-for-a-food food-id="[[foodId]]" food-name="[[foodName]]">
+            <!-- custom-foods="[[customFoods]]" -->
         </nc-nutrients-for-a-food>
 
         <form is="iron-form" method="get" action="/" id="presubmit">
-            <paper-input id="foodFluidSearchStringId" name="foodFluidSearch" 
-            label="1. Search for a Food" value="{{foodFluidSearchString}}" required 
-            autocapitalize="off" spellcheck="true" on-blur="_getFoodData" ></paper-input>
+            <paper-input id="foodFluidSearchStringId" name="foodFluidSearch" label="1. Search for a Food" value="{{foodFluidSearchString}}"
+                required autocapitalize="off" spellcheck="true" on-blur="_getFoodData"></paper-input>
             <paper-toggle-button checked="{{isStandardReference}}">
                 (Only Search Generic Food List)
             </paper-toggle-button>
-            <paper-dropdown-menu on-iron-select="_foodSelectionMenuIronSelectHandler" required style="width:100%;"  
-            label="2. Pick a specific food" id="foodSelectionMenu"  vertical-align="bottom" horizontal-align="left"> <!--on-opened-changed="_foodFluidListOpenedChanged" on-tap="_foodSelectionMenuTapped"-->
-                <div id="foodSelectionDropdownContentId" class="dropdown-content" slot="dropdown-content"  style="width: 75vw; height: 72vh; ">
-                    <iron-list id="foodFluidIronList" items="[[_foodsChanged(foods.*)]]" selected-item="{{selectedFood}}" selection-enabled >
+            <paper-dropdown-menu on-iron-select="_foodSelectionMenuIronSelectHandler" required style="width:100%;" label="2. Pick a specific food"
+                id="foodSelectionMenu" vertical-align="bottom" horizontal-align="left">
+                <!--on-opened-changed="_foodFluidListOpenedChanged" on-tap="_foodSelectionMenuTapped"-->
+                <div id="foodSelectionDropdownContentId" class="dropdown-content" slot="dropdown-content" style="width: 75vw; height: 72vh; ">
+                    <iron-list id="foodFluidIronList" items="[[_foodsChanged(foods.*)]]" selected-item="{{selectedFood}}" selection-enabled>
                         <template>
-                            <div on-click="_foodFluidItemToggled" tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]">[[item.name]]</div>   <!--   -->
+                            <div on-click="_foodFluidItemToggled" tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]">[[item.name]]</div>
+                            <!--   -->
                         </template>
                     </iron-list>
                 </div>
             </paper-dropdown-menu>
             <div class="horizontal">
                 <paper-input name="measure" label="(Serving size)" readonly="true" value="[[_getMeasure(foodNutrients.*)]]"></paper-input>
-                <paper-input class="gram-weight-field" name="weight" label="(Weight (g))" readonly="true" value="[[_getWeight(foodNutrients.*)]]"></paper-input>        
+                <paper-input class="gram-weight-field" name="weight" label="(Weight (g))" readonly="true" value="[[_getWeight(foodNutrients.*)]]"></paper-input>
             </div>
             <div class="horizontal">
                 <paper-input name="multiplier" type="number" step="any" label="3. How many servings?" value="{{multiplier}}" required></paper-input>
@@ -107,51 +110,24 @@
         </form>
 
         <div class="card" style="margin: unset;">
-            <paper-icon-button id="nutrientsHelpButton" icon="my-icons:help-outline"></paper-icon-button>
-            <paper-tooltip for="nutrientsHelpButton" position="right">
-                <div style="height: 100px; overflow-y: scroll;">
-                After you have...<br /><br />
-                1. searched for food<br />
-                2. picked a food<br />
-                3. and specified how many servings you want...<br />
-                <br/><br/>
-                ...then you will see the nutrients you care about under...
-                <br/><br/>
-                <div style="font-weight: bold;">"Nutrients you care about..."</div>
-                This will show you how much of each nutrient you care about occurs in the food you have chosen to "eat".
-                <br /><br />
-                Note:  if you just want to see this and not record it you don't have to ever press the "eat" button to save
-                what you have entered.   
-                </div>    
-            </paper-tooltip>
             <h2 style="font-size: 1em;">Nutrients you care about...</h2>
             <iron-list items="[[_getNutrientsFromFoodNutrients(foodNutrients.*)]]">
                 <template>
-                <div class="item horizontal" style="font-size:.7em; width: fit-content;">
-                    <div style="width: min-content;">[[item.nutrient]]:&nbsp;&nbsp;</div>
-                    <div style="width: min-content;">[[_applyMultiplier(item.value, multiplier)]]&nbsp;</div>
-                    <div>[[item.unit]]</div>
-                </div>
+                    <div class="item horizontal" style="font-size:.7em; width: fit-content;">
+                        <div style="width: min-content;">[[item.nutrient]]:&nbsp;&nbsp;</div>
+                        <div style="width: min-content;">[[_applyMultiplier(item.value, multiplier)]]&nbsp;</div>
+                        <div>[[item.unit]]</div>
+                    </div>
                 </template>
             </iron-list>
-    
+
             <paper-icon-button class="blue" icon="my-icons:edit" raised on-tap="_editNutrients">
             </paper-icon-button>
             <div class="horizontal">
                 <paper-input class="shortField" value="[[todayString]]" label="Report Date" placeholder="YYYY-MM-DD"></paper-input>
-                <paper-button class="btn blue" on-tap="_showChangeDateDialog" raised >Change Date</paper-button>
-                <paper-icon-button id="changeEatDateHelpButton" icon="my-icons:help-outline"></paper-icon-button>
-                </div>
-                <paper-tooltip for="changeEatDateHelpButton" position="right">
-                    <div style="height: 100px; overflow-y: scroll;">
-                    It is possible, before you save with the eat button, that you will actually want to save
-                    this particular food entry for a different day or time, in order to keep track of what
-                    day you actually ate something.  This field allows you to do this; just change the date
-                    by pressing the "change date" button, and then save you food as normal.<br />
-                    <br/>
-                    The food you have saved will save as if you had eaten it on that date!<br/>
-                </paper-tooltip>
-                
+                <paper-button class="btn blue" on-tap="_showChangeDateDialog" raised>Change Date</paper-button>
+            </div>
+
             <paper-dialog id="changeDateDialog" class="paper-date-picker-dialog" on-iron-overlay-closed="_dismissChangeDateDialog">
                 <paper-date-picker id="picker" date="{{selectedDate}}"></paper-date-picker>
                 <div class="horizontal">
@@ -160,13 +136,12 @@
                 </div>
             </paper-dialog>
         </div>
-                           
 
         <paper-toast duration="0" id="noResultsFoundToastId" text="We did not find any foods for '[[textSearch]]'?">
             <paper-button on-click="_hideTheToast" class="yellow-button">Close now!</paper-button>
         </paper-toast>
     </template>
-    
+
     <script>
         class NcConsumptionForm extends ReduxMixin(Polymer.Element) {
             static get is() { return 'nc-consumption-form'; }
@@ -186,15 +161,15 @@
                     },
                     foods: {
                         type: Array,
-                        statePath:  'latestFoodList'
+                        statePath: 'latestFoodList'
                     },
                     queryBroughtBackNoFoodList: {
                         type: Boolean,
-                        statePath:   'latestQueryBroughtBackNoFoodList'
+                        statePath: 'latestQueryBroughtBackNoFoodList'
                     },
                     lastQueryString: {
                         type: String,
-                        statePath:  'latestFoodListQueryString'
+                        statePath: 'latestFoodListQueryString'
                     },
                     selectedFood: {
                         type: Object,
@@ -220,7 +195,7 @@
                         value: 0
                     },
                     consumedGrams: {
-                        type:  Number,
+                        type: Number,
                         computed: '_calculateConsumedGrams(weight, multiplier)'
                     },
 
@@ -236,8 +211,8 @@
 
             _getNutrientsFromFoodNutrients(changeRecord) {
                 if (changeRecord.base.length > 0) {
-                this.notifyPath('foodNutrients.0.nutrients');
-                return changeRecord.base[0].nutrients;
+                    this.notifyPath('foodNutrients.0.nutrients');
+                    return changeRecord.base[0].nutrients;
                 }
                 return [];
             }
@@ -246,17 +221,17 @@
                 return (weight * multiplier).toFixed(2);
             }
 
-            _getWeight (changeRecord) {
+            _getWeight(changeRecord) {
                 if (changeRecord.base.length > 0) {
-                this.set('weight', changeRecord.base[0].weight);
-                return changeRecord.base[0].weight;
+                    this.set('weight', changeRecord.base[0].weight);
+                    return changeRecord.base[0].weight;
                 }
             }
 
-            _getMeasure (changeRecord) {
+            _getMeasure(changeRecord) {
                 if (changeRecord.base.length > 0) {
-                this.set('measure', changeRecord.base[0].measure);
-                return changeRecord.base[0].measure;
+                    this.set('measure', changeRecord.base[0].measure);
+                    return changeRecord.base[0].measure;
                 }
             }
 
@@ -264,22 +239,22 @@
                 this.$.noResultsFoundToastId.opened = false;
             }
 
-            _standardReferenceChanged (standardReferenceValue) {
+            _standardReferenceChanged(standardReferenceValue) {
                 console.info("standard reference was changed to ", standardReferenceValue);
                 return standardReferenceValue;
             }
 
-            ready () {
+            ready() {
                 super.ready();
-                this.addEventListener('state-changed', (e) => {this._reduxStoreStateChanged(e);});
+                this.addEventListener('state-changed', (e) => { this._reduxStoreStateChanged(e); });
             }
 
             _foodFluidItemToggled(e) {
                 //console.log("food/fluid click: ", this.selectedFood);
                 if (this.selectedFood !== null) {
-                   this.$.foodSelectionDropdownContentId.dispatchEvent(new CustomEvent('iron-select', {bubbles: true, composed: true, detail: {item: e.currentTarget /*this.selectedFood*/}}));
+                    this.$.foodSelectionDropdownContentId.dispatchEvent(new CustomEvent('iron-select', { bubbles: true, composed: true, detail: { item: e.currentTarget /*this.selectedFood*/ } }));
                 }
-               // this.$.foodSelectionMenu.opened = false;
+                // this.$.foodSelectionMenu.opened = false;
             }
 
             _foodSelectionMenuIronSelectHandler(e) {
@@ -292,14 +267,14 @@
             //         this.$.foodFluidIronList.notifyResize();
             //     }
             // }
-            
+
             _getFoodData() {
                 if (this.foodFluidSearchString && this.foodFluidSearchString !== '') {
                     this.textSearch = this.foodFluidSearchString;
                 }
             }
 
-            _reduxStoreStateChanged (e) {
+            _reduxStoreStateChanged(e) {
                 console.log("redux store state changed...in nc-consumption-form", this.foods);
                 if (this.queryBroughtBackNoFoodList) {
                     this.$.noResultsFoundToastId.opened = true;
@@ -312,7 +287,7 @@
                 //this.$.foodSelectionMenu.opened = true; // TODO not sure about this??
             }
 
-            _foodsChanged (changeRecord) {
+            _foodsChanged(changeRecord) {
                 if (changeRecord) {
                     return changeRecord.base;
                 }
@@ -321,23 +296,22 @@
             _computedClass(isSelected) {
                 var classes = 'item';
                 if (isSelected) {
-                classes += ' selected';
+                    classes += ' selected';
                 }
                 return classes;
             }
 
-            _selectedFoodChanged(selectedIndex,oldObject) {
+            _selectedFoodChanged(selectedIndex, oldObject) {
                 console.log("my-consumption:  selectedFood has changed: " + selectedIndex);
                 if (typeof selectedIndex === "undefined" || selectedIndex === null) {
                     return;
                 }
-                this.set('foodId',selectedIndex.ndbno);
+                this.set('foodId', selectedIndex.ndbno);
                 this.set('foodName', selectedIndex.name);
             }
 
         }
-    
+
         window.customElements.define(NcConsumptionForm.is, NcConsumptionForm);
     </script>
 </dom-module>
-    

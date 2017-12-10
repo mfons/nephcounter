@@ -2,7 +2,10 @@
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="nc-consumption-form.html">
+<link rel="import" href="my-icons.html">
+
 
 <dom-module id="nc-consumption">
   <template>
@@ -18,7 +21,7 @@
       <div class="circle">2</div>
       <paper-icon-button id="helpButton" icon="my-icons:help-outline"></paper-icon-button>
       <paper-tooltip for="helpButton" position="right">
-        <div style="height: 100px; overflow-y: scroll;">
+        <div style="height: 150px; overflow-y: scroll;">
           On this screen:<br /><br />
           1. type in 1 or 2 words to search for a food<br />
           2. pick from the search results which food you are eating/going to eat<br />
@@ -34,8 +37,41 @@
           something you have eaten for the day, and then clear the screen to be ready to allow you to enter/eat the next thing.
           <br/><br/>
           <div style="font-weight: bold;">"Only Search Generic Food List"</div>
-          With this switched on, you will only search a set of generic foods.  To increase your
+          With this switched on (this is the default), you will only search a set of generic foods.  To increase your
           search to include brand name items, you will need to switch this off.   
+          <br />
+          <br />
+          
+          <div>
+              After you have...
+              <br />
+              <br /> 1. searched for food
+              <br /> 2. picked a food
+              <br /> 3. and specified how many servings you want...
+              <br />
+              <br/>
+              <br/> ...then you will see the nutrients you care about under...
+              <br/>
+              <br/>
+              <div style="font-weight: bold;">"Nutrients you care about..."</div>
+              This will show you how much of each nutrient you care about occurs in the food you have chosen to "eat".
+              <br />
+              <br /> Note: if you just want to see this and not record it you don't have to ever press the "eat" button
+              to save what you have entered.
+          </div>
+          <br />
+          <br />
+          
+          <div>
+              It is possible, before you save with the eat button, that you will actually want to save this particular food entry for a
+              different day or time, in order to keep track of what day you actually ate something. This field
+              allows you to do this; just change the date by pressing the "change date" button, and then save
+              your food as normal.
+              <br />
+              <br/> The food you have saved will save as if you had eaten it on that date!
+              <br/>
+          </div>
+
         </div>    
       </paper-tooltip>
       <h1 style="margin-bottom: 0px;">Eat!</h1>
