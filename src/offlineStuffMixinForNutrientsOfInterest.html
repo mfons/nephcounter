@@ -70,6 +70,7 @@
                 openReq.onsuccess = function (event) {
                     var db = event.target.result;
                     db.close();
+                    resolve();
                     return;
                 };
 
