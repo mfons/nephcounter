@@ -10,15 +10,15 @@
                 display: none;
             }
         </style>
-        <iron-ajax
-        id="foodSearchAjaxId"
-        method="GET"
-        url="https://api.nal.usda.gov/ndb/search/"
-        handle-as="json"
-        params="[[ajaxParams]]"
-        on-response="_tasksLoaded">
-    </iron-ajax>
-</template>
+            <iron-ajax
+            id="foodSearchAjaxId"
+            method="GET"
+            url="https://api.nal.usda.gov/ndb/search/"
+            handle-as="json"
+            params="[[ajaxParams]]"
+            on-response="_tasksLoaded">
+        </iron-ajax>
+    </template>
 
     <script>
         class NcFoodsByTextSearch extends ReduxMixin(Polymer.Element) {

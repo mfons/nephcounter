@@ -25,6 +25,10 @@ module.exports = {
   {
     urlPattern: /^https:\/\/api\.nal\.usda\.gov\/ndb\/nutrients/,
     handler: 'cacheFirst'
+  },
+  {
+      urlPattern: /^https:\/\/api\.nal\.usda\.gov\/ndb\/list/,
+      handler: 'cacheFirst'
   }]
 
 };

@@ -10,6 +10,7 @@
 <link rel="import" href="../bower_components/polymer/lib/utils/render-status.html">
 <link rel="import" href="redux-store.html">
 <link rel="import" href="offlineStuffMixinForNutrientsOfInterest.html">
+<link rel="import" href="nc-ajax-get-possible-nutrients.html">
 
 <dom-module id="nc-nutrientsofinterest">
   <template>
@@ -20,77 +21,63 @@
         padding: 10px;
       }
 
-     .item.selected {
-       background: #ccc;
-     }
+      .item.selected {
+        background: #ccc;
+      }
 
-     .item {
-       background: #fff;
-     }
+      .item {
+        background: #fff;
+      }
     </style>
 
-    <!-- <app-indexeddb-mirror  id="nutrientsIndexedDB" key="nutrients"
-    data="[[nutrientsQueried]]"
-    persisted-data="{{nutrientsPersisted}}"></app-indexeddb-mirror> -->
-    <firebase-auth
-       id="auth"
-       user="{{user}}"
-       provider="google"
-       signed-in="{{signedIn}}" >
+    <firebase-auth id="auth" user="{{user}}" provider="google" signed-in="{{signedIn}}">
     </firebase-auth>
 
-    <firebase-query
-      id="query"
-      path="/nutrients"
-      data="{{nutrientsQueried}}">
+    <firebase-query id="nutrientsOfInterestQuery" path="[[_getNutrientsOfInterestPath(user)]]" data="{{nutrientsOfInterestQueried}}">
     </firebase-query>
-    <firebase-query
-      id="nutrientsOfInterestQuery"
-      path="[[_getNutrientsOfInterestPath(user)]]"
-      data="{{nutrientsOfInterestQueried}}">
-    </firebase-query>
+
+    <nc-ajax-get-possible-nutrients>
+    </nc-ajax-get-possible-nutrients>
 
     <div class="card">
       <div class="circle">1</div>
       <paper-icon-button id="helpButton" icon="my-icons:help-outline"></paper-icon-button>
       <paper-tooltip for="helpButton" position="right">
-        This screen is where you specify the nutrients you want to track.  
-        <br/><br/>
-        You MUST select some nutrients to track before you can start entering food on the 
-        Eat! screen -- the *next* screen to visit.
+        This screen is where you specify the nutrients you want to track.
+        <br/>
+        <br/> You MUST select some nutrients to track before you can start entering food on the Eat! screen -- the *next* screen
+        to visit.
       </paper-tooltip>
       <h1>Nutrients you care about...</h1>
 
-      <iron-list id="nutrientIronList" items="[[nutrientsPersisted]]" selected-items="{{selectedItems}}" selection-enabled multi-selection>
+      <iron-list id="nutrientIronList" items="[[possibleNutrients]]" selected-items="{{selectedItems}}" selection-enabled multi-selection>
         <template>
-        <div tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]">[[item.name]]</div>
+          <div tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]">[[item.name]]</div>
         </template>
       </iron-list>
 
     </div>
   </template>
   <script>
-      class NcNutrientsOfInterest extends 
+    class NcNutrientsOfInterest extends
       OfflineStuffMixinForNutientsOfInterest(
         ReduxMixin(
           Polymer.Element
         )
-      ){
+      ) {
       static get is() { return 'nc-nutrientsofinterest'; }
 
       static get properties() {
         return {
-          data: {
-            type: Array,
-            statePath: 'nutrients',
-          },
           offline: {
             type: Boolean,
             statePath: 'offline'
           },
-          nutrientsQueried : Array,
+          possibleNutrients: {
+            type: Array,
+            statePath: 'nutrients'
+          },
           nutrientsOfInterestQueried: Array,
-          nutrientsPersisted : Array,
           signedIn: Boolean,
           selectedItems: Array,
           refreshingSelectedItemsList: {
@@ -102,65 +89,62 @@
 
       static get actions() {
         return {
-          loadAllNutrients: (allNutrients) => {
-            return {
-                type: 'LOAD_ALL_NUTRIENTS',
-                nutrients:  allNutrients
-            }
-          },
           loadAllNutrientsOfInterest: (allNutrientsOfInterest) => {
-              return {
-                type: 'LOAD_ALL_NUTRIENTS_OF_INTEREST',
-                allNutrientsOfInterest:  allNutrientsOfInterest
-              }
+            return {
+              type: 'LOAD_ALL_NUTRIENTS_OF_INTEREST',
+              allNutrientsOfInterest: allNutrientsOfInterest
+            }
           },
         };
       }
 
       static get observers() {
-        return [ 
-          '_signedInChanged(signedIn)', 
-           '_selectedItemsChanged(selectedItems.*)' //,
-          // '_nutrientsOfInterestQueriedChanged(nutrientsOfInterestQueried.*)'
-        ]; 
+        return [
+          '_signedInChanged(signedIn)',
+          '_selectedItemsChanged(selectedItems.*)'
+        ];
       }
 
       ready() {
         super.ready();
+        this.addEventListener('state-changed', (e) => { this._reduxStoreStateChanged(e); });
         if (this.signedIn) {
           this.doNewOfflineNutrientStuff();
         }
-//        this.doOffLineNutrientStuff();
+      }
+
+      _reduxStoreStateChanged(e) {
+        console.log("redux store state changed...in nc-consumption-form", this.possibleNutrients);
       }
 
       _getNutrientsOfInterestPath(theUser) {
-        if (!theUser) { return '';}
+        if (!theUser) { return ''; }
         return '/users/' + theUser.uid + '/nutrientsOfInterest';
       }
 
       _readNutrientsOfInterest() {
-          if (!this.nutrientsPersisted || this.nutrientsPersisted.length === 0) { console.warn("_readNutrientsOfInterest() called when nutrients list was still empty!"); return;}
-          let thisWebComponent = this;
-          this._getNutrientsOfInterestFromIndexedDbIfAvailable()
-            .then(() => {/* do nothing yet here */
-                console.log("we got nutrients of interest from indexed db!");
-            })
-            .catch((errorText) => {
-              console.warn("_getNutrientsOfInterestFromIndexedDbIfAvailable promise rejected with error text...", errorText);
-              if (!thisWebComponent.offline && thisWebComponent.signedIn) {
-                thisWebComponent._setNutrientsOfInterestSelectedItemsFromFirebaseStore()
-                  .then(thisWebComponent.saveNutrientsOfInterestToIndexedDb)
-                  .catch((errorText) => {
-                    console.warn("_setNutrientsOfInterestSelectedItemsFromFirebaseStore failed: ", errorObject.code);
-                  });
-               }
-            });
+        if (!this.possibleNutrients || this.possibleNutrients.length === 0) { console.warn("_readNutrientsOfInterest() called when nutrients list was still empty!"); return; }
+        let thisWebComponent = this;
+        this._getNutrientsOfInterestFromIndexedDbIfAvailable()
+          .then(() => {/* do nothing yet here */
+            console.log("we got nutrients of interest from indexed db!");
+          })
+          .catch((errorText) => {
+            console.warn("_getNutrientsOfInterestFromIndexedDbIfAvailable promise rejected with error text...", errorText);
+            if (!thisWebComponent.offline && thisWebComponent.signedIn) {
+              thisWebComponent._setNutrientsOfInterestSelectedItemsFromFirebaseStore()
+                .then(thisWebComponent.saveNutrientsOfInterestToIndexedDb)
+                .catch((errorText) => {
+                  console.warn("_setNutrientsOfInterestSelectedItemsFromFirebaseStore failed: ", errorObject.code);
+                });
+            }
+          });
       }
 
       _setNutrientsOfInterestSelectedItemsFromFirebaseStore() {
         var thisWebComponent = this;
         return new Promise((resolve, reject) => {
-          thisWebComponent.$.nutrientsOfInterestQuery.ref.on("value", function(snapshot) {
+          thisWebComponent.$.nutrientsOfInterestQuery.ref.on("value", function (snapshot) {
             console.log("the nutrients of interest firebase read came back successfully!");
             thisWebComponent._selectGivenNutrientsOfInterest(snapshot.val());
             //this.selectedItems = snapshot.val();
@@ -168,7 +152,7 @@
           }.bind(thisWebComponent), function (errorObject) {
             console.warn("The nutrients of interest firebase read failed: ", errorObject.code);
             reject("The nutrients of interest firebase read failed: " + errorObject.code);
-          });            
+          });
         });
       }
 
@@ -178,77 +162,23 @@
         var thisWebComponent = this;
         theList.forEach((item) => {
           thisWebComponent.$.nutrientIronList.selectIndex(item.offset);
-          this.dispatch('loadAllNutrientsOfInterest', theList);      
+          this.dispatch('loadAllNutrientsOfInterest', theList);
         });
         this.refreshingSelectedItemsList = false;
       }
 
-      _getNutrientsOfInterestFromIndexedDbIfAvailable () {
-          let thisWebComponent = this;
-          return new Promise((resolve, reject) => {
-            var db;
-            var request = window.indexedDB.open("NephcounterOffLineDB");
-            request.onerror = function(event) {
-                // Do something with request.errorCode!
-                console.warn("NephcounterOffLineDB creation failed in _getNutrientsOfInterestFromIndexedDbIfAvailable!", event)
-                reject("open of database failed with error in _getNutrientsOfInterestFromIndexedDbIfAvailable!");
-            }; // end of onerror
-            request.onsuccess = function(event) { 
-              console.log("NephcounterOffLineDB open succeeded in _getNutrientsOfInterestFromIndexedDbIfAvailable!");
-              db = event.target.result;
-              if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
-                reject("nutrientsOfInterest object store has not been created yet to retrieve");
-                console.warn("nutrientsOfInterest object store has not been created yet to retrieve", db.objectStoreNames);
-                db.close();
-                return;
-              }
-              var objectStore = db.transaction(["nutrientsOfInterest"], "readonly").objectStore("nutrientsOfInterest");
-              var request = objectStore.get(1);
-              request.onerror = function(event) {
-                  // assuming that 1 was not found so it needs to be added
-                  console.warn("Caught querying record 1 from nutrientsOfInterest from error in event: ", event);
-                  reject("Caught querying record 1 from nutrientsOfInterest; check for console warning for specifics");
-                  db.close();
-              };
-              request.onsuccess = function(event) {
-                // Get the old value that we want to update
-                var data = event.target.result;
-                
-                if (typeof data === "undefined") {  // Then there is no record yet .
-                  reject("there is no record yet in indexedDB");
-                  db.close();
-                  return;
-                }
-
-                thisWebComponent._selectGivenNutrientsOfInterest(data.allNutrientsOfInterestList);
-                //thisWebComponent.selectedItems = data.allNutrientsOfInterestList;
-                resolve();
-              };
-  
-            }; // end of onsuccess
-  
-            // This is done only if there is no database and one needs to be created before we read from it.
-            request.onupgradeneeded = function(event) {   
-              console.warn("an upgrade is needed...");
-              var db = event.target.result;
-              reject("There is no offline database yet for nutrientsOfInterest");
-              db.close();
-            }; // end of onupgradeneeded
-          });
-      }
-
-      _nutrientsOfInterestQueriedChanged (changeRecord) {
+      _nutrientsOfInterestQueriedChanged(changeRecord) {
         if (!changeRecord || !changeRecord.base) { return; }
         console.log('nutrients of interest queried has ' + changeRecord.base.length + ' records!');
       }
 
-      _selectedItemsChanged (changeRecord) {
+      _selectedItemsChanged(changeRecord) {
         if (
           this.refreshingSelectedItemsList ||
-          typeof changeRecord === "undefined" || 
+          typeof changeRecord === "undefined" ||
           typeof changeRecord.base === "undefined" ||
           changeRecord.base.length === 0
-        ) {  return; }
+        ) { return; }
         // 1.  write to firebase if logged in and online
         if (!this.offline && this.signedIn) {
           this.writeNutrientsOfInterestToFirebase(changeRecord.base);
@@ -257,7 +187,7 @@
         this.saveNutrientsOfInterestToIndexedDb(changeRecord.base)
           .catch((errTxt) => { console.warn("The following error was caught from saveNutrientsOfInterestToIndexedDb call: ", errTxt); });
         // 3.  update redux  
-        this.dispatch('loadAllNutrientsOfInterest', changeRecord.base);      
+        this.dispatch('loadAllNutrientsOfInterest', changeRecord.base);
       }
 
       writeNutrientsOfInterestToFirebase(nutrientsOfInterestList) {
@@ -265,116 +195,29 @@
         updateRef.set(nutrientsOfInterestList);
       }
 
-      saveNutrientsOfInterestToIndexedDb (nutrientsOfInterestList) {
-          
-        return new Promise((resolve, reject) => {
-          var db;
-          var request = window.indexedDB.open("NephcounterOffLineDB");
-          request.onerror = function(event) {
-              // Do something with request.errorCode!
-              console.log("NephcounterOffLineDB creation failed!", event)
-              reject("open of database failed with error!");
-          }; // end of onerror
-          request.onsuccess = function(event) { 
-            console.log("NephcounterOffLineDB open succeeded!");
-            db = event.target.result;
-            if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
-              reject("nutrientsOfInterest object store has not been created yet to save");
-              console.warn("nutrientsOfInterest object store has not been created yet to save", db.objectStoreNames);
-              db.close();
-              return;
-            }
-            var objectStore = db.transaction(["nutrientsOfInterest"], "readwrite").objectStore("nutrientsOfInterest");
-            var request = objectStore.get(1);
-            request.onerror = function(event) {
-                // assuming that 1 was not found so it needs to be added
-                console.warn("Caught querying record 1 from nutrientsOfInterest from error in event: ", event);
-                reject("Caught querying record 1 from nutrientsOfInterest; check for console warning for specifics");
-                db.close();
-            };
-            request.onsuccess = function(event) {
-              // Get the old value that we want to update
-              var data = event.target.result;
-              
-              if (typeof data === "undefined") {  // Then there is no record yet and we must add rather than update.
-                var possibleNutrientsObjectStore = db.transaction("nutrientsOfInterest", "readwrite").objectStore("nutrientsOfInterest");
-                var request = possibleNutrientsObjectStore.add({allNutrientsOfInterestListKey: 1, allNutrientsOfInterestList: nutrientsOfInterestList});
-                request.onsuccess = (event) => { 
-                  console.log("added nutrients of interest to indexeddb");
-                  resolve();
-                  db.close()
-                }
-                return;
-              }
-
-              // update the value(s) in the object that you want to change
-              data.allNutrientsOfInterestList = nutrientsOfInterestList;
-
-              // Put this updated object back into the database.
-              var requestUpdate = objectStore.put(data);
-              requestUpdate.onerror = function(event) {
-                console.warn("rejecting nutrient of interest indexeddb update due to event:", event);
-                reject("rejecting nutrient of interest indexeddb update");
-                db.close();
-              };
-              requestUpdate.onsuccess = function(event) {
-                console.log("updated nutrients of interest in indexeddb");
-                resolve();
-                db.close();
-              };
-            };
-
-          }; // end of onsuccess
-
-          // This is done only if there is no database and one needs to be created before we read from it.
-          request.onupgradeneeded = function(event) {   
-              console.log("an upgrade is needed...");
-              var db = event.target.result;
-          }; // end of onupgradeneeded
-        });
-      }
-
       _doStuffOnceNutrientsHaveLoaded() {
         //this._readNutrientsOfInterest(); // TODO -- this did not work...even though the 
         // nutrients array is populated, iron-list is still not showing anything yet.  
         // Need to find a way to make sure that has happened...call this method afterNextRender from here??
-//         Polymer.RenderStatus.afterNextRender(this, function() {
-//           this._readNutrientsOfInterest();
-//         });
+        //         Polymer.RenderStatus.afterNextRender(this, function() {
+        //           this._readNutrientsOfInterest();
+        //         });
 
-      // OK:  this is more an act of irritation than anything else:
-      // there is the initial loading stuff with the nutrients list.  
-      // This can in fact interact with the loading of the nutrients of 
-      // interest through the nutrientsOfInterest-changed method...something
-      // this long pause separates all the stuff at the beginning from the
-      // later loading of the selected items.  A hail Mary in other words.  Sorry.  But this works. :-D
-      // Some additional thoughts:  since this gets called, we really need to keep track of how
-      // many times this is called, and only call this when there are no more pending calls.
-      // TODO ? maybe check out https://stackoverflow.com/questions/31424561/wait-until-all-es6-promises-complete-even-rejected-promises
+        // OK:  this is more an act of irritation than anything else:
+        // there is the initial loading stuff with the nutrients list.  
+        // This can in fact interact with the loading of the nutrients of 
+        // interest through the nutrientsOfInterest-changed method...something
+        // this long pause separates all the stuff at the beginning from the
+        // later loading of the selected items.  A hail Mary in other words.  Sorry.  But this works. :-D
+        // Some additional thoughts:  since this gets called, we really need to keep track of how
+        // many times this is called, and only call this when there are no more pending calls.
+        // TODO ? maybe check out https://stackoverflow.com/questions/31424561/wait-until-all-es6-promises-complete-even-rejected-promises
         var thisWebComponent = this;
-        setTimeout(function() {
+        setTimeout(function () {
           thisWebComponent._readNutrientsOfInterest();
         }, 2000);  //TODO not sure if this length of time is long enough for crappy networks...
-     }
-
-      deleteDB() {
-        var thisWebComponent = this;
-        return new Promise((resolve, reject) => {
-          var DBDeleteRequest = window.indexedDB.deleteDatabase("NephcounterOffLineDB");
-
-          DBDeleteRequest.onerror = function(event) {
-            console.log("Error deleting database.");
-            reject();
-          };
-          
-          DBDeleteRequest.onsuccess = function(event) {
-            console.log("Database deleted successfully");
-              
-            console.log(event.result); // should be undefined
-            resolve();
-          };          
-        });
       }
+
 
       _computedClass(isSelected) {
         var classes = 'item';
@@ -394,10 +237,6 @@
         return count > 0 ? '(' + count + ')' : '';
       }
 
-      _nutrientsQueriedChanged(changeRecord) {
-        console.log("here is the nutrientsQueried base: ", changeRecord.base);
-      }
-
       _signedInChanged(newValue, oldValue) {
         console.log("new value:", newValue);
         console.log("old value:", oldValue);
@@ -407,8 +246,7 @@
         if (this.signedIn) {
           this.doNewOfflineNutrientStuff();
         }
-        //this.doOffLineNutrientStuff();
-       }
+      }
 
     }
 
