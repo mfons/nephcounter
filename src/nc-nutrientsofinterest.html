@@ -135,7 +135,7 @@
               thisWebComponent._setNutrientsOfInterestSelectedItemsFromFirebaseStore()
                 .then(thisWebComponent.saveNutrientsOfInterestToIndexedDb)
                 .catch((errorText) => {
-                  console.warn("_setNutrientsOfInterestSelectedItemsFromFirebaseStore failed: ", errorObject.code);
+                  console.warn("_setNutrientsOfInterestSelectedItemsFromFirebaseStore failed: ", errorText.code);
                 });
             }
           });
