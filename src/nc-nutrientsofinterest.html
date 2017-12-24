@@ -126,7 +126,8 @@
         if (!this.possibleNutrients || this.possibleNutrients.length === 0) { console.warn("_readNutrientsOfInterest() called when nutrients list was still empty!"); return; }
         let thisWebComponent = this;
         this._getNutrientsOfInterestFromIndexedDbIfAvailable()
-          .then(() => {/* do nothing yet here */
+          .then((allNutrientsOfInterestList) => {/* do nothing yet here */
+            thisWebComponent._selectGivenNutrientsOfInterest(allNutrientsOfInterestList);
             console.log("we got nutrients of interest from indexed db!");
           })
           .catch((errorText) => {

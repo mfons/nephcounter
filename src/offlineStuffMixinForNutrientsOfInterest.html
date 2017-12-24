@@ -191,9 +191,8 @@
                             return;
                         }
 
-                        thisWebComponent._selectGivenNutrientsOfInterest(data.allNutrientsOfInterestList);
-                        //thisWebComponent.selectedItems = data.allNutrientsOfInterestList;
-                        resolve();
+                        resolve(data.allNutrientsOfInterestList);
+                        db.close();
                     };
 
                 }; // end of onsuccess
@@ -202,6 +201,9 @@
                 request.onupgradeneeded = function (event) {
                     console.warn("an upgrade is needed...");
                     var db = event.target.result;
+                    if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
+                        let nutrientsOfInterestObjectStore = db.createObjectStore("nutrientsOfInterest", { keyPath: "allNutrientsOfInterestListKey" });
+                    }
                     reject("There is no offline database yet for nutrientsOfInterest");
                     db.close();
                 }; // end of onupgradeneeded
