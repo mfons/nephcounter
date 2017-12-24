@@ -69,6 +69,7 @@
 
                 openReq.onsuccess = function (event) {
                     var db = event.target.result;
+                    // Note:  it seems that sometimes this does not get
                     db.close();
                     resolve();
                     return;

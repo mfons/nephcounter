@@ -73,7 +73,7 @@
       <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
         <a name="nutrientsofinterest" href="/nutrientsofinterest">Nutrients you care about</a>
         <a name="consumption" href="/consumption">Eat!</a>
-        <a name="view3" href="/view3">View Three</a>
+        <a name="offline-capabilities" href="/offline-capabilities">Offline Capable...</a>
       </iron-selector>
       <nephcounter-login hidden$="[[offline]]"></nephcounter-login>
     </app-drawer>
@@ -119,7 +119,7 @@
           role="main">
         <nc-nutrientsofinterest name="nutrientsofinterest"></nc-nutrientsofinterest>
         <nc-consumption name="consumption"></nc-consumption>
-        <my-view3 name="view3"></my-view3>
+        <nc-offline-capabilities name="offline-capabilities"></nc-offline-capabilities>
         <my-view404 name="view404"></my-view404>
       </iron-pages>
     </app-header-layout>
@@ -212,6 +212,7 @@
             if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
               reject("nutrientsOfInterest object store has not been created yet to retrieve");
               console.warn("nutrientsOfInterest object store has not been created yet to retrieve", db.objectStoreNames);
+              db.close();
               return;
             }
             var objectStore = db.transaction(["nutrientsOfInterest"], "readonly").objectStore("nutrientsOfInterest");
@@ -227,9 +228,11 @@
               
               if (typeof data === "undefined") {  // Then there is no record yet .
                 reject("there is no record yet in indexedDB");
+                db.close();
                 return;
               }
               resolve(data.allNutrientsOfInterestList);
+              db.close();
             };
 
           }; // end of onsuccess
@@ -238,6 +241,9 @@
           request.onupgradeneeded = function(event) {   
             console.log("an upgrade is needed...");
             var db = event.target.result;
+            if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
+                let nutrientsOfInterestObjectStore = db.createObjectStore("nutrientsOfInterest", { keyPath: "allNutrientsOfInterestListKey" });
+            }
             reject("There is no offline database yet for nutrientsOfInterest");
           }; // end of onupgradeneeded
         });
