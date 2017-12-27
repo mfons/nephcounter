@@ -15,52 +15,73 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 
 <dom-module id="nc-offline-capabilities">
-  <template>
-    <style include="shared-styles">
-      :host {
-        display: block;
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
 
-        padding: 10px;
-      }
-    </style>
+                padding: 10px;
+            }
+        </style>
 
-    <div class="card">
-      <h1>Offline Capability Statuses</h1>
-      <ul>
-        <li>This app's pages [[_isCurrentPageControlledBySWYet()]] be available off line</li>
-        <li>The nutrients we care about [[_areNutrientsWeCareAboutAvailableOffline()]] available during offline use of this app.</li>
-        <li>TODO nutrients saved yet?</li>
-        <li>TODO food searches offline yet?</li>
-        <li>TODO individual foods saved for offline yet?</li>
-      </ul>
-    </div>
-  </template>
+        <div class="card">
+            <h1>Offline Capability Statuses</h1>
+            <ul>
+                <li>This app's pages [[_isCurrentPageControlledBySWYet()]] be available off line</li>
+                <li>The nutrients we care about [[areNutrientsWeCareAboutAvailableOfflineString]] available during offline use
+                    of this app.</li>
+                <li>TODO nutrients saved yet?</li>
+                <li>TODO food searches offline yet?</li>
+                <li>TODO individual foods saved for offline yet?</li>
+            </ul>
+        </div>
+    </template>
 
-  <script>
-    class NcOfflineCapabilities extends
-    OfflineStuffMixinForNutientsOfInterest(
-        ReduxMixin(
-          Polymer.Element
-        )
-      ) {
+    <script>
+        class NcOfflineCapabilities extends
+            OfflineStuffMixinForNutientsOfInterest(
+                ReduxMixin(
+                    Polymer.Element
+                )
+            ) {
 
-      static get is() { return 'nc-offline-capabilities'; }
+            static get is() { return 'nc-offline-capabilities'; }
 
-      _isCurrentPageControlledBySWYet() {
-          return navigator.serviceWorker.controller ? 'WILL' : 'WILL NOT YET';
-      }
-
-      _areNutrientsWeCareAboutAvailableOffline() {
-        this._getNutrientsOfInterestFromIndexedDbIfAvailable()
-            .then((list) => {
-                if (list.length > 0) {
-                    return "ARE NOT";
+            static get properties() {
+                return {
+                    areNutrientsWeCareAboutAvailableOfflineString: String
                 }
-                return "ARE";
-            });
-      }
-    }
+            }
 
-    window.customElements.define(NcOfflineCapabilities.is, NcOfflineCapabilities);
-  </script>
+            _isCurrentPageControlledBySWYet() {
+                return navigator.serviceWorker.controller ? 'WILL' : 'WILL NOT YET';
+            }
+
+            ready() {
+                super.ready();
+                var thiswebcomponent = this;
+                this._getNutrientsOfInterestFromIndexedDbIfAvailable()
+                    .then((list) => {
+                        thiswebcomponent.areNutrientsWeCareAboutAvailableOfflineString = (list && list.length > 0) ? "ARE" : "ARE NOT";
+                    });
+            }
+
+            _listVariousKindsOfCachedResponses() {
+                caches.keys()
+                    .then((cacheNames) => {
+                        return caches.open(cacheNames[0]);
+                    })
+                    .then((cache) => {
+                        return cache.keys();
+                    })
+                    .then((cacheNames) => {
+                        // TODO continue to dig in the cache and summarize what 
+                        // has been cached so far.
+                        console.log("cacheNames", cacheNames);
+                    });
+            }
+        }
+
+        window.customElements.define(NcOfflineCapabilities.is, NcOfflineCapabilities);
+    </script>
 </dom-module>

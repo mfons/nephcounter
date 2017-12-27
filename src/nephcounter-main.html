@@ -236,7 +236,7 @@
         var thisWebComponent = this;
         this._getNutrientsOfInterestFromIndexedDbIfAvailable()
           .then((nutrientsOfInterestList) => {
-            if (nutrientsOfInterestList.length > 0) {
+            if (nutrientsOfInterestList && nutrientsOfInterestList.length > 0) {
               thisWebComponent.dispatch('loadAllNutrientsOfInterest', nutrientsOfInterestList);    
             }
           })
