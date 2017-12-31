@@ -240,7 +240,7 @@
               thisWebComponent.dispatch('loadAllNutrientsOfInterest', nutrientsOfInterestList);    
             }
           })
-          .catch((err) => { console.error("error occurred getting nutrients of interest:", err)});
+          .catch((err) => { console.warn("error or promise rejection occurred getting nutrients of interest:", err)});
       }
 
       _pageChanged(page) {
