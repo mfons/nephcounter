@@ -126,9 +126,18 @@
         if (!this.possibleNutrients || this.possibleNutrients.length === 0) { console.warn("_readNutrientsOfInterest() called when nutrients list was still empty!"); return; }
         let thisWebComponent = this;
         this._getNutrientsOfInterestFromIndexedDbIfAvailable()
-          .then((allNutrientsOfInterestList) => {/* do nothing yet here */
-            thisWebComponent._selectGivenNutrientsOfInterest(allNutrientsOfInterestList);
-            console.log("we got nutrients of interest from indexed db!");
+          .then((allNutrientsOfInterestList) => {
+            if (allNutrientsOfInterestList && allNutrientsOfInterestList.length > 0) {
+              console.debug("we got nutrients of interest from indexed db!");
+              thisWebComponent._selectGivenNutrientsOfInterest(allNutrientsOfInterestList);
+            }
+            else if (!thisWebComponent.offline && thisWebComponent.signedIn) {
+              thisWebComponent._setNutrientsOfInterestSelectedItemsFromFirebaseStore()
+                .then(thisWebComponent.saveNutrientsOfInterestToIndexedDb)
+                .catch((errorText) => {
+                  console.warn("_setNutrientsOfInterestSelectedItemsFromFirebaseStore failed: ", errorText.code);
+                });
+            }
           })
           .catch((errorText) => {
             console.warn("_getNutrientsOfInterestFromIndexedDbIfAvailable promise rejected with error text...", errorText);
