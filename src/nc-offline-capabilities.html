@@ -31,8 +31,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <li>The nutrients we care about [[areNutrientsWeCareAboutAvailableOfflineString]] available during offline use
                     of this app.</li>
                 <li>The complete nutrients list [[isCompleteNutrientListAvailableOfflineString]] available offline.</li>
-                <li>TODO food searches offline yet?</li>
-                <li>TODO individual foods saved for offline yet?</li>
+                <li>There [[areAnyFoodSearchesAvailableOfflineString]] food searches available offline for the following search strings:</li>
+                <li>There [[areAnyFoodNutrientListsAvailableOfflineString]] food nutrient lists available offline for the following foods:</li>
             </ul>
         </div>
     </template>
@@ -56,6 +56,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     isCompleteNutrientListAvailableOfflineString: {
                         type: String,
                         value: "IS NOT"
+                    },
+                    areAnyFoodSearchesAvailableOfflineString: {
+                        type: String,
+                        value: "ARE NOT"
+                    },
+                    areAnyFoodNutrientListsAvailableOfflineString: {
+                        type: String,
+                        value: "ARE NOT"
                     }
                 }
             }
@@ -91,11 +99,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         // TODO continue to dig in the cache and summarize what 
                         // has been cached so far.
                         console.log("cacheNames", cacheNames);
-                        if (!cacheNames || !cacheNames.find((cacheName) => { return cacheName.startsWith("ndb/list");})) {
+                        // check for cached list of all possible nutrients
+                        if (!cacheNames || !cacheNames.find((cacheName) => { return cacheName.url.search("ndb/list") > -1;})) {
                             thisWebComponent.isCompleteNutrientListAvailableOfflineString = 'IS NOT';                            
                         }
                         else {
                             thisWebComponent.isCompleteNutrientListAvailableOfflineString = 'IS';
+                        }
+                        // check for food and gather list of names if so
+                        if (!cacheNames || !cacheNames.find((cacheName) => { return cacheName.url.search("ndb/search") > -1;})) {
+                            thisWebComponent.areAnyFoodSearchesAvailableOfflineString = 'IS NOT';                            
+                        }
+                        else {
+                            thisWebComponent.areAnyFoodSearchesAvailableOfflineString = 'IS';
+                            cacheNames
+                                .filter((cacheName) => {return cacheName.url.search("ndb/search") > -1;})
+                                .forEach((cachedRequest)=>{
+                                    caches.match(cachedRequest)
+                                        .then((cachedResponse)=>{
+                                            // console.info("responses for food searches found: ", cachedResponse);
+                                            return cachedResponse.json();
+                                        })
+                                        .then((data) => {
+                                            console.info("json response:", data);
+                                        });
+                                })
+                        }
+                        // check detailed food lists and list food names if so
+                        if (!cacheNames || !cacheNames.find((cacheName) => { return cacheName.url.search("ndb/nutrients") > -1;})) {
+                            thisWebComponent.areAnyFoodNutrientListsAvailableOfflineString = 'IS NOT';                            
+                        }
+                        else {
+                            thisWebComponent.areAnyFoodNutrientListsAvailableOfflineString = 'IS';
                         }
                     });
             }
