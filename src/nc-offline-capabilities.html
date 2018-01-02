@@ -31,7 +31,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <li>The nutrients we care about [[areNutrientsWeCareAboutAvailableOfflineString]] available during offline use
                     of this app.</li>
                 <li>The complete nutrients list [[isCompleteNutrientListAvailableOfflineString]] available offline.</li>
-                <li>There [[areAnyFoodSearchesAvailableOfflineString]] food searches available offline for the following search strings:</li>
+                <li>There [[areAnyFoodSearchesAvailableOfflineString]] food searches available offline for the following search strings:
+                    <template is="dom-if" if="[[areAnyFoodSearchesAvailableOfflineString]] == 'ARE'">
+                        <div>PLACEHOLDER FOR LIST OF FOOD SEARCHES AVAILABLE OFFLINE</div>
+                     </template>                    
+                </li>
                 <li>There [[areAnyFoodNutrientListsAvailableOfflineString]] food nutrient lists available offline for the following foods:</li>
             </ul>
         </div>
