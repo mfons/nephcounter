@@ -32,7 +32,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     of this app.</li>
                 <li>The complete nutrients list [[isCompleteNutrientListAvailableOfflineString]] available offline.</li>
                 <li>There [[areAnyFoodSearchesAvailableOfflineString]] food searches available offline
-                    <template is="dom-if" if="[[_foodSearchesAreAvailableOffline()]]">
+                    <template is="dom-if" if="[[_foodSearchesAreAvailableOffline(areAnyFoodSearchesAvailableOfflineString)]]">
                         for the following search strings:
                         <ul>
                             <template is="dom-repeat" items="[[availableFoodSearchesList]]">
@@ -83,7 +83,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
             }
 
-            _foodSearchesAreAvailableOffline() {
+            _foodSearchesAreAvailableOffline(areAnyFoodSearchesAvailableOfflineString) {
                 return this.areAnyFoodSearchesAvailableOfflineString === 'ARE';
             }
 
