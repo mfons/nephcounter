@@ -41,8 +41,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         </ul>
                     </template>
                 </li>
-                <li>There [[areAnyFoodNutrientListsAvailableOfflineString]] food nutrient lists available offline for the following
-                    foods:
+                <li>There [[areAnyFoodNutrientListsAvailableOfflineString]] food searches available offline
+                    <template is="dom-if" if="[[_foodNutrientListsAreAvailableOffline(areAnyFoodNutrientListsAvailableOfflineString)]]">
+                        for the following search strings:
+                        <ul>
+                            <template is="dom-repeat" items="[[availableFoodNutrientLists]]">
+                                <li>[[item]]</li>
+                            </template>
+                        </ul>
+                    </template>
                 </li>
             </ul>
         </div>
@@ -79,12 +86,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     areAnyFoodNutrientListsAvailableOfflineString: {
                         type: String,
                         value: "ARE NOT"
-                    }
+                    },
+                    availableFoodNutrientLists: {
+                        type: Array,
+                        value: []
+                    },
                 }
             }
 
             _foodSearchesAreAvailableOffline(areAnyFoodSearchesAvailableOfflineString) {
                 return this.areAnyFoodSearchesAvailableOfflineString === 'ARE';
+            }
+
+            _foodNutrientListsAreAvailableOffline(areAnyFoodNutrientListsAvailableOfflineString) {
+                return this.areAnyFoodNutrientListsAvailableOfflineString === 'ARE';
             }
 
             _isCurrentPageControlledBySWYet() {
@@ -145,10 +160,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         }
                         // check detailed food lists and list food names if so
                         if (!cacheNames || !cacheNames.find((cacheName) => { return cacheName.url.search("ndb/nutrients") > -1; })) {
-                            thisWebComponent.areAnyFoodNutrientListsAvailableOfflineString = 'IS NOT';
+                            thisWebComponent.areAnyFoodNutrientListsAvailableOfflineString = 'ARE NOT';
                         }
                         else {
-                            thisWebComponent.areAnyFoodNutrientListsAvailableOfflineString = 'IS';
+                            thisWebComponent.areAnyFoodNutrientListsAvailableOfflineString = 'ARE';
+                            cacheNames
+                                .filter((cacheName) => { return cacheName.url.search("ndb/nutrients") > -1; })
+                                .forEach((cachedRequest) => {
+                                    caches.match(cachedRequest)
+                                        .then((cachedResponse) => {
+                                            // console.info("responses for food searches found: ", cachedResponse);
+                                            return cachedResponse.json();
+                                        })
+                                        .then((data) => {// TODO data.list.q
+                                            console.info("json response:", data);
+                                            // TODO THIS IS COPIED, CUSTOMIZE FOR THIS DATA POINT
+                                            //thisWebComponent.push('availableFoodSearchesList', data.list.q);
+                                        });
+                                })
                         }
                     });
             }
