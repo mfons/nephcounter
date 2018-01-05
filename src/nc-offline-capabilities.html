@@ -174,8 +174,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                         })
                                         .then((data) => {// TODO data.list.q
                                             console.info("json response:", data);
-                                            // TODO THIS IS COPIED, CUSTOMIZE FOR THIS DATA POINT
-                                            //thisWebComponent.push('availableFoodSearchesList', data.list.q);
+                                            if (data.errors) { return; }
+                                            thisWebComponent.push('availableFoodSearchesList', data.report.foods[0].name);
                                         });
                                 })
                         }
