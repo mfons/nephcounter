@@ -45,7 +45,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <template is="dom-if" if="[[_foodNutrientListsAreAvailableOffline(areAnyFoodNutrientListsAvailableOfflineString)]]">
                         for the following search strings:
                         <ul>
-                            <template is="dom-repeat" items="[[availableFoodNutrientLists]]">
+                            <template is="dom-repeat" items="[[availableFoodNutrientList]]">
                                 <li>[[item]]</li>
                             </template>
                         </ul>
@@ -87,7 +87,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         type: String,
                         value: "ARE NOT"
                     },
-                    availableFoodNutrientLists: {
+                    availableFoodNutrientList: {
                         type: Array,
                         value: []
                     },
