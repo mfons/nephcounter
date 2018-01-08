@@ -21,6 +21,10 @@
         padding: 10px;
       }
 
+      .hide-item {
+        display: none;
+      }
+
       .item.selected {
         background: #ccc;
       }
@@ -52,7 +56,7 @@
 
       <iron-list id="nutrientIronList" items="[[possibleNutrients]]" selected-items="{{selectedItems}}" selection-enabled multi-selection>
         <template>
-          <div tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]">[[item.name]]</div>
+          <div tabindex$="[[tabIndex]]" class$="[[_computedClass(selected, item.name)]]">[[item.name]]</div>
         </template>
       </iron-list>
 
@@ -111,6 +115,14 @@
         if (this.signedIn) {
           this.doNewOfflineNutrientStuff();
         }
+      }
+
+      _stringDoesNotBeginWithANumber(s) {
+        if (!s) { return false; }
+        if (s.match(/^\d/)) {
+          return true;
+        }
+        return false;
       }
 
       _reduxStoreStateChanged(e) {
@@ -229,8 +241,11 @@
       }
 
 
-      _computedClass(isSelected) {
-        var classes = 'item';
+      _computedClass(isSelected, currentItemName) {
+        if (this._stringDoesNotBeginWithANumber(currentItemName)) {
+          return 'hide-item';
+        }
+          var classes = 'item';
         if (isSelected) {
           classes += ' selected';
         }
