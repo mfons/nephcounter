@@ -33,7 +33,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <li>The complete nutrients list [[isCompleteNutrientListAvailableOfflineString]] available offline.</li>
                 <li>There [[areAnyFoodSearchesAvailableOfflineString]] food searches available offline
                     <template is="dom-if" if="[[_foodSearchesAreAvailableOffline(areAnyFoodSearchesAvailableOfflineString)]]">
-                        for the following search strings:
+                        &nbsp; for the following search strings:
                         <ul>
                             <template is="dom-repeat" items="[[availableFoodSearchesList]]">
                                 <li>[[item]]</li>
@@ -43,7 +43,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </li>
                 <li>There [[areAnyFoodNutrientListsAvailableOfflineString]] nutrient lists available offline
                     <template is="dom-if" if="[[_foodNutrientListsAreAvailableOffline(areAnyFoodNutrientListsAvailableOfflineString)]]">
-                        for the following specific foods:
+                        &nbsp; for the following specific foods:
                         <div style="height: 250px; overflow-y: scroll;">
                             <template is="dom-repeat" items="[[availableFoodNutrientList]]">
                                 <div>[[item]]</div>
