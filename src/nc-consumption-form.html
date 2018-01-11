@@ -80,6 +80,8 @@
             <!-- custom-foods="[[customFoods]]" -->
         </nc-nutrients-for-a-food>
 
+        <div id="quaggaElement"></div>
+
         <form is="iron-form" method="get" action="/" id="presubmit">
             <paper-input id="foodFluidSearchStringId" name="foodFluidSearch" label="1. Search for a Food" value="{{foodFluidSearchString}}"
                 required autocapitalize="off" spellcheck="true" on-blur="_getFoodData"></paper-input>
@@ -248,6 +250,28 @@
             ready() {
                 super.ready();
                 this.addEventListener('state-changed', (e) => { this._reduxStoreStateChanged(e); });
+                this.placeBarCodeImage();
+            }
+
+            placeBarCodeImage() {
+                const thisWebComponent = this;
+                Quagga.init({
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: thisWebComponent.$.quaggaElement
+                    },
+                    decoder: {
+                        readers: ["code_128_reader"]
+                    }
+                }, function (err) {
+                    if (err) {
+                        console.log(err);
+                        return
+                    }
+                    console.log("Initialization finished. Ready to start");
+                    Quagga.start();
+                });
             }
 
             _foodFluidItemToggled(e) {
