@@ -10,130 +10,182 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="generator" content="Polymer Starter Kit">
-    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>My App</title>
-    <meta name="description" content="My App description">
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Polymer Starter Kit">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <link rel="icon" href="/images/favicon.ico">
+  <title>My App</title>
+  <meta name="description" content="My App description">
 
-    <!-- See https://goo.gl/OOhYW5 -->
-    <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/images/favicon.ico">
 
-    <!-- See https://goo.gl/qRE0vM -->
-    <meta name="theme-color" content="#3f51b5">
+  <!-- See https://goo.gl/OOhYW5 -->
+  <link rel="manifest" href="/manifest.json">
 
-    <!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="My App">
+  <!-- See https://goo.gl/qRE0vM -->
+  <meta name="theme-color" content="#3f51b5">
 
-    <!-- Add to homescreen for Safari on iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="My App">
+  <!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="My App">
 
-    <!-- Homescreen icons -->
-    <link rel="apple-touch-icon" href="/images/manifest/icon-48x48.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="/images/manifest/icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="96x96" href="/images/manifest/icon-96x96.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/images/manifest/icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="/images/manifest/icon-192x192.png">
+  <!-- Add to homescreen for Safari on iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="My App">
 
-    <!-- Tile icon for Windows 8 (144x144 + tile color) -->
-    <meta name="msapplication-TileImage" content="/images/manifest/icon-144x144.png">
-    <meta name="msapplication-TileColor" content="#3f51b5">
-    <meta name="msapplication-tap-highlight" content="no">
+  <!-- Homescreen icons -->
+  <link rel="apple-touch-icon" href="/images/manifest/icon-48x48.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/images/manifest/icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="96x96" href="/images/manifest/icon-96x96.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/images/manifest/icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/images/manifest/icon-192x192.png">
 
-    <!-- Add any global styles for body, document, etc. -->
-    <style>
-      body {
-        margin: 0;
-        font-family: 'Roboto', 'Noto', sans-serif;
-        line-height: 1.5;
-        min-height: 100vh;
-        background-color: #eeeeee;
-        background: -webkit-linear-gradient(-45deg, rgba(12, 34, 255, 0.05), rgba(222, 12, 255, 0.1));
-        background: linear-gradient(-45deg, rgba(12, 34, 255, 0.05), rgba(222, 12, 255, 0.1));
+  <!-- Tile icon for Windows 8 (144x144 + tile color) -->
+  <meta name="msapplication-TileImage" content="/images/manifest/icon-144x144.png">
+  <meta name="msapplication-TileColor" content="#3f51b5">
+  <meta name="msapplication-tap-highlight" content="no">
+
+  <!-- Add any global styles for body, document, etc. -->
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', 'Noto', sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+      background-color: #eeeeee;
+      background: -webkit-linear-gradient(-45deg, rgba(12, 34, 255, 0.05), rgba(222, 12, 255, 0.1));
+      background: linear-gradient(-45deg, rgba(12, 34, 255, 0.05), rgba(222, 12, 255, 0.1));
+    }
+
+    /* styling for render while resources are loading */
+
+    .splash {
+      display: block;
+      text-align: center;
+      font-weight: 300;
+      font-size: 18px;
+      color: black;
+      max-width: 400px;
+      margin: auto;
+      padding-top: 10%;
+    }
+
+    .header {
+      height: 300px;
+      overflow: hidden;
+    }
+
+    .loading {
+      animation: blink 1.5s linear infinite;
+      -o-animation: blink 1.5s linear infinite;
+      -moz-animation: blink 1.5s linear infinite;
+      -webkit-animation: blink 1.5s linear infinite;
+    }
+
+    @keyframes blink {
+      0% {
+        opacity: 1;
       }
-      /* styling for render while resources are loading */
-      .splash {
-        display: block;
-        text-align: center;
-        font-weight: 300;
-        font-size: 18px;
-        color: black;
-        max-width: 400px;
-        margin: auto;
-        padding-top: 10%;
+      50% {
+        opacity: 0.2;
       }
-
-      .header {
-        height: 300px;
-        overflow: hidden;
+      100% {
+        opacity: 1;
       }
+    }
 
-      .loading {
-        animation: blink 1.5s linear infinite;
-        -o-animation: blink 1.5s linear infinite;
-        -moz-animation: blink 1.5s linear infinite;
-        -webkit-animation: blink 1.5s linear infinite;
+    @-webkit-keyframes blink {
+      0% {
+        opacity: 1;
       }
-
-      @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
-      @-webkit-keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
-      @-moz-keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
-      @-o-keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
-
-      .footer {
-        font-size: 13px;
+      50% {
+        opacity: 0.2;
       }
-
-      a:link, a:visited {
-        color: blue;
-        text-decoration: none;
+      100% {
+        opacity: 1;
       }
+    }
 
-      a:hover {
-        text-decoration: underline;
+    @-moz-keyframes blink {
+      0% {
+        opacity: 1;
       }
-    </style>
-  </head>
-  <body>
-    <my-app>
-      <div class="splash">
-        <div class="header">
-          <div style="font-size: 2.8em;">Nephcounter</div>
-          <p>A Nutrient Monitoring and Reporting App Specialized for the needs of Dialysis Patients</p>
-          <br>
-          <p class="loading"> Loading... </p>
-        </div>
+      50% {
+        opacity: 0.2;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
 
-        <p class="footer">Made with Google Polymer/2, Firebase, Redux, and the USDA nutrition database.&nbsp; Created by <a href="https://www.facebook.com/sandra.fons.94?fref=ts">Sandra M. Fons</a>, User Experience Consultant, and <a href="https://www.linkedin.com/in/michaelafons">Michael A. Fons</a>, Applications Developer.  Consulting Nutritionist: Lesley Cloke, R.D.
-          Find this on <a href="https://github.com/mfons/nephcounter">GitHub</a>.</p>
+    @-o-keyframes blink {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.2;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .footer {
+      font-size: 13px;
+    }
+
+    a:link,
+    a:visited {
+      color: blue;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <my-app>
+    <div class="splash">
+      <div class="header">
+        <div style="font-size: 2.8em;">Nephcounter</div>
+        <p>A Nutrient Monitoring and Reporting App Specialized for the needs of Dialysis Patients</p>
+        <br>
+        <p class="loading"> Loading... </p>
       </div>
-    </my-app>
-    <!-- Built with love using Polymer Starter Kit -->
-    <!-- Load and register pre-caching Service Worker -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/service-worker.js').then(function() { // NB: if you ever want to build your own service worker you already started one at /my-service-worker.js in conjunction with your udacity course.
-            //console.log('Service Worker Registered Successfully!');
-          }).catch(function() {
-            //console.warn('Service Worker Registration Failed!');
-          });
+
+      <p class="footer">Made with Google Polymer/2, Firebase, Redux, and the USDA nutrition database.&nbsp; Created by
+        <a href="https://www.facebook.com/sandra.fons.94?fref=ts">Sandra M. Fons</a>, User Experience Consultant, and
+        <a href="https://www.linkedin.com/in/michaelafons">Michael A. Fons</a>, Applications Developer. Consulting Nutritionist: Lesley Cloke, R.D. Find this on
+        <a href="https://github.com/mfons/nephcounter">GitHub</a>.</p>
+    </div>
+  </my-app>
+  <!-- Built with love using Polymer Starter Kit -->
+  <!-- Load and register pre-caching Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        // navigator.serviceWorker.register('/service-worker.js').then(function() { // NB: if you ever want to build your own service worker you already started one at /my-service-worker.js in conjunction with your udacity course.
+        navigator.serviceWorker.register('/my-service-worker.js').then(function () {
+          //console.log('Service Worker Registered Successfully!');
+        }).catch(function () {
+          //console.warn('Service Worker Registration Failed!');
         });
-      }
-    </script>
+      });
+    }
+  </script>
 
-    <!-- Load webcomponents-loader.js to check and load any polyfills your browser needs -->
-    <script src="/bower_components/webcomponentsjs/webcomponents-loader.js"></script>
-    <script src="/node_modules/redux/dist/redux.js"></script>
-    <!-- Load your application shell -->
-    <link rel="import" href="/src/my-app.html">
+  <!-- Load webcomponents-loader.js to check and load any polyfills your browser needs -->
+  <script src="/bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="/node_modules/redux/dist/redux.js"></script>
+  <!-- Load your application shell -->
+  <link rel="import" href="/src/my-app.html">
 
-  </body>
+</body>
+
 </html>
