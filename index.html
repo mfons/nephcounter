@@ -146,6 +146,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     a:hover {
       text-decoration: underline;
     }
+    .yellow-button {
+        text-transform: none;
+        color: #eeff41;
+    }
   </style>
 </head>
 
@@ -165,11 +169,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <a href="https://github.com/mfons/nephcounter">GitHub</a>.</p>
     </div>
   </my-app>
+  <paper-toast id="swtoast" duration="0" text="There is a new service-worker available.  Would you like to install it?">
+    <paper-button onclick="this.parentNode.toggle()" class="yellow-button">Yes, please do!</paper-button>
+  </paper-toast>
   <!-- Built with love using Polymer Starter Kit -->
   <!-- Load and register pre-caching Service Worker -->
   <script>
     function _updateReady() {
-      alert("there is a service worker update ready");
+      //alert("there is a service worker update ready");
+      document.querySelector("#swtoast").open();
     }
 
     if ('serviceWorker' in navigator) {
@@ -217,6 +225,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script src="/node_modules/redux/dist/redux.js"></script>
   <!-- Load your application shell -->
   <link rel="import" href="/src/my-app.html">
+  <link rel="import" href="/bower_components/paper-toast/paper-toast.html">
+  <link rel="import" href="/bower_components/paper-button/paper-button.html">
 
 </body>
 
