@@ -168,11 +168,43 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <!-- Built with love using Polymer Starter Kit -->
   <!-- Load and register pre-caching Service Worker -->
   <script>
+    function _updateReady() {
+      alert("there is a service worker update ready");
+    }
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
         // navigator.serviceWorker.register('/service-worker.js').then(function() { // NB: if you ever want to build your own service worker you already started one at /my-service-worker.js in conjunction with your udacity course.
-        navigator.serviceWorker.register('/my-service-worker.js').then(function () {
-          //console.log('Service Worker Registered Successfully!');
+        navigator.serviceWorker.register('/my-service-worker.js').then(function (reg) {
+          // if there's no controller, this page wasn't loaded
+          // via a service worker, so they're looking at the latest version.
+          // In that case, exit early
+          if (!navigator.serviceWorker.controller) {
+            return;
+          }
+
+          // if there's an updated worker already waiting, call
+          if (reg.waiting) {
+            _updateReady();
+            return;
+          }
+
+          // if there's an updated worker installing, track its
+          // progress. If it becomes "installed",
+          if (reg.installing) {
+            reg.installing.addEventListener('statechange', () => {
+              if (this.state === 'installed') {
+                _updateReady();
+              }
+            })
+          }
+          else {
+            reg.addEventListener('updateFound', () => {
+              if (this.state === 'installed') {
+                _updateReady();
+              }
+            })
+          }
         }).catch(function () {
           //console.warn('Service Worker Registration Failed!');
         });
