@@ -1,23 +1,24 @@
 
 /* eslint no-console: ["error", { allow: ["info"] }] */
 
-var staticCacheName = 'nephcounter-static-v1';
+var staticCacheName = 'nephcounter-static-v3';
 self.addEventListener('install', function(event) {
   var urlsToCache = [
     '/',
-    'js/main.js',
-    'css/main.css',
+    'bower_components/webcomponentsjs/webcomponents-loader.js',
+    'node_modules/redux/dist/redux.js',
     'imgs/icon.png',
-    'https://fonts.gstatic.com/s/roboto/v15/2UX7WLTfW3W8TclTUvlFyQ.woff',
-    'https://fonts.gstatic.com/s/roboto/v15/d-6IYplOFocCacKzxwXSOD8E0i7KZn-EPnyo3HZu7kw.woff'
+    'src/my-app.html',
+    'bower_components/paper-toast/paper-toast.html',
+    'bower_components/paper-button/paper-button.html'
   ];
 
   event.waitUntil(
     caches.open(staticCacheName).then(function(cache){
       return cache.addAll(urlsToCache).then(function() {
         console.log('requests have been added to the cache');
-      }).catch(function() {
-        console.log('requests have NOT been added to the cache');
+      }).catch(function(err) {
+        console.warn('requests have NOT been added to the cache', err);
       });
     })
   );
