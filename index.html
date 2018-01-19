@@ -171,14 +171,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </div>
   </my-app>
   <paper-toast id="swtoast" duration="0" text="There is a new service-worker available.  Would you like to install it?">
-    <paper-button onclick="this.parentNode.toggle()" class="yellow-button">Yes, please do!</paper-button>
+    <paper-button onclick="_refreshSW(this)" class="yellow-button">Yes!</paper-button>
+    <paper-button onclick="this.parentNode.toggle()" class="yellow-button">No.</paper-button>
   </paper-toast>
   <!-- Built with love using Polymer Starter Kit -->
   <!-- Load and register pre-caching Service Worker -->
   <script>
-    function _updateReady() {
+    function _refreshSW(el) {
+      el.parentNode.toggle();
+      // TODO this is hacky.
+      window.myserviceworker.postMessage({foo: 'bar'});
+    }
+
+    function _updateReady(worker) {
       //alert("there is a service worker update ready");
-      document.querySelector("#swtoast").open();
+      const toast = document.querySelector("#swtoast");
+      toast.open();
+      window.myserviceworker = worker;
+      // toast.answer.then(function (answer) {
+      //   if (answer != 'refresh') return;
+      //   // ++++tell the service worker to skipWaiting
+      //   worker.postMessage({ foo: 'bar' });
+      // });
     }
 
     function _detectNewServiceWorkerReadyToInstall(reg) {
@@ -191,7 +205,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       // if there's an updated worker already waiting, call
       if (reg.waiting) {
-        _updateReady();
+        _updateReady(reg.waiting);
         return;
       }
 
@@ -200,14 +214,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       if (reg.installing) {
         reg.installing.addEventListener('statechange', () => {
           if (this.state === 'installed') {
-            _updateReady();
+            _updateReady(reg.installing);
           }
         })
       }
       else {
         reg.addEventListener('updateFound', () => {
           if (this.state === 'installed') {
-            _updateReady();
+            _updateReady(reg.installing);
           }
         })
       }
@@ -220,6 +234,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           _detectNewServiceWorkerReadyToInstall(reg);
         }).catch(function () {
           console.warn('Service Worker Registration Failed!');
+        });
+
+        // ++++listen for the controlling service worker changing
+        // and reload the page
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          document.location.reload();
         });
       });
     }
