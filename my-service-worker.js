@@ -23,7 +23,7 @@ self.addEventListener('fetch', function(event){
 // ++++++++listen for the "message" event, and call
 // skipWaiting if you get the appropriate message
 self.addEventListener('message', function(event) {
-    if (event.data.foo === 'bar') {
+    if (event.data.action === 'skipWaiting') {
       self.skipWaiting();
     }
   });
