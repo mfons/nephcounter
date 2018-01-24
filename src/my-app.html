@@ -5,13 +5,18 @@
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="redux-store.html">
-<!-- START HERE:  YOU MUST NEXT FIND OUT HOW TO TRANSLATE THE MY-APP FIREBASE STUFF (LIKE HOW DO WE DO READY IN 2.0?) AND THEN TRANSLATE IT TO HERE AND TRY IT OUT (GET A BUTTON) -->
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+
 <dom-module id="my-app">
   <template>
     <style include="shared-styles">
       :host {
-        --app-primary-color: blue;  /* orange */
-        --app-secondary-color: lightblue;  /* teal */
+        --app-primary-color: blue;
+        /* orange */
+        --app-secondary-color: lightblue;
+        /* teal */
         --app-primary-text-color: black;
         --app-secondary-text-color: gray;
         --app-error-color: red;
@@ -64,7 +69,8 @@
         font-size: 13px;
       }
 
-      a:link, a:visited {
+      a:link,
+      a:visited {
         color: var(--app-primary-color);
         text-decoration: none;
       }
@@ -84,21 +90,27 @@
         font-size: 14px;
         cursor: pointer;
       }
+
+      .yellow-button {
+        text-transform: none;
+        color: #eeff41;
+      }
     </style>
 
 
-    <firebase-app
-      auth-domain="nephcounter.firebaseapp.com"
-      database-url="https://nephcounter.firebaseio.com"
-      api-key="AIzaSyDbXgNCFBMglr8WWEkZuhMHQohMduiJsUM"
-      >
+    <firebase-app auth-domain="nephcounter.firebaseapp.com" database-url="https://nephcounter.firebaseio.com" api-key="AIzaSyDbXgNCFBMglr8WWEkZuhMHQohMduiJsUM">
       <!-- storage-bucket="nephcounter.appspot.com"
       messaging-sender-id="808384625893"
       project-id="nephcounter" -->
     </firebase-app>
-    <firebase-auth id="auth" user="{{user}}" provider="google" >
+    <firebase-auth id="auth" user="{{user}}" provider="google">
     </firebase-auth>
     <!-- on-error="handleError" -->
+
+    <paper-toast id="swtoast" duration="0" text="There is a new service-worker available.  Would you like to install it?">
+      <paper-button on-tap="_refreshSW" class="yellow-button">Yes!</paper-button>
+      <paper-button on-tap="_closeToast" class="yellow-button">No.</paper-button>
+    </paper-toast>
 
     <div class="signin-view" id="signin" hidden>
       <div class="header">
@@ -109,8 +121,10 @@
         <div hidden$="[[!offline]]" class="offline">We can't log on right now because we are offline.</div>
       </div>
 
-      <p class="footer">Made with Google Polymer/2, Firebase, Redux, and the USDA nutrition database.&nbsp; Created by <a href="https://www.facebook.com/sandra.fons.94?fref=ts">Sandra M. Fons</a>, User Experience Consultant, and <a href="https://www.linkedin.com/in/michaelafons">Michael A. Fons</a>, Applications Developer.  Consulting Nutritionist: Lesley Cloke, R.D.
-        Find this on <a href="https://github.com/mfons/nephcounter">GitHub</a>.</p>
+      <p class="footer">Made with Google Polymer/2, Firebase, Redux, and the USDA nutrition database.&nbsp; Created by
+        <a href="https://www.facebook.com/sandra.fons.94?fref=ts">Sandra M. Fons</a>, User Experience Consultant, and
+        <a href="https://www.linkedin.com/in/michaelafons">Michael A. Fons</a>, Applications Developer. Consulting Nutritionist: Lesley Cloke, R.D. Find this on
+        <a href="https://github.com/mfons/nephcounter">GitHub</a>.</p>
     </div>
 
     <nephcounter-main id="nephcountid"></nephcounter-main>
@@ -125,6 +139,7 @@
             type: Boolean,
             statePath: 'offline',
           },
+          myServiceWorker: Object
         };
       }
       static get actions() {
@@ -134,19 +149,26 @@
         };
       }
 
-      ready () {
+      static get observers() {
+        return [
+          '_myServiceWorkerChanged(myServiceWorker.*)'
+        ];
+      }
+
+
+      ready() {
         super.ready();
         this.setUpOfflineListeners();
 
-        this.$.auth.auth.onAuthStateChanged(function(user) {
+        this.$.auth.auth.onAuthStateChanged(function (user) {
           if (!!user) {
-//            this.importHref(this.resolveUrl('nephcount-main.html'), function() {
-              //this.$.nephcountid.user = user;
-              this.$.signin.hidden = true;
-              this.$.nephcountid.hidden = false;
-              // We went from hidden to visible, so app-layout needs to recompute its size.
-              this.$.nephcountid.resizeHeader();
-  //          });
+            //            this.importHref(this.resolveUrl('nephcount-main.html'), function() {
+            //this.$.nephcountid.user = user;
+            this.$.signin.hidden = true;
+            this.$.nephcountid.hidden = false;
+            // We went from hidden to visible, so app-layout needs to recompute its size.
+            this.$.nephcountid.resizeHeader();
+            //          });
           } else {
             this.$.signin.hidden = false;
             this.$.nephcountid.hidden = true;
@@ -154,14 +176,29 @@
         }.bind(this));
       }
 
+      _refreshSW() {
+        this._closeToast();
+        // could I just say navigator.serviceWorker ??
+        this.myServiceWorker.postMessage({ action: 'skipWaiting' });
+      }
+      
+      _closeToast() {
+        this.$.swtoast.opened = false;
+      }
+
       setUpOfflineListeners() {
-        window.addEventListener('online', function() {
+        window.addEventListener('online', function () {
           this.dispatch('goOnline');
         }.bind(this));
-        window.addEventListener('offline', function() {
+        window.addEventListener('offline', function () {
           this.dispatch('goOffline');
         }.bind(this));
       }
+
+      _myServiceWorkerChanged(myServiceWorkerObserved) {
+        this.$.swtoast.opened = true;
+      }
+      
     }
 
     window.customElements.define(MyApp.is, MyApp);

@@ -147,15 +147,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       text-decoration: underline;
     }
 
-    .yellow-button {
-      text-transform: none;
-      color: #eeff41;
-    }
   </style>
 </head>
 
 <body>
-  <my-app>
+  <my-app id="myAppElementId">
     <div class="splash">
       <div class="header">
         <div style="font-size: 2.8em;">Nephcounter</div>
@@ -170,33 +166,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <a href="https://github.com/mfons/nephcounter">GitHub</a>.</p>
     </div>
   </my-app>
-  <!-- <paper-toast id="swtoast" duration="0" text="There is a new service-worker available.  Would you like to install it?">
-    <paper-button onclick="_refreshSW(this)" class="yellow-button">Yes!</paper-button>
-    <paper-button onclick="this.parentNode.toggle()" class="yellow-button">No.</paper-button>
-  </paper-toast> -->
 
-  <!-- TODO call in my-app api to open a toast inside my-app instead of using this makeshift toast -->
-  <div id="newSWToast" style="display: none;">There is a new service worker available.  Would you like to install it? 
-    <button onclick="_refreshSW(this)">Yes!</button><button onclick="this.parentNode.style.display = 'none';">No.</button></div>
   <!-- Built with love using Polymer Starter Kit -->
   <!-- Load and register pre-caching Service Worker -->
   <script>
-    function _refreshSW(el) {
-      el.parentNode.style.display = 'none';
-      // TODO this is hacky.
-      window.myserviceworker.postMessage({action: 'skipWaiting'});
-    }
 
     function _updateReady(worker) {
-      //alert("there is a service worker update ready");
-      const toast = document.querySelector("#newSWToast");
-      toast.style.display = 'inline-block';
-      window.myserviceworker = worker;
-      // toast.answer.then(function (answer) {
-      //   if (answer != 'refresh') return;
-      //   // ++++tell the service worker to skipWaiting
-      //   worker.postMessage({ foo: 'bar' });
-      // });
+      console.log("there is a service worker update ready");
+      const myAppElement = document.querySelector("#myAppElementId");
+      myAppElement.myServiceWorker = worker;
     }
 
     function _detectNewServiceWorkerReadyToInstall(reg) {
@@ -233,7 +211,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
-       navigator.serviceWorker.register('/service-worker.js').then(function() { // NB: if you ever want to build your own service worker you already started one at /my-service-worker.js in conjunction with your udacity course.
+       navigator.serviceWorker.register('/service-worker.js').then(function(reg) { // NB: if you ever want to continue building your own service worker you already started one at /my-service-worker.js in conjunction with your udacity course.
         // navigator.serviceWorker.register('/my-service-worker.js').then(function (reg) {
         //   _detectNewServiceWorkerReadyToInstall(reg);
         }).catch(function () {
@@ -254,8 +232,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script src="/node_modules/redux/dist/redux.js"></script>
   <!-- Load your application shell -->
   <link rel="import" href="/src/my-app.html">
-  <!-- <link rel="import" href="/bower_components/paper-toast/paper-toast.html">
-  <link rel="import" href="/bower_components/paper-button/paper-button.html"> -->
 
 </body>
 

@@ -1,6 +1,6 @@
 
 /* eslint no-console: ["error", { allow: ["info"] }] */
-var staticCacheName = 'nephcounter-static-v4';
+var staticCacheName = 'nephcounter-static-v6';
 self.addEventListener('install', function(event) {
   var urlsToCache = [
     '/',
