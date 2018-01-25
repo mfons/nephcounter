@@ -1,3 +1,15 @@
+const syncStore = {};
+self.addEventListener('message', event => {
+  if(event.data.type === 'sync') {
+    // get a unique id to save the data
+    const id = uuid();
+    syncStore[id] = event.data;
+    // register a sync and pass the id as tag for it to get the data
+    self.registration.sync.register(id);
+  }
+  console.log(event.data);
+});
+
 console.log("background-sync:  Hello World!");
 self.addEventListener('sync', function (event) {
     if (event.tag == 'eatSomething') {
