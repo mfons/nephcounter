@@ -314,7 +314,13 @@
                 this.set('foodName', selectedIndex.name);
             }
 
-            eatSomething() {
+            dequeueEatenItemFromIndexDBQueueAndStoreInFirebase() {
+                // check for items to dequeue and do so if any.
+                // for each dequeued item write to firebase.
+                // TODO:  on error, reenqueue.
+            }
+
+            enqueueEatenItemToIndexedDB() {
                 if (offline) {
                     // TODO display a toast that the user does not have offline capability 
                     // and to resubmit when back online.
@@ -343,24 +349,22 @@
                 newObject.consumedGrams = this.consumedGrams;
                 newObject.consumedDate = (this._isHistoric(this.todayString)) ? this.todayStringEnd : this._formatLocalDate(new Date());
                 newObject.nutrientsOfInterest = this.foodNutrients[0].nutrients;
-                // fire an event holding new object
-                //this.fire('just-eat-it', newObject);
-                // put it to redux I guess.
-                // TODO dispatch redux action to enqueue eat
+                // TODO: write to indexedDB or storage api
             }
 
             _submit() {
+                enqueueEatenItemToIndexedDB();
                 if ('serviceWorker' in navigator && 'SyncManager' in window) {
                     navigator.serviceWorker.ready.then(function (reg) {
                         return reg.sync.register('eatSomething');
                     }).catch(function () {
                         // system was unable to register for a sync,
                         // this could be an OS-level restriction
-                        eatSomething();
+                        dequeueEatenItemFromIndexDBQueueAndStoreInFirebase();
                     });
                 } else {
                     // serviceworker/sync not supported
-                    eatSomething();
+                    dequeueEatenItemFromIndexDBQueueAndStoreInFirebase();
                 }
             }
 

@@ -19,8 +19,9 @@ self.addEventListener('sync', function (event) {
 
 function  eatSomething(tag) {
     return new Promise((resolve, reject) => {
-        // TODO read from redux queue of things to eat,
-        // write it to firebase somehow.
+        // TODO send a message back to nc-consumption-form to try to dequeue
+        // and save to firebase.  
+        // TODO if fails, wait an hour and fire again.
         console.info("sync: eatSomething is happening.", tag);
         resolve();
     });
