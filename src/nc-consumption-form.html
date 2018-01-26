@@ -318,14 +318,11 @@
                 // check for items to dequeue and do so if any.
                 // for each dequeued item write to firebase.
                 // TODO:  on error, reenqueue.
+                // TODO:  should this function check for offline, and 
+                // bail if so?
             }
 
             enqueueEatenItemToIndexedDB() {
-                if (offline) {
-                    // TODO display a toast that the user does not have offline capability 
-                    // and to resubmit when back online.
-                    return;
-                }
                 let newObject = {
                     "name": "example food3",
                     "ndbno": "00002",
