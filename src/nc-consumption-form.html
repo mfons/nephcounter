@@ -346,8 +346,84 @@
                 newObject.consumedGrams = this.consumedGrams;
                 newObject.consumedDate = (this._isHistoric(this.todayString)) ? this.todayStringEnd : this._formatLocalDate(new Date());
                 newObject.nutrientsOfInterest = this.foodNutrients[0].nutrients;
-                // TODO: write to indexedDB or storage api
+
+                writeEatenItemToIndexedDB(newObject);
             }
+
+            // TODO: Move this function and other offline-related items
+            // to a mixin.
+            // TODO: change the following function contents to save this new object
+            // in a different store (this was copy-pasted from nutrient of interest offline mixin file)
+            // and use an enqueing concept. (like unshift and pop on an array)
+            writeEatenItemToIndexedDB(item) {
+                return new Promise((resolve, reject) => {
+                    var db;
+                    var request = window.indexedDB.open("NephcounterOffLineDB");
+                    request.onerror = function (event) {
+                        // Do something with request.errorCode!
+                        console.log("NephcounterOffLineDB creation failed!", event)
+                        reject("open of database failed with error!");
+                    }; // end of onerror
+                    request.onsuccess = function (event) {
+                        console.log("NephcounterOffLineDB open succeeded!");
+                        db = event.target.result;
+                        if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
+                            reject("nutrientsOfInterest object store has not been created yet to save");
+                            console.warn("nutrientsOfInterest object store has not been created yet to save", db.objectStoreNames);
+                            db.close();
+                            return;
+                        }
+                        var objectStore = db.transaction(["nutrientsOfInterest"], "readwrite").objectStore("nutrientsOfInterest");
+                        var request = objectStore.get(1);
+                        request.onerror = function (event) {
+                            // assuming that 1 was not found so it needs to be added
+                            console.warn("Caught querying record 1 from nutrientsOfInterest from error in event: ", event);
+                            reject("Caught querying record 1 from nutrientsOfInterest; check for console warning for specifics");
+                            db.close();
+                        };
+                        request.onsuccess = function (event) {
+                            // Get the old value that we want to update
+                            var data = event.target.result;
+
+                            if (typeof data === "undefined") {  // Then there is no record yet and we must add rather than update.
+                                var nutrientsOfInterestObjectStore = db.transaction("nutrientsOfInterest", "readwrite").objectStore("nutrientsOfInterest");
+                                var request = nutrientsOfInterestObjectStore.add({ allNutrientsOfInterestListKey: 1, allNutrientsOfInterestList: item });
+                                request.onsuccess = (event) => {
+                                    console.log("added nutrients of interest to indexeddb");
+                                    resolve();
+                                    db.close()
+                                }
+                                return;
+                            }
+
+                            // update the value(s) in the object that you want to change
+                            data.allNutrientsOfInterestList = item;
+
+                            // Put this updated object back into the database.
+                            var requestUpdate = objectStore.put(data);
+                            requestUpdate.onerror = function (event) {
+                                console.warn("rejecting nutrient of interest indexeddb update due to event:", event);
+                                reject("rejecting nutrient of interest indexeddb update");
+                                db.close();
+                            };
+                            requestUpdate.onsuccess = function (event) {
+                                console.log("updated nutrients of interest in indexeddb");
+                                resolve();
+                                db.close();
+                            };
+                        };
+
+                    }; // end of onsuccess
+
+                    // This is done only if there is no database and one needs to be created before we read from it.
+                    request.onupgradeneeded = function (event) {
+                        console.log("an upgrade is needed...");
+                        var db = event.target.result;
+                    }; // end of onupgradeneeded
+                });
+            }
+
+
 
             _submit() {
                 enqueueEatenItemToIndexedDB();
