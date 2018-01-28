@@ -64,6 +64,9 @@
                     if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
                         let nutrientsOfInterestObjectStore = db.createObjectStore("nutrientsOfInterest", { keyPath: "allNutrientsOfInterestListKey" });
                     }
+                    if (!db.objectStoreNames.contains('eatenItemsQueue')) {
+                        let eatenItemsQueueObjectStore = db.createObjectStore("eatenItemsQueue", { autoIncrement : true });
+                    }
                     console.log("NephcounterOffLineDB has finished its upgrade.")
                 };
 
@@ -203,6 +206,9 @@
                     var db = event.target.result;
                     if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
                         let nutrientsOfInterestObjectStore = db.createObjectStore("nutrientsOfInterest", { keyPath: "allNutrientsOfInterestListKey" });
+                    }
+                    if (!db.objectStoreNames.contains('eatenItemsQueue')) {
+                        let eatenItemsQueueObjectStore = db.createObjectStore("eatenItemsQueue", { autoIncrement : true });
                     }
                     reject("There is no offline database yet for nutrientsOfInterest");
                     db.close();

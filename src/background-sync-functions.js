@@ -10,7 +10,7 @@ self.addEventListener('message', event => {
   console.log(event.data);
 });
 
-console.log("background-sync:  Hello World!");
+// console.log("background-sync:  Hello World!");
 self.addEventListener('sync', function (event) {
     if (event.tag == 'eatSomething') {
         event.waitUntil(eatSomething(event.tag));
