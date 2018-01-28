@@ -348,7 +348,7 @@
                 //newObject.consumedDate = (this._isHistoric(this.todayString)) ? this.todayStringEnd : this._formatLocalDate(new Date());
                 //newObject.nutrientsOfInterest = this.foodNutrients[0].nutrients;
 
-                this.writeEatenItemToIndexedDB(newObject);
+                return this.writeEatenItemToIndexedDB(newObject);
             }
 
             // TODO: Move this function and other offline-related items
@@ -399,18 +399,24 @@
             }
 
             _submit() {
-                this.enqueueEatenItemToIndexedDB();
+                const enqueuePromise = this.enqueueEatenItemToIndexedDB();
                 if ('serviceWorker' in navigator && 'SyncManager' in window) {
-                    navigator.serviceWorker.ready.then(function (reg) {
-                        return reg.sync.register('eatSomething');
-                    }).catch(function () {
-                        // system was unable to register for a sync,
-                        // this could be an OS-level restriction
-                        this.dequeueEatenItemFromIndexDBQueueAndStoreInFirebase();
+                    enqueuePromise.then(() => {
+                        // TODO change this to sending a message to the service worker
+                        // to register a sync; also pass along a communication channel
+                        // so that the service worker can try to tell firebase to persist the enqueued data
+                        // and dequeue it.
+                        navigator.serviceWorker.ready.then(function (reg) {
+                            return reg.sync.register('eatSomething');
+                        }).catch(function () {
+                            // system was unable to register for a sync,
+                            // this could be an OS-level restriction
+                            this.dequeueEatenItemFromIndexDBQueueAndStoreInFirebase();
+                        });
                     });
                 } else {
                     // serviceworker/sync not supported
-                    this.dequeueEatenItemFromIndexDBQueueAndStoreInFirebase();
+                    enqueuePromise.then(this.dequeueEatenItemFromIndexDBQueueAndStoreInFirebase());
                 }
             }
 
