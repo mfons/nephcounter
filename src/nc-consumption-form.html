@@ -314,9 +314,10 @@
                 this.set('foodName', selectedIndex.name);
             }
 
-            dequeueEatenItemFromIndexDBQueueAndStoreInFirebase() {
+            dequeueEatenItemFromIndexDBQueueAndStoreInFirebase(addedId) {
                 // check for items to dequeue and do so if any.
                 // for each dequeued item write to firebase.
+                console.info("dequeue: send to firebase: ", addedId);
                 // TODO:  on error, reenqueue.
                 // TODO:  should this function check for offline, and 
                 // bail if so?
@@ -384,7 +385,7 @@
                             var data = event.target.result;
                             console.log("added nutrients of interest to indexeddb");
                             db.close()
-                            resolve();
+                            resolve(event.target.result);
                             return;
                         };
 
@@ -399,29 +400,47 @@
             }
 
             // send message to serviceWorker
-            _sendMessageToSWToRegisterSync(url, options) {
-                navigator.serviceWorker.controller.postMessage({ type: 'sync', url, options });
+            _sendMessageToSWToRegisterSync(addedId) {
+                // navigator.serviceWorker.controller.postMessage({ type: 'somethingWasEaten', addedId, options });
+                return new Promise((resolve, reject) => {
+                    // Create a Message Channel
+                    const msg_chan = new MessageChannel();
+                    const msg = {type: 'somethingWasEaten', addedId : addedId };
+                    // Handler for recieving message reply from service worker
+                    msg_chan.port1.onmessage = event => {
+                        if (event.data.error) {
+                            reject(event.data.error);
+                        } else {
+                            resolve(event.data);
+                        }
+                    }
+                    navigator.serviceWorker.controller.postMessage(msg, [msg_chan.port2]);
+                });
             }
 
             _submit() {
+                const thisWebComponent = this;
                 const enqueuePromise = this.enqueueEatenItemToIndexedDB();
                 if ('serviceWorker' in navigator && 'SyncManager' in window) {
-                    enqueuePromise.then(() => {
+                    enqueuePromise.then((addedId) => {
                         // TODO change this to sending a message to the service worker
                         // to register a sync; also pass along a communication channel
                         // so that the service worker can try to tell firebase to persist the enqueued data
                         // and dequeue it.
-                        navigator.serviceWorker.ready.then(function (reg) {
-                            return reg.sync.register('eatSomething');
-                        }).catch(function () {
-                            // system was unable to register for a sync,
-                            // this could be an OS-level restriction
-                            this.dequeueEatenItemFromIndexDBQueueAndStoreInFirebase();
-                        });
+                        thisWebComponent._sendMessageToSWToRegisterSync(addedId)
+                            .then(thisWebComponent.dequeueEatenItemFromIndexDBQueueAndStoreInFirebase)
+                            .catch((error) => { console.warn("received error from sw sync processing: ", error);});
+                        // navigator.serviceWorker.ready.then(function (reg) {
+                        //     return reg.sync.register('eatSomething');
+                        // }).catch(function () {
+                        //     // system was unable to register for a sync,
+                        //     // this could be an OS-level restriction
+                        //     this.dequeueEatenItemFromIndexDBQueueAndStoreInFirebase();
+                        // });
                     });
                 } else {
                     // serviceworker/sync not supported
-                    enqueuePromise.then(this.dequeueEatenItemFromIndexDBQueueAndStoreInFirebase());
+                    enqueuePromise.then((addedId) => { this.dequeueEatenItemFromIndexDBQueueAndStoreInFirebase(addedId); });
                 }
             }
 

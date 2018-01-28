@@ -1,28 +1,28 @@
 const syncStore = {};
+
 self.addEventListener('message', event => {
-  if(event.data.type === 'sync') {
-    // get a unique id to save the data
-    const id = uuid();
-    syncStore[id] = event.data;
-    // register a sync and pass the id as tag for it to get the data
-    self.registration.sync.register(id);
-  }
-  console.log(event.data);
+    if (isObject(event.data)) {
+        if (event.data.type === 'somethingWasEaten') {
+            //     const id = event.data.id || uuid()
+            // pass the port into the memory store
+            syncStore[event.data.addId] = Object.assign({ port: event.ports[0] }, event.data);
+            self.registration.sync.register(event.data.addedId);
+        }
+    }
+    console.info("message sent to service worker: ", event.data);
 });
 
 // console.log("background-sync:  Hello World!");
 self.addEventListener('sync', function (event) {
-    if (event.tag == 'eatSomething') {
-        event.waitUntil(eatSomething(event.tag));
-    }
+    event.waitUntil(eatSomething(event.tag));
 });
 
-function  eatSomething(tag) {
+function eatSomething(addedId) {
     return new Promise((resolve, reject) => {
-        // TODO send a message back to nc-consumption-form to try to dequeue
-        // and save to firebase.  
-        // TODO if fails, wait an hour and fire again.
-        console.info("sync: eatSomething is happening.", tag);
+        const {port} = syncStore[event.tag] || {};
+        delete syncStore[event.tag];
+        port.postMessage(addedId);
+        console.info("sw sync event: we are online (for the moment); please send the following eaten item to firebase storage:", addedId);
         resolve();
     });
 }
