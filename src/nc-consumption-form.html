@@ -398,6 +398,11 @@
                 });
             }
 
+            // send message to serviceWorker
+            _sendMessageToSWToRegisterSync(url, options) {
+                navigator.serviceWorker.controller.postMessage({ type: 'sync', url, options });
+            }
+
             _submit() {
                 const enqueuePromise = this.enqueueEatenItemToIndexedDB();
                 if ('serviceWorker' in navigator && 'SyncManager' in window) {
