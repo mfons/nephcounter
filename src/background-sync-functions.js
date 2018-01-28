@@ -19,8 +19,8 @@ self.addEventListener('sync', function (event) {
 
 function eatSomething(addedId) {
     return new Promise((resolve, reject) => {
-        const {port} = syncStore[event.tag] || {};
-        delete syncStore[event.tag];
+        const {port} = syncStore[addedId] || {};
+        delete syncStore[addedId];
         port.postMessage(addedId);
         console.info("sw sync event: we are online (for the moment); please send the following eaten item to firebase storage:", addedId);
         resolve();
