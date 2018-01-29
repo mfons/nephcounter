@@ -50,13 +50,11 @@ function build() {
     // Lets create some inline code splitters in case you need them later in your build.
     let sourcesStreamSplitter = new polymerBuild.HtmlSplitter();
     let dependenciesStreamSplitter = new polymerBuild.HtmlSplitter();
-    console.log("made it this far 1");
 
     // Okay, so first thing we do is clear the build directory
     console.log(`Deleting ${buildDirectory} directory...`);
     del([buildDirectory])
       .then(() => {
-        console.log("made it this far 2");
         // Let's start by getting your source files. These are all the files
         // in your `src/` directory, or those that match your polymer.json
         // "sources"  property if you provided one.
@@ -84,7 +82,6 @@ function build() {
           // Remember, you need to rejoin any split inline code when you're done.
           .pipe(sourcesStreamSplitter.rejoin());
 
-          console.log("made it this far 3");
 
         // Similarly, you can get your dependencies seperately and perform
         // any dependency-only optimizations here as well.
@@ -92,7 +89,6 @@ function build() {
           .pipe(dependenciesStreamSplitter.split())
           // Add any dependency optimizations here.
           .pipe(dependenciesStreamSplitter.rejoin());
-          console.log("made it this far 4");
 
 
         // Okay, now let's merge your sources & dependencies together into a single build stream.
@@ -100,21 +96,17 @@ function build() {
           .once('data', () => {
             console.log('Analyzing build dependencies...');
           });
-          console.log("made it this far 5");
 
         // If you want bundling, pass the stream to polymerProject.bundler.
         // This will bundle dependencies into your fragments so you can lazy
         // load them.
         buildStream = buildStream.pipe(polymerProject.bundler());
-        console.log("made it this far 6");
 
         // Now let's generate the HTTP/2 Push Manifest
         buildStream = buildStream.pipe(polymerProject.addPushManifest());
-        console.log("made it this far 7");
 
         // Okay, time to pipe to the build directory
         buildStream = buildStream.pipe(gulp.dest(buildDirectory));
-        console.log("made it this far 8");
 
         // waitFor the buildStream to complete
         return waitFor(buildStream);

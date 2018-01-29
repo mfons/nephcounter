@@ -1,11 +1,11 @@
-const syncStore = {};
+const syncStore = [];
 
 self.addEventListener('message', event => {
 //if (isObject(event.data)) {
         if (event.data.type === 'somethingWasEaten') {
             //     const id = event.data.id || uuid()
             // pass the port into the memory store
-            syncStore[event.data.addId] = Object.assign({ port: event.ports[0] }, event.data);
+            syncStore[event.data.addedId] = Object.assign({ port: event.ports[0] }, event.data);
             self.registration.sync.register(event.data.addedId);
         }
 //    }
