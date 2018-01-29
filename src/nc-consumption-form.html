@@ -411,6 +411,11 @@
                         if (event.data.error) {
                             reject(event.data.error);
                         } else {
+                            // TODO do we need to send the sw's sync event promise
+                            // here at the client so we can resolve it when and if firebase
+                            // write and indexedDB delete succeed? Should I try again to 
+                            // talk to fb db in the sw??  That would make things 
+                            // easier by far!!
                             resolve(event.data);
                         }
                     }
@@ -423,10 +428,7 @@
                 const enqueuePromise = this.enqueueEatenItemToIndexedDB();
                 if ('serviceWorker' in navigator && 'SyncManager' in window) {
                     enqueuePromise.then((addedId) => {
-                        // TODO change this to sending a message to the service worker
-                        // to register a sync; also pass along a communication channel
-                        // so that the service worker can try to tell firebase to persist the enqueued data
-                        // and dequeue it.
+                        // TODO:  this is not quite right:  
                         thisWebComponent._sendMessageToSWToRegisterSync(addedId)
                             .then(thisWebComponent.dequeueEatenItemFromIndexDBQueueAndStoreInFirebase)
                             .catch((error) => { console.warn("received error from sw sync processing: ", error);});
