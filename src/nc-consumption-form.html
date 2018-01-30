@@ -316,8 +316,9 @@
 
             storeInFirebaseAndDequeueEatenItemFromIndexDBQueue(addedId) {
                 // TODO store to fb, then dequeue stored item from idb.
-                console.info("store in fb and dequeue from idb, if store successful: ", addedId);
-                // TODO:  on error, reenqueue.
+                // TODO Should this work be done in this web-component
+                // or in its parent component -- nc-consumption.html? 
+                console.info("store in fb and dequeue from idb if store successful: ", addedId);
                 // TODO:  should this function check for offline, and 
                 // bail if so?
             }
@@ -412,13 +413,14 @@
                     const msg = {type: 'somethingWasEaten', addedId : addedId };
                     // Handler for recieving message reply from service worker
                     msg_chan.port1.onmessage = event => {
-                        if (event.data.error) {
-                            reject(event.data.error);
-                        } else {
-                            resolve(event.data);
-                        }
+                        // if (event.data.error) {
+                        //     reject(event.data.error);
+                        // } else {
+                        //     resolve(event.data);
+                        // }
                     }
                     navigator.serviceWorker.controller.postMessage(msg, [msg_chan.port2]);
+                    resolve(addedId);
                 });
             }
 
