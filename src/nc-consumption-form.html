@@ -19,6 +19,8 @@
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 
 <dom-module id="nc-consumption-form">
     <template>
@@ -72,6 +74,12 @@
             </style>
         </custom-style>
 
+        <firebase-auth id="auth" user="{{user}}" >
+        </firebase-auth>
+    
+        <firebase-query id="consumptionQuery" path="[[_getConsumptionQueryPath(user)]]" >
+        </firebase-query>
+    
         <nc-foods-by-text-search text-search="[[textSearch]]" id="foodsByTextSearch" is-standard-reference="[[isStandardReference]]">
         </nc-foods-by-text-search>
 
@@ -314,10 +322,11 @@
                 this.set('foodName', selectedIndex.name);
             }
 
-            storeInFirebaseAndDequeueEatenItemFromIndexDBQueue(addedId) {
+            storeInFirebaseAndDequeueEatenItemFromIndexDBQueue(eatData) {
                 // TODO store to fb, then dequeue stored item from idb.
                 // TODO Should this work be done in this web-component
                 // or in its parent component -- nc-consumption.html? 
+                this.$.consumptionQuery.ref.push(eatData.item);
                 console.info("store in fb and dequeue from idb if store successful: ", addedId);
                 // TODO:  should this function check for offline, and 
                 // bail if so?
@@ -385,7 +394,7 @@
                             var data = event.target.result;
                             console.log("added nutrients of interest to indexeddb");
                             db.close()
-                            resolve(event.target.result);
+                            resolve({ addedId: event.target.result, item: item});
                             return;
                         };
 
@@ -400,7 +409,7 @@
             }
 
             // send message to serviceWorker
-            _sendMessageToSWToRegisterSync(addedId) {
+            _sendMessageToSWToRegisterSync(eatData) {
                 // navigator.serviceWorker.controller.postMessage({ type: 'somethingWasEaten', addedId, options });
                 // TODO?? if needed I do not think we need this if we somehow used the tag
                 // to pass data...like ('somethingWasEaten:' + addedId) but maybe this is 
@@ -410,7 +419,7 @@
                 return new Promise((resolve, reject) => {
                     // Create a Message Channel
                     const msg_chan = new MessageChannel();
-                    const msg = {type: 'somethingWasEaten', addedId : addedId };
+                    const msg = {type: 'somethingWasEaten', addedId : eatData.addedId };
                     // Handler for recieving message reply from service worker
                     msg_chan.port1.onmessage = event => {
                         // if (event.data.error) {
@@ -420,7 +429,7 @@
                         // }
                     }
                     navigator.serviceWorker.controller.postMessage(msg, [msg_chan.port2]);
-                    resolve(addedId);
+                    resolve(eatData);
                 });
             }
 
@@ -428,15 +437,19 @@
                 const thisWebComponent = this;
                 const enqueuePromise = this.enqueueEatenItemToIndexedDB();
                 if ('serviceWorker' in navigator && 'SyncManager' in window) {
-                    enqueuePromise.then((addedId) => {
-                        thisWebComponent._sendMessageToSWToRegisterSync(addedId)
+                    enqueuePromise.then((eatData) => {
+                        thisWebComponent._sendMessageToSWToRegisterSync(eatData)
                             .then(thisWebComponent.storeInFirebaseAndDequeueEatenItemFromIndexDBQueue)
                             .catch((error) => { console.warn("received error from sw sync processing: ", error);});
                     });
                 } else {
                     // serviceworker/sync not supported
-                    enqueuePromise.then((addedId) => { this.storeInFirebaseAndDequeueEatenItemFromIndexDBQueue(addedId); });
+                    enqueuePromise.then(this.storeInFirebaseAndDequeueEatenItemFromIndexDBQueue);
                 }
+            }
+
+            _getConsumptionQueryPath(newValue, oldValue) {
+                return "/users/" + newValue + "/consumption";
             }
 
         }
