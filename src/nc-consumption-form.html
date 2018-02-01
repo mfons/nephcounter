@@ -77,7 +77,7 @@
         <firebase-auth id="auth" user="{{user}}" >
         </firebase-auth>
     
-        <firebase-query id="consumptionQuery" path="[[_getConsumptionQueryPath(user)]]" >
+        <firebase-query id="consumptionQuery" path="[[_getConsumptionQueryPath(user.uid)]]" >
         </firebase-query>
     
         <nc-foods-by-text-search text-search="[[textSearch]]" id="foodsByTextSearch" is-standard-reference="[[isStandardReference]]">
@@ -322,12 +322,15 @@
                 this.set('foodName', selectedIndex.name);
             }
 
-            storeInFirebaseAndDequeueEatenItemFromIndexDBQueue(eatData) {
+            // TODO I don't like passing in this here, but it got
+            // lost in all the promise change with what "this" meant.  
+            // I could have used bind, too, I imagine.
+            storeInFirebaseAndDequeueEatenItemFromIndexDBQueue(me, eatData) {
                 // TODO store to fb, then dequeue stored item from idb.
                 // TODO Should this work be done in this web-component
                 // or in its parent component -- nc-consumption.html? 
-                this.$.consumptionQuery.ref.push(eatData.item);
-                console.info("store in fb and dequeue from idb if store successful: ", addedId);
+                me.$.consumptionQuery.ref.push(eatData.item);
+                console.info("store in fb and dequeue from idb if store successful: ", eatData.addedId);
                 // TODO:  should this function check for offline, and 
                 // bail if so?
             }
@@ -428,6 +431,8 @@
                         //     resolve(event.data);
                         // }
                     }
+                    // TODO?  if the user does shift-refresh, navigator.serviceWorker.controller
+                    // will be null!  And then the following will fail.
                     navigator.serviceWorker.controller.postMessage(msg, [msg_chan.port2]);
                     resolve(eatData);
                 });
@@ -439,12 +444,12 @@
                 if ('serviceWorker' in navigator && 'SyncManager' in window) {
                     enqueuePromise.then((eatData) => {
                         thisWebComponent._sendMessageToSWToRegisterSync(eatData)
-                            .then(thisWebComponent.storeInFirebaseAndDequeueEatenItemFromIndexDBQueue)
+                            .then((eatData) => {thisWebComponent.storeInFirebaseAndDequeueEatenItemFromIndexDBQueue(thisWebComponent, eatData);})
                             .catch((error) => { console.warn("received error from sw sync processing: ", error);});
                     });
                 } else {
                     // serviceworker/sync not supported
-                    enqueuePromise.then(this.storeInFirebaseAndDequeueEatenItemFromIndexDBQueue);
+                    enqueuePromise.then((eatData) => {thisWebComponent.storeInFirebaseAndDequeueEatenItemFromIndexDBQueue(thisWebComponent, eatData);});
                 }
             }
 

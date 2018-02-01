@@ -1,4 +1,4 @@
-//const syncStore = [];
+const syncStore = [];
 
 self.addEventListener('message', event => {
     if (event.data.type === 'somethingWasEaten') {
@@ -35,7 +35,7 @@ function eatSomething(addedId) {
 function areThereRecordsInTheQueue() {
     return new Promise((resolve, reject) => {
         var db;
-        var request = window.indexedDB.open("NephcounterOffLineDB");
+        var request = self.indexedDB.open("NephcounterOffLineDB");
         request.onerror = function (event) {
             // Do something with request.errorCode!
             console.log("NephcounterOffLineDB creation failed!", event)
