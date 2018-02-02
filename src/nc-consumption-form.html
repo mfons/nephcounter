@@ -327,8 +327,38 @@
             // I could have used bind, too, I imagine.
             storeInFirebaseAndDequeueEatenItemFromIndexDBQueue(me, eatData) {
                 // TODO store to fb, then dequeue stored item from idb.
+                // TODO idb: take lessons learned from SW class:  use npm idb?
+                // use async/await?  generate your own mixin library that you 
+                // can reuse across your app?
                 // TODO Should this work be done in this web-component
-                // or in its parent component -- nc-consumption.html? 
+                // or in its parent component -- nc-consumption.html?
+                this._openIDB()
+                    .then((db) => {
+                        if (!db.objectStoreNames.contains('eatenItemsQueue')) {
+                            reject("eatenItemsQueue object store has not been created yet to save to.");
+                            console.warn("eatenItemsQueue object store has not been created yet to save to.", db.objectStoreNames);
+                            db.close();
+                            return;
+                        }
+                        var objectStore = db.transaction(["eatenItemsQueue"], "readwrite").objectStore("eatenItemsQueue");
+                        // TODO read all items, then write them in turn to firebase and delete them.
+                        // var request = objectStore.add(item);
+                        // request.onerror = function (event) {
+                        //     // assuming that 1 was not found so it needs to be added
+                        //     console.warn("Caught querying record 1 from nutrientsOfInterest from error in event: ", event);
+                        //     db.close();
+                        //     reject("Caught querying record 1 from nutrientsOfInterest; check for console warning for specifics");
+                        // };
+                        // request.onsuccess = function (event) {
+                        //     // Get the old value that we want to update
+                        //     var data = event.target.result;
+                        //     console.log("added nutrients of interest to indexeddb");
+                        //     db.close()
+                        //     resolve({ addedId: event.target.result, item: item});
+                        //     return;
+                        // };
+
+                    }); 
                 me.$.consumptionQuery.ref.push(eatData.item);
                 console.info("store in fb and dequeue from idb if store successful: ", eatData.addedId);
                 // TODO:  should this function check for offline, and 
@@ -362,6 +392,28 @@
                 //newObject.nutrientsOfInterest = this.foodNutrients[0].nutrients;
 
                 return this.writeEatenItemToIndexedDB(newObject);
+            }
+
+            _openIDB() {
+                return new Promise((resolve, reject) => {
+                    var db;
+                    var request = window.indexedDB.open("NephcounterOffLineDB");
+                    request.onerror = function (event) {
+                        // Do something with request.errorCode!
+                        console.log("NephcounterOffLineDB creation failed!", event)
+                        reject("open of database failed with error!");
+                    }; // end of onerror
+                    request.onsuccess = function (event) {
+                        console.log("NephcounterOffLineDB open succeeded!");
+                        resolve(event.target.result);
+                    }; // end of onsuccess
+
+                    // This is done only if there is no database and one needs to be created before we read from it.
+                    request.onupgradeneeded = function (event) {
+                        console.log("an upgrade is needed...");
+                        var db = event.target.result;
+                    }; // end of onupgradeneeded
+                });
             }
 
             // TODO: Move this function and other offline-related items
