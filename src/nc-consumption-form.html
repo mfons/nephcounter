@@ -350,7 +350,7 @@
                                 return Promise.all(keys.map(key => me._deleteRecIDB(objectStore, key)));
                             })
                             .then(() => {
-                                console.info("store in fb and dequeue from idb if store successful: ", eatData.addedId);
+                            console.info("wow!  it seems like we have actually stored everything to firebase and removed it all from idb!"/*, eatData.addedId*/);
                                 db.close();
                             });
                     });
