@@ -12,22 +12,34 @@ self.addEventListener('message', event => {
 
 // console.log("background-sync:  Hello World!");
 self.addEventListener('sync', function (event) {
-    event.waitUntil(eatSomething(event.tag));
+    event.waitUntil(allEatenThingsSaved(event.tag));
 });
 
-function eatSomething(addedId) {
+function allEatenThingsSaved(addedId) {
     return new Promise((resolve, reject) => {
-        // const { port } = syncStore[addedId] || {};
-        // delete syncStore[addedId];
-        // Don't think we need to send a message: 
-        // port.postMessage(addedId);
+        const { port } = syncStore[addedId] || {};
         // Instead of messaging back and forth we just 
         // "talk" through the indexedDB record...so the test here
         // would be to reject if the indexeddb record exists, and 
         // resolve if it is gone.
         areThereRecordsInTheQueue()
-            .then(() => { resolve();})
-            .catch(() => { reject();});
+            .then(() => {
+                // clients.matchAll({ includeUncontrolled: true })
+                //     .then(clients => {
+                //         clients.forEach(client => client.postMessage('Please post queued records. Sincerely, Sync.'))
+                //     });
+                port.postMessage('Please post queued records. Sincerely, Sync.');
+                reject();
+            })
+            .catch(() => {
+                clients.matchAll({ includeUncontrolled: true })
+                    .then(clients => {
+                        clients.forEach(client => client.postMessage('There are no more queued records!  Good job! Sincerely, Sync.'))
+                    });
+                port.postMessage('There are no more queued records!  Good job! Sincerely, Sync.');
+                delete syncStore[addedId];
+                resolve();
+            });
         console.info("sw sync event: ", addedId);
     });
 }

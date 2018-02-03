@@ -492,12 +492,17 @@
                 // better...?  Or maybe just agree that if there was anything in the queue
                 // that it would be written all at once...not sure.  Fewer moving parts is 
                 // better by far.  Could just register a sync here and be done with it. -- 1/29/18
+                let thisWebComponent = this;
                 return new Promise((resolve, reject) => {
                     // Create a Message Channel
                     const msg_chan = new MessageChannel();
                     const msg = { type: 'somethingWasEaten', addedId: eatData.addedId };
                     // Handler for recieving message reply from service worker
                     msg_chan.port1.onmessage = event => {
+                        if (event.data.startsWith('Please')) {
+                            // This means it failed last time and it is trying again.
+                            thisWebComponent.storeInFirebaseAndDequeueEatenItemFromIndexDBQueue(thisWebComponent, eatData);
+                        }
                         // if (event.data.error) {
                         //     reject(event.data.error);
                         // } else {
