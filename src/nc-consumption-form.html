@@ -346,7 +346,6 @@
                                 values.forEach((rec) => {
                                     me.$.consumptionQuery.ref.push(rec/*eatData.item*/);
                                 });
-                                allRecsKeysPromises.push(me._deleteRecIDB(objectStore, rec.key)); 
                                 return Promise.all(keys.map(key => me._deleteRecIDB(objectStore, key)));
                             })
                             .then(() => {
