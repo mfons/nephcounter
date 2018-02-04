@@ -342,14 +342,14 @@
                         }
                         var objectStore = db.transaction(["eatenItemsQueue"], "readwrite").objectStore("eatenItemsQueue");
                         me._getAllIDB(objectStore)
-                            .then(({values, keys}) => {
+                            .then(({ values, keys }) => {
                                 values.forEach((rec) => {
                                     me.$.consumptionQuery.ref.push(rec/*eatData.item*/);
                                 });
                                 return Promise.all(keys.map(key => me._deleteRecIDB(objectStore, key)));
                             })
                             .then(() => {
-                            console.info("wow!  it seems like we have actually stored everything to firebase and removed it all from idb!"/*, eatData.addedId*/);
+                                console.info("wow!  it seems like we have actually stored everything to firebase and removed it all from idb!"/*, eatData.addedId*/);
                                 db.close();
                             });
                     });
@@ -386,10 +386,13 @@
                 return this.writeEatenItemToIndexedDB(newObject);
             }
 
-            _deleteRecIDB (objectStore, keyString) {
-                // TODO return a promise to the successful delete of 
-                // record with key, keyString. (keyString might be a number
-                // if generated)
+            _deleteRecIDB(objectStore, keyString) {
+                return new Promise((resolve, reject) => {
+                    var request = objectStore.delete(keyString);
+                    request.onsuccess = function (event) {
+                        resolve();
+                    };
+                });
             }
 
             _getAllIDB(objectStore) {
@@ -405,7 +408,7 @@
                             cursor.continue();
                         }
                         else {
-                            resolve({values: allValues, keys: allKeys});
+                            resolve({ values: allValues, keys: allKeys });
                         }
                     };
                     request.onerror = (event) => {
