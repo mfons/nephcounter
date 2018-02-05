@@ -343,8 +343,7 @@
                         var objectStore = db.transaction(["eatenItemsQueue"], "readwrite").objectStore("eatenItemsQueue");
                         me._getAllIDB(objectStore)
                             .then(({ values, keys }) => {
-                                allFirebaseValuesWrittenPromise = Promise.all(values.map(value => me.$.consumptionQuery.ref.push(value)));
-                                allFirebaseValuesWrittenPromise
+                                Promise.all(values.map(value => me.$.consumptionQuery.ref.push(value)))
                                     .then(() => {
                                         return Promise.all(keys.map(key => me._deleteRecIDB(objectStore, key)));
                                     })
