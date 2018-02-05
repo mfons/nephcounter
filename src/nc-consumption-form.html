@@ -343,16 +343,17 @@
                         var objectStore = db.transaction(["eatenItemsQueue"], "readwrite").objectStore("eatenItemsQueue");
                         me._getAllIDB(objectStore)
                             .then(({ values, keys }) => {
-                                values.forEach((rec) => {
-                                    me.$.consumptionQuery.ref.push(rec/*eatData.item*/);
-                                });
-                                return Promise.all(keys.map(key => me._deleteRecIDB(objectStore, key)));
-                            })
-                            .then(() => {
-                                console.info("wow!  it seems like we have actually stored everything to firebase and removed it all from idb!"/*, eatData.addedId*/);
-                                db.close();
+                                allFirebaseValuesWrittenPromise = Promise.all(values.map(value => me.$.consumptionQuery.ref.push(value)));
+                                allFirebaseValuesWrittenPromise
+                                    .then(() => {
+                                        return Promise.all(keys.map(key => me._deleteRecIDB(objectStore, key)));
+                                    })
+                                    .then(() => {
+                                        console.info("wow!  it seems like we have actually stored everything to firebase and removed it all from idb!"/*, eatData.addedId*/);
+                                        db.close();
+                                    });
                             });
-                    });
+                   });
                 // TODO:  should this function check for offline, and 
                 // bail if so?
             }
