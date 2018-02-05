@@ -340,12 +340,12 @@
                             db.close();
                             return;
                         }
-                        var objectStore = db.transaction(["eatenItemsQueue"], "readwrite").objectStore("eatenItemsQueue");
+                        var objectStore = db.transaction(["eatenItemsQueue"], "readonly").objectStore("eatenItemsQueue");
                         me._getAllIDB(objectStore)
                             .then(({ values, keys }) => {
                                 Promise.all(values.map(value => me.$.consumptionQuery.ref.push(value)))
                                     .then(() => {
-                                        return Promise.all(keys.map(key => me._deleteRecIDB(objectStore, key)));
+                                        return me._deleteRecsIDB(db, keys);
                                     })
                                     .then(() => {
                                         console.info("wow!  it seems like we have actually stored everything to firebase and removed it all from idb!"/*, eatData.addedId*/);
@@ -393,6 +393,14 @@
                         resolve();
                     };
                 });
+            }
+
+            _deleteRecsIDB(db, keys) {
+                let thisWebComponent = this;
+                return Promise.all(keys.map(key => {
+                        var objectStore = db.transaction(["eatenItemsQueue"], "readwrite").objectStore("eatenItemsQueue");
+                        return thisWebComponent._deleteRecIDB(objectStore, key);
+                    }));
             }
 
             _getAllIDB(objectStore) {
