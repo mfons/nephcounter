@@ -350,6 +350,9 @@
                                     .then(() => {
                                         console.info("wow!  it seems like we have actually stored everything to firebase and removed it all from idb!"/*, eatData.addedId*/);
                                         db.close();
+                                    })
+                                    .catch((err) => {
+                                        console.warn("storeInFirebaseAndDequeueEatenItemFromIndexDBQueue produced an error:", err);
                                     });
                             });
                    });
