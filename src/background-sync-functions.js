@@ -29,7 +29,7 @@ function allEatenThingsSaved(addedId) {
                 //         clients.forEach(client => client.postMessage('Please post queued records. Sincerely, Sync.'))
                 //     });
                 port.postMessage('Please post queued records. Sincerely, Sync.');
-                resolve();
+                reject();
             })
             .catch(() => {
                 // clients.matchAll({ includeUncontrolled: true })
@@ -38,7 +38,7 @@ function allEatenThingsSaved(addedId) {
                 //     });
                 port.postMessage('There are no more queued records!  Good job! Sincerely, Sync.');
                 delete syncStore[addedId];
-                reject();
+                resolve();
             });
         console.info("sw sync event: ", addedId);
     });
@@ -69,11 +69,11 @@ function areThereRecordsInTheQueue() {
                 if (cursor) {
                     //alert("Name for SSN " + cursor.key + " is " + cursor.value.name);
                     //cursor.continue();
-                    reject(); // tell sync to try again later
+                    resolve(); // tell sync to try again later
                 }
                 else {
                     //alert("No more entries!");
-                    resolve();
+                    reject();
                 }
                 db.close();
             };
