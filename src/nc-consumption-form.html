@@ -322,6 +322,10 @@
                 this.set('foodName', selectedIndex.name);
             }
 
+            _isFirebaseOnline() {
+                return firebase.database().ref(".info/connected").on("value");
+            }
+
             // TODO I don't like passing in this here, but it got
             // lost in all the promise change with what "this" meant.  
             // I could have used bind, too, I imagine.
@@ -343,7 +347,15 @@
                         var objectStore = db.transaction(["eatenItemsQueue"], "readonly").objectStore("eatenItemsQueue");
                         me._getAllIDB(objectStore)
                             .then(({ values, keys }) => {
-                                Promise.all(values.map(value => me.$.consumptionQuery.ref.push(value)))
+                                me._isFirebaseOnline()
+                                    .then((isFirebaseConnected) => {
+                                        if (isFirebaseConnected.val()) {
+                                            return Promise.all(values.map(value => me.$.consumptionQuery.ref.push(value)));
+                                        }
+                                        else {
+                                            return Promise.reject("Firebase was not connected, so we will not attempt to push data yet.");
+                                        }
+                                    })
                                     .then(() => {
                                         return me._deleteRecsIDB(db, keys);
                                     })
@@ -353,9 +365,10 @@
                                     })
                                     .catch((err) => {
                                         console.warn("storeInFirebaseAndDequeueEatenItemFromIndexDBQueue produced an error:", err);
+                                        db.close();
                                     });
                             });
-                   });
+                    });
                 // TODO:  should this function check for offline, and 
                 // bail if so?
             }
@@ -401,9 +414,9 @@
             _deleteRecsIDB(db, keys) {
                 let thisWebComponent = this;
                 return Promise.all(keys.map(key => {
-                        var objectStore = db.transaction(["eatenItemsQueue"], "readwrite").objectStore("eatenItemsQueue");
-                        return thisWebComponent._deleteRecIDB(objectStore, key);
-                    }));
+                    var objectStore = db.transaction(["eatenItemsQueue"], "readwrite").objectStore("eatenItemsQueue");
+                    return thisWebComponent._deleteRecIDB(objectStore, key);
+                }));
             }
 
             _getAllIDB(objectStore) {
