@@ -29,16 +29,16 @@ function allEatenThingsSaved(addedId) {
                 //         clients.forEach(client => client.postMessage('Please post queued records. Sincerely, Sync.'))
                 //     });
                 port.postMessage('Please post queued records. Sincerely, Sync.');
-                reject();
+                resolve();
             })
             .catch(() => {
-                clients.matchAll({ includeUncontrolled: true })
-                    .then(clients => {
-                        clients.forEach(client => client.postMessage('There are no more queued records!  Good job! Sincerely, Sync.'))
-                    });
+                // clients.matchAll({ includeUncontrolled: true })
+                //     .then(clients => {
+                //         clients.forEach(client => client.postMessage('There are no more queued records!  Good job! Sincerely, Sync.'))
+                //     });
                 port.postMessage('There are no more queued records!  Good job! Sincerely, Sync.');
                 delete syncStore[addedId];
-                resolve();
+                reject();
             });
         console.info("sw sync event: ", addedId);
     });
