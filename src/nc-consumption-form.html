@@ -323,7 +323,7 @@
             }
 
             _isFirebaseOnline() {
-                return firebase.database().ref(".info/connected").on("value");
+                return firebase.database().ref(".info/connected").once("value");
             }
 
             // TODO I don't like passing in this here, but it got
