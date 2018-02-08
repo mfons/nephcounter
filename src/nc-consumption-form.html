@@ -548,7 +548,7 @@
                 if ('serviceWorker' in navigator && 'SyncManager' in window) {
                     enqueuePromise.then((eatData) => {
                         thisWebComponent._sendMessageToSWToRegisterSync(eatData)
-                            .then((eatData) => { thisWebComponent.storeInFirebaseAndDequeueEatenItemFromIndexDBQueue(thisWebComponent, eatData); })
+                            .then((eatData) => { /*thisWebComponent.storeInFirebaseAndDequeueEatenItemFromIndexDBQueue(thisWebComponent, eatData);*/ })
                             .catch((error) => { console.warn("received error from sw sync processing: ", error); });
                     });
                 } else {
