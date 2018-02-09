@@ -1,17 +1,17 @@
 const syncStore = [];
 
-self.addEventListener('message', event => {
+self.addEventListener('message', async (event) => {
     if (event.data.type === 'somethingWasEaten') {
         //     const id = event.data.id || uuid()
         // pass the port into the memory store
         syncStore[event.data.addedId] = Object.assign({ port: event.ports[0] }, event.data);
-        /*await*/ self.registration.sync.register(event.data.addedId)
-            .then(() => {
-                console.log('Sync registered');
-            })
-            .catch((err) => {
-                console.warn('Error with sync registration: ', err);
-            });
+        await self.registration.sync.register(event.data.addedId);
+            // .then(() => {
+            //     console.log('Sync registered');
+            // })
+            // .catch((err) => {
+            //     console.warn('Error with sync registration: ', err);
+            // });
     }
     console.info("message sent to service worker: ", event.data);
 });
