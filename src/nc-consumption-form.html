@@ -368,8 +368,6 @@
                                     });
                             });
                     });
-                // TODO:  should this function check for offline, and 
-                // bail if so?
             }
 
             enqueueEatenItemToIndexedDB() {
@@ -537,8 +535,26 @@
                     // TODO?  if the user does shift-refresh, navigator.serviceWorker.controller
                     // will be null!  And then the following will fail.
                     navigator.serviceWorker.controller.postMessage(msg, [msg_chan.port2]);
+                    // NOTE:  the following alternate code
+                    // works the same as the sync that is in the service worker
+                    // 'message' event handler;  unfortunately neither option
+                    // works on my phone in airplane mode...the sync reg occurs but
+                    // the 'sync event is never dispatched.
+                    // setTimeout(async () => {
+                    //     const reg = await thisWebComponent.registerServiceWorker();
+                    //     if (reg.sync && reg.sync.getTags) {
+                    //         await reg.sync.register(eatData.addedId);
+                    //     }
+                    // }, 1000);
                     resolve(eatData);
                 });
+            }
+
+            registerServiceWorker() {
+                if (!navigator.serviceWorker) {
+                    return Promise.reject(Error("Service worker not supported"));
+                }
+                return navigator.serviceWorker.register('/service-worker.js');
             }
 
             _submit() {
