@@ -21,6 +21,7 @@
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="dateUtilsMixin.html">
 
 <dom-module id="nc-consumption-form">
     <template>
@@ -110,7 +111,8 @@
                 <paper-input class="gram-weight-field" name="weight" label="(Weight (g))" readonly="true" value="[[_getWeight(foodNutrients.*)]]"></paper-input>
             </div>
             <div class="horizontal">
-                <paper-input id="multiplierFieldId" name="multiplier" on-tap="_onMultiplierTap" type="number" step="any" label="3. How many servings?" value="{{multiplier}}" required></paper-input>
+                <paper-input id="multiplierFieldId" name="multiplier" on-tap="_onMultiplierTap" type="number" step="any" label="3. How many servings?"
+                    value="{{multiplier}}" required></paper-input>
                 <paper-input class="gram-weight-field" name="consumedGrams" label="(Total (g))" value="{{consumedGrams}}" readonly="true"></paper-input>
             </div>
             <paper-icon-button icon="my-icons:local-dining" raised on-tap="_submit" title="Consume" class="blue"></paper-icon-button>
@@ -151,7 +153,12 @@
     </template>
 
     <script>
-        class NcConsumptionForm extends ReduxMixin(Polymer.Element) {
+        class NcConsumptionForm extends
+            DateUtilsMixin(
+                ReduxMixin(
+                    Polymer.Element
+                )
+            ) {
             static get is() { return 'nc-consumption-form'; }
 
             static get properties() {
