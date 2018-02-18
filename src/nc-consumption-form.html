@@ -61,7 +61,7 @@
 
                 paper-icon-button.blue,
                 paper-button.blue {
-                    --paper-icon-button-ink-color: var(--paper-orange-500);
+                    --paper-icon-button-ink-color: var(--paper-black-500);
                     background-color: var(--paper-light-blue-500);
                     color: white;
                     border-radius: 3px;
@@ -88,36 +88,38 @@
             <!-- custom-foods="[[customFoods]]" -->
         </nc-nutrients-for-a-food>
 
-        <form is="iron-form" method="get" action="/" id="presubmit">
-            <paper-input id="foodFluidSearchStringId" name="foodFluidSearch" label="1. Search for a Food" value="{{foodFluidSearchString}}"
-                required autocapitalize="off" spellcheck="true" on-blur="_getFoodData"></paper-input>
-            <paper-toggle-button checked="{{isStandardReference}}">
-                (Only Search Generic Food List)
-            </paper-toggle-button>
-            <paper-dropdown-menu on-iron-select="_foodSelectionMenuIronSelectHandler" required style="width:100%;" label="2. Pick a specific food"
-                id="foodSelectionMenu" vertical-align="bottom" horizontal-align="left">
-                <!--on-opened-changed="_foodFluidListOpenedChanged" on-tap="_foodSelectionMenuTapped"-->
-                <div id="foodSelectionDropdownContentId" class="dropdown-content" slot="dropdown-content" style="width: 75vw; height: 72vh; ">
-                    <iron-list id="foodFluidIronList" items="[[_foodsChanged(foods.*)]]" selected-item="{{selectedFood}}" selection-enabled>
-                        <template>
-                            <div on-click="_foodFluidItemToggled" tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]">[[item.name]]</div>
-                            <!--   -->
-                        </template>
-                    </iron-list>
+        <iron-form id="presubmit">
+            <form method="get" action="/">
+                <paper-input id="foodFluidSearchStringId" name="foodFluidSearch" label="1. Search for a Food" value="{{foodFluidSearchString}}"
+                    required autocapitalize="off" spellcheck="true" on-blur="_getFoodData"></paper-input>
+                <paper-toggle-button checked="{{isStandardReference}}">
+                    (Only Search Generic Food List)
+                </paper-toggle-button>
+                <paper-dropdown-menu on-iron-select="_foodSelectionMenuIronSelectHandler" required style="width:100%;" label="2. Pick a specific food"
+                    id="foodSelectionMenu" vertical-align="bottom" horizontal-align="left">
+                    <!--on-opened-changed="_foodFluidListOpenedChanged" on-tap="_foodSelectionMenuTapped"-->
+                    <div id="foodSelectionDropdownContentId" class="dropdown-content" slot="dropdown-content" style="width: 75vw; height: 72vh; ">
+                        <iron-list id="foodFluidIronList" items="[[_foodsChanged(foods.*)]]" selected-item="{{selectedFood}}" selection-enabled>
+                            <template>
+                                <div on-click="_foodFluidItemToggled" tabindex$="[[tabIndex]]" class$="[[_computedClass(selected)]]">[[item.name]]</div>
+                                <!--   -->
+                            </template>
+                        </iron-list>
+                    </div>
+                </paper-dropdown-menu>
+                <div class="horizontal">
+                    <paper-input name="measure" label="(Serving size)" readonly="true" value="[[_getMeasure(foodNutrients.*)]]"></paper-input>
+                    <paper-input class="gram-weight-field" name="weight" label="(Weight (g))" readonly="true" value="[[_getWeight(foodNutrients.*)]]"></paper-input>
                 </div>
-            </paper-dropdown-menu>
-            <div class="horizontal">
-                <paper-input name="measure" label="(Serving size)" readonly="true" value="[[_getMeasure(foodNutrients.*)]]"></paper-input>
-                <paper-input class="gram-weight-field" name="weight" label="(Weight (g))" readonly="true" value="[[_getWeight(foodNutrients.*)]]"></paper-input>
-            </div>
-            <div class="horizontal">
-                <paper-input id="multiplierFieldId" name="multiplier" on-tap="_onMultiplierTap" type="number" step="any" label="3. How many servings?"
-                    value="{{multiplier}}" required></paper-input>
-                <paper-input class="gram-weight-field" name="consumedGrams" label="(Total (g))" value="{{consumedGrams}}" readonly="true"></paper-input>
-            </div>
-            <paper-icon-button icon="my-icons:local-dining" raised on-tap="_submit" title="Consume" class="blue"></paper-icon-button>
-            <paper-icon-button icon="my-icons:clear" raised on-tap="_reset" title="Reset" class="blue"></paper-icon-button>
-        </form>
+                <div class="horizontal">
+                    <paper-input id="multiplierFieldId" name="multiplier" on-tap="_onMultiplierTap" type="number" step="any" label="3. How many servings?"
+                        value="{{multiplier}}" required></paper-input>
+                    <paper-input class="gram-weight-field" name="consumedGrams" label="(Total (g))" value="{{consumedGrams}}" readonly="true"></paper-input>
+                </div>
+                <paper-icon-button icon="my-icons:local-dining" raised on-tap="_submit" title="Consume" class="blue"></paper-icon-button>
+                <paper-icon-button icon="my-icons:clear" raised on-tap="_reset" title="Reset" class="blue"></paper-icon-button>
+            </form>
+        </iron-form>
 
         <div class="card" style="margin: unset;">
             <h2 style="font-size: 1em;">Nutrients you care about...</h2>
@@ -580,6 +582,11 @@
                     // serviceworker/sync not supported
                     enqueuePromise.then((eatData) => { thisWebComponent.storeInFirebaseAndDequeueEatenItemFromIndexDBQueue(thisWebComponent, eatData); });
                 }
+            }
+
+            _reset(event) {
+                //var form = Polymer.dom(event).localTarget.parentElement
+                this.$.presubmit.reset();
             }
 
             _getConsumptionQueryPath(newValue, oldValue) {
