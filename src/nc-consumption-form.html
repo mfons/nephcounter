@@ -403,9 +403,8 @@
                 newObject.weight = this.weight;
                 newObject.multiplier = this.multiplier;
                 newObject.consumedGrams = this.consumedGrams;
-                // TODO add the date behavior in as a mixin to enable the following fields and related.
                 newObject.consumedDate = (this._isHistoric(this.todayString)) ? this.todayStringEnd : this._formatLocalDate(new Date());
-                //newObject.nutrientsOfInterest = this.foodNutrients[0].nutrients;
+                newObject.nutrientsOfInterest = this.foodNutrients[0].nutrients;
 
                 return this.writeEatenItemToIndexedDB(newObject);
             }
