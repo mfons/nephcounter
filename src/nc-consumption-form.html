@@ -112,7 +112,7 @@
                     <paper-input class="gram-weight-field" name="weight" label="(Weight (g))" readonly="true" value="[[_getWeight(foodNutrients.*)]]"></paper-input>
                 </div>
                 <div class="horizontal">
-                    <paper-input id="multiplierFieldId" name="multiplier" on-tap="_onMultiplierTap" type="number" step="any" label="3. How many servings?"
+                    <paper-input id="multiplierFieldId" name="multiplier" on-click="_onMultiplierTap" type="number" step="any" label="3. How many servings?"
                         value="{{multiplier}}" required></paper-input>
                     <paper-input class="gram-weight-field" name="consumedGrams" label="(Total (g))" value="{{consumedGrams}}" readonly="true"></paper-input>
                 </div>
