@@ -149,8 +149,8 @@
             </paper-dialog>
         </div>
 
-        <paper-toast duration="0" id="noResultsFoundToastId" text="We did not find any foods for '[[textSearch]]'?">
-            <paper-button onclick="this.parentElement.toggle()" class="yellow-button">Close now!</paper-button>
+        <paper-toast duration="10000" id="noResultsFoundToastId" text="We did not find any foods for '[[textSearch]]'; try a different search.">
+            <!-- <paper-button onclick="this.parentElement.toggle()" class="yellow-button">Close now!</paper-button> -->
         </paper-toast>
     </template>
 
@@ -273,7 +273,7 @@
             ready() {
                 super.ready();
                 this.addEventListener('state-changed', (e) => { this._reduxStoreStateChanged(e); });
-                // var toastDismissalButton = this.$.noResultsFoundToastId.querySelector(".yellow-button");
+                var toastDismissalButton = this.$.noResultsFoundToastId.querySelector(".yellow-button");
                 // // Create an observer instance linked to the callback function
                 // var observer = new MutationObserver((mutationsList) => {
                 //     for (var mutation of mutationsList) {
