@@ -277,7 +277,7 @@
                 // Create an observer instance linked to the callback function
                 var observer = new MutationObserver((mutationsList) => {
                     for (var mutation of mutationsList) {
-                        console.log('The ' + mutation.attributeName + ' attribute was modified.');
+                        console.info('The ' + mutation.attributeName + ' attribute was modified.', mutation);
                     }
                 });
                 // Start observing the target node for configured mutations
