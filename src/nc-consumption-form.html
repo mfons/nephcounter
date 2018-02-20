@@ -150,7 +150,7 @@
         </div>
 
         <paper-toast duration="0" id="noResultsFoundToastId" text="We did not find any foods for '[[textSearch]]'?">
-            <paper-button onclick="noResultsFoundToastId.toggle()" class="yellow-button">Close now!</paper-button>
+            <paper-button onclick="this.parentElement.toggle()" class="yellow-button">Close now!</paper-button>
         </paper-toast>
     </template>
 
