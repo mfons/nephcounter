@@ -90,7 +90,7 @@
 
         <iron-form id="presubmit">
             <form method="get" action="/">
-                <paper-input id="foodFluidSearchStringId" name="foodFluidSearch" label="1. Search for a Food" value="{{foodFluidSearchString}}"
+                <paper-input id="foodFluidSearchStringId" on-click="_onSearchStringTap" name="foodFluidSearch" label="1. Search for a Food" value="{{foodFluidSearchString}}"
                     required autocapitalize="off" spellcheck="true" on-blur="_getFoodData"></paper-input>
                 <paper-toggle-button checked="{{isStandardReference}}">
                     (Only Search Generic Food List)
@@ -225,6 +225,10 @@
 
             _onMultiplierTap() {
                 this.$.multiplierFieldId.inputElement.inputElement.select();
+            }
+
+            _onSearchStringTap() {
+                this.$.foodFluidSearchStringId.inputElement.inputElement.select();
             }
 
             _applyMultiplier(nutrientValue, multiplier) {
