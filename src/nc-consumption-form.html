@@ -262,6 +262,7 @@
 
             _hideTheToast() {
                 this.$.noResultsFoundToastId.opened = false;
+                console.info("closed toast");
             }
 
             _standardReferenceChanged(standardReferenceValue) {
@@ -272,6 +273,15 @@
             ready() {
                 super.ready();
                 this.addEventListener('state-changed', (e) => { this._reduxStoreStateChanged(e); });
+                var toastDismissalButton = this.$.noResultsFoundToastId.querySelector(".yellow-button");
+                // Create an observer instance linked to the callback function
+                var observer = new MutationObserver((mutationsList) => {
+                    for (var mutation of mutationsList) {
+                        console.log('The ' + mutation.attributeName + ' attribute was modified.');
+                    }
+                });
+                // Start observing the target node for configured mutations
+                observer.observe(toastDismissalButton, { attributes: true });
             }
 
             _foodFluidItemToggled(e) {
@@ -303,6 +313,7 @@
                 console.log("redux store state changed...in nc-consumption-form", this.foods);
                 if (this.queryBroughtBackNoFoodList) {
                     this.$.noResultsFoundToastId.opened = true;
+                    console.info("opened toast");
                     this.$.foodSelectionMenu.disabled = true;
                 }
                 else {
