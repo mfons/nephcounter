@@ -150,7 +150,7 @@
         </div>
 
         <paper-toast duration="0" id="noResultsFoundToastId" text="We did not find any foods for '[[textSearch]]'?">
-            <paper-button on-click="_hideTheToast" class="yellow-button">Close now!</paper-button>
+            <paper-button onclick="_hideTheToast" class="yellow-button">Close now!</paper-button>
         </paper-toast>
     </template>
 
@@ -273,15 +273,15 @@
             ready() {
                 super.ready();
                 this.addEventListener('state-changed', (e) => { this._reduxStoreStateChanged(e); });
-                var toastDismissalButton = this.$.noResultsFoundToastId.querySelector(".yellow-button");
-                // Create an observer instance linked to the callback function
-                var observer = new MutationObserver((mutationsList) => {
-                    for (var mutation of mutationsList) {
-                        console.info('The ' + mutation.attributeName + ' attribute was modified.', mutation);
-                    }
-                });
-                // Start observing the target node for configured mutations
-                observer.observe(toastDismissalButton, { attributes: true });
+                // var toastDismissalButton = this.$.noResultsFoundToastId.querySelector(".yellow-button");
+                // // Create an observer instance linked to the callback function
+                // var observer = new MutationObserver((mutationsList) => {
+                //     for (var mutation of mutationsList) {
+                //         console.info('The ' + mutation.attributeName + ' attribute was modified.', mutation);
+                //     }
+                // });
+                // // Start observing the target node for configured mutations
+                // observer.observe(toastDismissalButton, { attributes: true });
             }
 
             _foodFluidItemToggled(e) {
