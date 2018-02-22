@@ -142,7 +142,7 @@
             </div>
 
             <paper-dialog id="changeDateDialog" class="paper-date-picker-dialog" on-iron-overlay-closed="_dismissChangeDateDialog">
-                <vaadin-date-picker value="{{selectedDate}}" initial-position="[[todayString]]" label="Pick a date">
+                <vaadin-date-picker id="picker" value="{{selectedDate}}" initial-position="[[todayString]]" label="Pick a date">
                 </vaadin-date-picker>
                 <div class="horizontal">
                     <paper-button class="blue" dialog-dismiss>Cancel</paper-button>
@@ -231,7 +231,7 @@
 
             _dismissChangeDateDialog(event) {
                 if (event.detail.confirmed) {
-                    this.todayString = this._formatLocalDate(this.$.picker.date).substring(0, 10);
+                    this.todayString = this._formatLocalDate(this.$.picker.value).substring(0, 10);
                     this.todayStringStart = this.todayString + "T00:00:00";
                     this.todayStringEnd = this.todayString + "T23:59:59";
                 }
