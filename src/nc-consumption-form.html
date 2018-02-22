@@ -23,6 +23,7 @@
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/vaadin-date-picker/vaadin-date-picker.html">
 <link rel="import" href="dateUtilsMixin.html">
+<link rel="import" href="nc-alter-food-nutrient-amounts.html">
 
 <dom-module id="nc-consumption-form">
     <template>
@@ -149,6 +150,17 @@
                     <paper-button class="blue" dialog-confirm>OK</paper-button>
                 </div>
             </paper-dialog>
+
+            <paper-dialog id="editConsumptionNutrientsDialog">
+                <nc-alter-food-nutrient-amounts food-nutrients="[[_getNutrientsFromFoodNutrients(foodNutrients.*)]]" multiplier="[[multiplier]]"
+                    altered-nutrients="{{alteredNutrients}}">
+                </nc-alter-food-nutrient-amounts>
+                <div class="buttons">
+                    <paper-button dialog-dismiss>Cancel</paper-button>
+                    <paper-button dialog-confirm autofocus>Save Nutrients</paper-button>
+                </div>
+            </paper-dialog>
+
         </div>
 
         <paper-toast duration="10000" id="noResultsFoundToastId" text="We did not find any foods for '[[textSearch]]'; try a different search.">
