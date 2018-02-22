@@ -231,7 +231,7 @@
 
             _dismissChangeDateDialog(event) {
                 if (event.detail.confirmed) {
-                    this.todayString = this._formatLocalDate(this.$.picker.value).substring(0, 10);
+                    this.todayString = this._formatLocalDate(new Date(this.$.picker.value)).substring(0, 10);
                     this.todayStringStart = this.todayString + "T00:00:00";
                     this.todayStringEnd = this.todayString + "T23:59:59";
                 }
