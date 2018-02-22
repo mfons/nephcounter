@@ -21,6 +21,7 @@
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/vaadin-date-picker/vaadin-date-picker.html">
 <link rel="import" href="dateUtilsMixin.html">
 
 <dom-module id="nc-consumption-form">
@@ -141,7 +142,8 @@
             </div>
 
             <paper-dialog id="changeDateDialog" class="paper-date-picker-dialog" on-iron-overlay-closed="_dismissChangeDateDialog">
-                <paper-date-picker id="picker" date="{{selectedDate}}"></paper-date-picker>
+                    <vaadin-date-picker value="{{selectedDate}}" initial-position="[[todayString]]" label="Pick a date">
+                        </vaadin-date-picker>
                 <div class="horizontal">
                     <paper-button class="blue" dialog-dismiss>Cancel</paper-button>
                     <paper-button class="blue" dialog-confirm>OK</paper-button>
