@@ -50,7 +50,7 @@
             return new Promise((resolve, reject) => {
                 var db;
                 console.log("in testIfNutrientsOfInterestOffLineExists...");
-                var openReq = window.indexedDB.open("NephcounterOffLineDB");
+                var openReq = window.indexedDB.open("NephcounterOffLineDB", 1);
                 openReq.onblocked = function (event) {
                     // If some other tab is loaded with the database, then it needs to be closed
                     // before we can proceed.
@@ -61,11 +61,10 @@
                     // All other databases have been closed. Set everything up.
                     console.log("an upgrade is needed...");
                     var db = event.target.result;
-                    if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
-                        let nutrientsOfInterestObjectStore = db.createObjectStore("nutrientsOfInterest", { keyPath: "allNutrientsOfInterestListKey" });
-                    }
-                    if (!db.objectStoreNames.contains('eatenItemsQueue')) {
-                        let eatenItemsQueueObjectStore = db.createObjectStore("eatenItemsQueue", { autoIncrement : true });
+                    switch (db.oldVersion) {
+                        case 0:
+                            let nutrientsOfInterestObjectStore = db.createObjectStore("nutrientsOfInterest", { keyPath: "allNutrientsOfInterestListKey" });
+                            let eatenItemsQueueObjectStore = db.createObjectStore("eatenItemsQueue", { autoIncrement: true });
                     }
                     console.log("NephcounterOffLineDB has finished its upgrade.")
                 };
@@ -208,7 +207,7 @@
                         let nutrientsOfInterestObjectStore = db.createObjectStore("nutrientsOfInterest", { keyPath: "allNutrientsOfInterestListKey" });
                     }
                     if (!db.objectStoreNames.contains('eatenItemsQueue')) {
-                        let eatenItemsQueueObjectStore = db.createObjectStore("eatenItemsQueue", { autoIncrement : true });
+                        let eatenItemsQueueObjectStore = db.createObjectStore("eatenItemsQueue", { autoIncrement: true });
                     }
                     reject("There is no offline database yet for nutrientsOfInterest");
                     db.close();
