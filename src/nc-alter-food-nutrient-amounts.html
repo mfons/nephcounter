@@ -1,0 +1,39 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="nc-alter-food-nutrient-amounts">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+            }
+        </style>
+
+        <paper-card heading="Alter Nutrient Amounts" alt="Alter Nutrient Amounts">
+            <div class="card-content">
+                <paper-input id="nutrientNameField" readonly label="Nutrient Name" value="[[nutrientName]]"></paper-input>
+                <paper-input id="nutrientValueField" required label="Value" value="{{nutrientValue}}"></paper-input>
+                <paper-input id="nutrientUnitField" readonly label="Unit of Measure" value="[[nutrientUnit]]"></paper-input>
+            </div>
+            <div class="card-actions"> // hi!
+                <paper-button on-tap="update">Update</paper-button>
+                <paper-button on-tap="restore">Restore</paper-button>
+                <paper-icon-button on-tap="previousRecord" icon="my-svg-icons:chevron-left"></paper-icon-button>
+                <paper-icon-button on-tap="nextRecord" icon="my-svg-icons:chevron-right"></paper-icon-button>
+            </div>
+        </paper-card>
+    </template>
+
+    <script>
+        class NcAlterFoodNutrientAmounts extends Polymer.Element {
+            static get is() { return 'nc-alter-food-nutrient-amounts'; }
+            // TODO continue refactoring old version from nephcount project...
+            // along with behaviors and whatever else is needed.
+        }
+
+        window.customElements.define(NcAlterFoodNutrientAmounts.is, NcAlterFoodNutrientAmounts);
+    </script>
+</dom-module>
