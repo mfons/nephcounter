@@ -166,7 +166,7 @@
       _setNutrientsOfInterestSelectedItemsFromFirebaseStore() {
         var thisWebComponent = this;
         return new Promise((resolve, reject) => {
-          thisWebComponent.$.nutrientsOfInterestQuery.ref.on("value", function (snapshot) {
+          thisWebComponent.$.nutrientsOfInterestQuery.ref.once("value", function (snapshot) {
             console.log("the nutrients of interest firebase read came back successfully!");
             thisWebComponent._selectGivenNutrientsOfInterest(snapshot.val());
             //this.selectedItems = snapshot.val();
