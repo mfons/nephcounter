@@ -2,7 +2,11 @@
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="my-icons.html">
+<link rel="import" href="mixins/multiRecordEditMixin.html">
+<link rel="import" href="mixins/dataMixin.html">
 
 <dom-module id="nc-alter-food-nutrient-amounts">
     <template>
@@ -28,10 +32,62 @@
     </template>
 
     <script>
-        class NcAlterFoodNutrientAmounts extends Polymer.Element {
+        class NcAlterFoodNutrientAmounts extends
+            MultiRecordEditMixin(
+                DataMixin(
+                    Polymer.Element
+                )
+            ) {
             static get is() { return 'nc-alter-food-nutrient-amounts'; }
             // TODO continue refactoring old version from nephcount project...
             // along with behaviors and whatever else is needed.
+
+            static get properties() {
+                return {
+                    foodNutrients: Array,
+                    multiplier: Number,
+                    alteredNutrients: {
+                        type: Array,
+                        notify: true,
+                        value: []
+                    },
+                    nutrientName: String,
+                    nutrientValue: String,
+                    nutrientUnit: String
+                };
+            }
+
+            static get observers() {
+                return [
+                    '_foodNutrientsChanged(foodNutrients.*, multiplier)',
+                    '_currentRecordIndexChanged(alteredNutrients.*, currentRecordIndex)'
+                ];
+            }
+
+            _foodNutrientsChanged(changeRecord, multiplier) {
+                this.splice('alteredNutrients', 0, this.alteredNutrients.length);
+                for (var i = 0; i < changeRecord.base.length; i++) {
+                    var nutrientClone = this.cloneIt(changeRecord.base[i]);
+                    nutrientClone.value = (changeRecord.base[i].value === "--") ? "--" : changeRecord.base[i].value * multiplier;
+                    this.push('alteredNutrients', nutrientClone);
+                }
+                this.restore();
+            }
+
+            restore() {
+                if (this.alteredNutrients.length === 0 ||
+                    this.currentRecordIndex >= this.alteredNutrients.length) {
+                    return;
+                }
+                this.nutrientName = this.alteredNutrients[this.currentRecordIndex].nutrient;
+                this.nutrientValue = this.alteredNutrients[this.currentRecordIndex].value;
+                this.nutrientUnit = this.alteredNutrients[this.currentRecordIndex].unit;
+            }
+
+            update() {
+                this.set('alteredNutrients.' + this.currentRecordIndex + '.value', this.nutrientValue);
+            }
+
         }
 
         window.customElements.define(NcAlterFoodNutrientAmounts.is, NcAlterFoodNutrientAmounts);
