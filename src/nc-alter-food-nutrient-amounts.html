@@ -5,6 +5,8 @@
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="my-icons.html">
+<link rel="import" href="mixins/multiRecordEditMixin.html">
+<link rel="import" href="mixins/dataMixin.html">
 
 <dom-module id="nc-alter-food-nutrient-amounts">
     <template>
@@ -30,7 +32,12 @@
     </template>
 
     <script>
-        class NcAlterFoodNutrientAmounts extends Polymer.Element {
+        class NcAlterFoodNutrientAmounts extends
+            MultiRecordEditMixin(
+                DataMixin(
+                    Polymer.Element
+                )
+            ) {
             static get is() { return 'nc-alter-food-nutrient-amounts'; }
             // TODO continue refactoring old version from nephcount project...
             // along with behaviors and whatever else is needed.
@@ -76,7 +83,7 @@
                 this.nutrientValue = this.alteredNutrients[this.currentRecordIndex].value;
                 this.nutrientUnit = this.alteredNutrients[this.currentRecordIndex].unit;
             }
-            
+
             update() {
                 this.set('alteredNutrients.' + this.currentRecordIndex + '.value', this.nutrientValue);
             }
