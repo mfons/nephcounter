@@ -1,5 +1,6 @@
 # Nephcounter TODO list
-- [ ] think about wording of Standard Reference versus Name Brand
+- [ ] make alter food nutrient amounts notify redux when someone saves a nutrient list (could just notify instead?)  This would be an opportunity to try captain codeman's suggestions for fragmenting redux stores in polymer.
+- [ ] maybe move date field directly to screen instead of putting another field in the dialog and requiring another click.
 - [X] on refresh sometimes redux nutrients-of-interest count does not get updated
 - [ ] when you are typing stuff into the food list make the search less picky about spelling and capitalization
 
