@@ -1,6 +1,7 @@
 # Nephcounter TODO list
-- [ ] make alter food nutrient amounts notify redux when someone saves a nutrient list (could just notify instead?)  This would be an opportunity to try captain codeman's suggestions for fragmenting redux stores in polymer.
-- [ ] maybe move date field directly to screen instead of putting another field in the dialog and requiring another click.
+- [ ] make alter food nutrient amounts notify redux when someone saves a nutrient list (could just notify instead?)  This would be an opportunity to try captain codeman's suggestions for fragmenting redux stores in polymer. (https://www.captaincodeman.com/2017/07/19/project-structure-for-using-redux-with-polymer-20)
+- [ ] make alter food nutrient edit rely on the dialogs save cancel to save everything or nothing.  Just make it so that it saves it as they type, and get rid of the "update" and "restore" buttons.
+- [ ] maybe move consumption date field directly to screen instead of putting another field in the dialog and requiring another click.
 - [ ] get the firebase function maybe working by doing some variant of surma's server side rendering with firebase.
 - [X] on refresh sometimes redux nutrients-of-interest count does not get updated
 - [ ] when you are typing stuff into the food list make the search less picky about spelling and capitalization
