@@ -7,6 +7,7 @@
 - [ ] when you are typing stuff into the food list make the search less picky about spelling and capitalization
 - [ ] all enterable fields need to have "select()" happen on focus.
 - [ ] for some reason the nutrients may not have been stored yet in indexeddb and this causes the ajax call to fail when a food is selected and it tries to get the nutrients of interest for that food.
+- [ ] apply what you learned from supercharged comments app to nephcounter using cloud functions.
 
 # Polymer App Toolbox - Starter Kit
 
