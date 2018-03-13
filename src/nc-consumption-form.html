@@ -152,8 +152,7 @@
             </paper-dialog>
 
             <paper-dialog id="editConsumptionNutrientsDialog">
-                <nc-alter-food-nutrient-amounts food-nutrients="[[_getNutrientsFromFoodNutrients(foodNutrients.*)]]" multiplier="[[multiplier]]"
-                    altered-nutrients="{{alteredNutrients}}"> <!-- TODO -->
+                <nc-alter-food-nutrient-amounts food-nutrients="[[_getNutrientsFromFoodNutrients(foodNutrients.*)]]" multiplier="[[multiplier]]"> 
                 </nc-alter-food-nutrient-amounts>
                 <div class="buttons">
                     <paper-button dialog-dismiss>Cancel</paper-button>
@@ -233,7 +232,10 @@
                         type: Number,
                         computed: '_calculateConsumedGrams(weight, multiplier)'
                     },
-
+                    alteredNutrients: {
+                        type: Array,
+                        statePath: 'consumptionFormAlteredNutrients'
+                    },
                 };
             }
 
@@ -355,6 +357,11 @@
                 }
                 //this.$.foodListId.render(); // this only applies to dom-repeat sometimes...not iron-list
                 //this.$.foodSelectionMenu.opened = true; // TODO not sure about this??
+                if (this.alteredNutrients.length > 0) {
+                    this.foodNutrients = this.alteredNutrients;
+                    ==>>start here
+                    // TODO create another action to clear in redux store what alteredNutrients connects to...
+                }
             }
 
             _foodsChanged(changeRecord) {

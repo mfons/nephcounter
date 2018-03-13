@@ -10,7 +10,8 @@
     latestFoodList: [],
     latestQueryBroughtBackNoFoodList: true,
     latestFoodListQueryString: "",
-    foodNutrientsForCurrentlySelectedFood: {}
+    foodNutrientsForCurrentlySelectedFood: {},
+    consumptionFormAlteredNutrients: {}
   };
 
   const reducer = (state, action) => {
@@ -41,6 +42,10 @@
         case 'SAVE_FOOD_NUTRIENTS_FOR_CURRENTLY_SELECTED_FOOD' :
         return Object.assign({}, state, { 
           foodNutrientsForCurrentlySelectedFood: action.foodNutrientsForCurrentlySelectedFood
+        });
+        case 'SAVE_ALTERED_CONSUMPTION_FORM_FOOD_NUTRIENTS' :
+        return Object.assign({}, state, {
+          consumptionFormAlteredNutrients: action.consumptionFormAlteredNutrients
         });
       default :
         console.warn("Invalid action type in redux store:", action.type);

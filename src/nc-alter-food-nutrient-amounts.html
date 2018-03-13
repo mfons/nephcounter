@@ -7,6 +7,7 @@
 <link rel="import" href="my-icons.html">
 <link rel="import" href="mixins/multiRecordEditMixin.html">
 <link rel="import" href="mixins/dataMixin.html">
+<link rel="import" href="redux-store.html">
 
 <dom-module id="nc-alter-food-nutrient-amounts">
     <template>
@@ -22,7 +23,7 @@
                 <paper-input id="nutrientValueField" required label="Value" value="{{nutrientValue}}"></paper-input>
                 <paper-input id="nutrientUnitField" readonly label="Unit of Measure" value="[[nutrientUnit]]"></paper-input>
             </div>
-            <div class="card-actions"> 
+            <div class="card-actions">
                 <paper-button on-tap="update">Update</paper-button>
                 <paper-button on-tap="restore">Restore</paper-button>
                 <paper-icon-button on-tap="previousRecord" icon="my-icons:chevron-left"></paper-icon-button>
@@ -35,7 +36,9 @@
         class NcAlterFoodNutrientAmounts extends
             MultiRecordEditMixin(
                 DataMixin(
-                    Polymer.Element
+                    ReduxMixin(
+                        Polymer.Element
+                    )
                 )
             ) {
             static get is() { return 'nc-alter-food-nutrient-amounts'; }
@@ -48,7 +51,6 @@
                     multiplier: Number,
                     alteredNutrients: {
                         type: Array,
-                        notify: true,
                         value: []
                     },
                     nutrientName: String,
@@ -62,6 +64,17 @@
                     '_foodNutrientsChanged(foodNutrients.*, multiplier)',
                     '_currentRecordIndexChanged(alteredNutrients.*, currentRecordIndex)'
                 ];
+            }
+
+            static get actions() {
+                return {
+                    saveAlteredFoodNutrients: (consumptionFormAlteredNutrients) => {
+                        return {
+                            type: 'SAVE_ALTERED_CONSUMPTION_FORM_FOOD_NUTRIENTS',
+                            consumptionFormAlteredNutrients:  consumptionFormAlteredNutrients
+                        }
+                    }
+                };
             }
 
             _foodNutrientsChanged(changeRecord, multiplier) {
@@ -86,6 +99,7 @@
 
             update() {
                 this.set('alteredNutrients.' + this.currentRecordIndex + '.value', this.nutrientValue);
+                this.dispatch('saveAlteredFoodNutrients', this.alteredNutrients);
             }
 
         }
