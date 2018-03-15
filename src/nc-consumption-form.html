@@ -369,7 +369,7 @@
                 //this.$.foodListId.render(); // this only applies to dom-repeat sometimes...not iron-list
                 //this.$.foodSelectionMenu.opened = true; // TODO not sure about this??
                 if (this.alteredNutrients.length > 0) {
-                    this.foodNutrients = this.alteredNutrients;
+                    this.set('foodNutrients', this.alteredNutrients);
                     // start here ==> TODO? anything else need to be done to notify polymer binding about foodNutrient change or the iron-list?
                     this.dispatch('saveAlteredFoodNutrients', []); // clear it out
                 }
