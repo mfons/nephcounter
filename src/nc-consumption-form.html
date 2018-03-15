@@ -176,6 +176,17 @@
             ) {
             static get is() { return 'nc-consumption-form'; }
 
+            static get actions() {
+                return {
+                    saveAlteredFoodNutrients: (consumptionFormAlteredNutrients) => {
+                        return {
+                            type: 'SAVE_ALTERED_CONSUMPTION_FORM_FOOD_NUTRIENTS',
+                            consumptionFormAlteredNutrients:  consumptionFormAlteredNutrients
+                        }
+                    }
+                };
+            }
+
             static get properties() {
                 return {
                     offline: {
@@ -359,8 +370,8 @@
                 //this.$.foodSelectionMenu.opened = true; // TODO not sure about this??
                 if (this.alteredNutrients.length > 0) {
                     this.foodNutrients = this.alteredNutrients;
-                    ==>>start here
-                    // TODO create another action to clear in redux store what alteredNutrients connects to...
+                    // start here ==> TODO? anything else need to be done to notify polymer binding about foodNutrient change or the iron-list?
+                    this.dispatch('saveAlteredFoodNutrients', []); // clear it out
                 }
             }
 
