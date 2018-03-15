@@ -78,6 +78,7 @@
             }
 
             _foodNutrientsChanged(changeRecord, multiplier) {
+                if (!changeRecord.base) return;
                 this.splice('alteredNutrients', 0, this.alteredNutrients.length);
                 for (var i = 0; i < changeRecord.base.length; i++) {
                     var nutrientClone = this.cloneIt(changeRecord.base[i]);
