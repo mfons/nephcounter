@@ -11,10 +11,9 @@
   <script src="../node_modules/redux/dist/redux.js"></script>
   <script src="../bower_components/web-component-tester/browser.js"></script>
 
-  <!-- Import the element to test -->
-  <!-- <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<script src="../../@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>owser.js"></script>.html">
     <link rel="import" href="../bower_components/polymerfire/firebase-app.html"> -->
-  <link rel="import" href="../src/nc-consumption-form.html">
+  <script type="module" src="../src/nc-consumption-form.js"></script>
 </head>
 
 <body>
@@ -36,28 +35,32 @@
         var ncConsumptionForm = fixture('BasicView');
         var toast = ncConsumptionForm.shadowRoot.querySelector('#noResultsFoundToastId');
         var foodMenu = ncConsumptionForm.shadowRoot.querySelector("paper-dropdown-menu");
-        console.log("in last test");
+  <script type="module">
+import '../src/nc-consumption-form.js';
+suite('nc-consumption-form tests', function () {
+  test('bad search string should open toast that should dismiss when told', function (done) {
+    var ncConsumptionForm = fixture('BasicView');
+    var toast = ncConsumptionForm.shadowRoot.querySelector('#noResultsFoundToastId');
+    var foodMenu = ncConsumptionForm.shadowRoot.querySelector("paper-dropdown-menu");
+    console.log("in last test");
+    setTimeout(() => {
+      var searchField = ncConsumptionForm.shadowRoot.querySelector("#foodFluidSearchStringId");
+      searchField.inputElement.inputElement.value = "a-non-edible-search-string";
+      ncConsumptionForm.textSearch = "a-non-edible-search-string";
+      setTimeout(() => {
+        var event = new Event('click');
+        foodMenu.dispatchEvent(event);
         setTimeout(() => {
-          var searchField = ncConsumptionForm.shadowRoot.querySelector("#foodFluidSearchStringId");
-          searchField.inputElement.inputElement.value = "a-non-edible-search-string";
-          ncConsumptionForm.textSearch = "a-non-edible-search-string";
+          assert.equal(toast.opened, true);
+          ncConsumptionForm.shadowRoot.querySelector(".yellow-button").dispatchEvent(new Event('click'));
           setTimeout(() => {
-            var event = new Event('click');
-            foodMenu.dispatchEvent(event);
-            setTimeout(() => {
-              assert.equal(toast.opened, true);
-              ncConsumptionForm.shadowRoot.querySelector(".yellow-button").dispatchEvent(new Event('click'));
-              setTimeout(() => {
-                assert.equal(toast.opened, true);
-                done();
-              }, 500);
-            }, 500);
+            assert.equal(toast.opened, true);
+            done();
           }, 500);
         }, 500);
+      }, 500);
+    }, 500);
 
-      });
-    });
-  </script>
-</body>
-
-</html>
+  });
+});
+</script>

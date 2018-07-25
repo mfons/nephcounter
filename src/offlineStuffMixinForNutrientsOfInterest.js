@@ -1,0 +1,236 @@
+OfflineStuffMixinForNutientsOfInterest = (superClass) => class extends superClass {
+    constructor() {
+        super();
+    }
+
+    static get properties() {
+        return {
+            bar: {
+                type: Object
+            }
+        };
+    }
+
+    static get observers() {
+        return [];
+    }
+
+    doNewOfflineNutrientStuff() {
+        // Note: we assume we are signed in already.
+        let thisWebComponent = this;
+        this._waitForIndexedDbToOpenAndReadOrFail()
+            .then(() => {
+                console.log("_waitForIndexedDbToOpenAndReadOrFail success!");
+                thisWebComponent._doStuffOnceNutrientsHaveLoaded();
+            })
+            .catch(errMsg => {
+                console.log("in catch with error message of ", errMsg);
+            })
+    }
+
+    useDatabase(db, whatToDo) {
+        // Make sure to add a handler to be notified if another page requests a version
+        // change. We must close the database. This allows the other page to upgrade the database.
+        // If you don't do this then the upgrade won't happen until the user closes the tab.
+        db.onversionchange = (event) => {
+            db.close();
+            alert("A new version of this page is ready. Please reload!");
+        };
+
+        // Do stuff with the database.
+        whatToDo();
+
+        db.close(); // TODO do something besides closing.
+    }
+
+
+    _waitForIndexedDbToOpenAndReadOrFail(nutrientsArrayFromDB) {
+        var thisWebComponent = this;
+        return new Promise((resolve, reject) => {
+            var db;
+            console.log("in testIfNutrientsOfInterestOffLineExists...");
+            var openReq = window.indexedDB.open("NephcounterOffLineDB", 1);
+            openReq.onblocked = function (event) {
+                // If some other tab is loaded with the database, then it needs to be closed
+                // before we can proceed.
+                alert("Please close all other tabs with this site open!");
+            };
+
+            openReq.onupgradeneeded = (event) => {
+                // All other databases have been closed. Set everything up.
+                console.log("an upgrade is needed...");
+                var db = event.target.result;
+                switch (db.oldVersion) {
+                    case 0:
+                        let nutrientsOfInterestObjectStore = db.createObjectStore("nutrientsOfInterest", { keyPath: "allNutrientsOfInterestListKey" });
+                        let eatenItemsQueueObjectStore = db.createObjectStore("eatenItemsQueue", { autoIncrement: true });
+                }
+                console.log("NephcounterOffLineDB has finished its upgrade.")
+            };
+
+            openReq.onsuccess = function (event) {
+                var db = event.target.result;
+                // Note:  it seems that sometimes this does not get
+                db.close();
+                resolve();
+                return;
+            };
+
+            openReq.onerror = function (event) {
+                // Do something with request.errorCode!
+                console.log("NephcounterOffLineDB creation failed!", event);
+                reject("NephcounterOffLineDB open(/creation?) failed!");
+                // I assume if there was an error in opening the database
+                // that we also don't need to do a db.close() here.
+            };
+        });
+    }
+
+    saveNutrientsOfInterestToIndexedDb(nutrientsOfInterestList) {
+
+        return new Promise((resolve, reject) => {
+            var db;
+            var request = window.indexedDB.open("NephcounterOffLineDB");
+            request.onerror = function (event) {
+                // Do something with request.errorCode!
+                console.log("NephcounterOffLineDB creation failed!", event)
+                reject("open of database failed with error!");
+            }; // end of onerror
+            request.onsuccess = function (event) {
+                console.log("NephcounterOffLineDB open succeeded!");
+                db = event.target.result;
+                if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
+                    reject("nutrientsOfInterest object store has not been created yet to save");
+                    console.warn("nutrientsOfInterest object store has not been created yet to save", db.objectStoreNames);
+                    db.close();
+                    return;
+                }
+                var objectStore = db.transaction(["nutrientsOfInterest"], "readwrite").objectStore("nutrientsOfInterest");
+                var request = objectStore.get(1);
+                request.onerror = function (event) {
+                    // assuming that 1 was not found so it needs to be added
+                    console.warn("Caught querying record 1 from nutrientsOfInterest from error in event: ", event);
+                    reject("Caught querying record 1 from nutrientsOfInterest; check for console warning for specifics");
+                    db.close();
+                };
+                request.onsuccess = function (event) {
+                    // Get the old value that we want to update
+                    var data = event.target.result;
+
+                    if (typeof data === "undefined") {  // Then there is no record yet and we must add rather than update.
+                        var nutrientsOfInterestObjectStore = db.transaction("nutrientsOfInterest", "readwrite").objectStore("nutrientsOfInterest");
+                        var request = nutrientsOfInterestObjectStore.add({ allNutrientsOfInterestListKey: 1, allNutrientsOfInterestList: nutrientsOfInterestList });
+                        request.onsuccess = (event) => {
+                            console.log("added nutrients of interest to indexeddb");
+                            resolve();
+                            db.close()
+                        }
+                        return;
+                    }
+
+                    // update the value(s) in the object that you want to change
+                    data.allNutrientsOfInterestList = nutrientsOfInterestList;
+
+                    // Put this updated object back into the database.
+                    var requestUpdate = objectStore.put(data);
+                    requestUpdate.onerror = function (event) {
+                        console.warn("rejecting nutrient of interest indexeddb update due to event:", event);
+                        reject("rejecting nutrient of interest indexeddb update");
+                        db.close();
+                    };
+                    requestUpdate.onsuccess = function (event) {
+                        console.log("updated nutrients of interest in indexeddb");
+                        resolve();
+                        db.close();
+                    };
+                };
+
+            }; // end of onsuccess
+
+            // This is done only if there is no database and one needs to be created before we read from it.
+            request.onupgradeneeded = function (event) {
+                console.log("an upgrade is needed...");
+                var db = event.target.result;
+            }; // end of onupgradeneeded
+        });
+    }
+
+    _getNutrientsOfInterestFromIndexedDbIfAvailable() {
+        let thisWebComponent = this;
+        return new Promise((resolve, reject) => {
+            var db;
+            var request = window.indexedDB.open("NephcounterOffLineDB");
+            request.onerror = function (event) {
+                // Do something with request.errorCode!
+                console.warn("NephcounterOffLineDB creation failed in _getNutrientsOfInterestFromIndexedDbIfAvailable!", event)
+                reject("open of database failed with error in _getNutrientsOfInterestFromIndexedDbIfAvailable!");
+            }; // end of onerror
+            request.onsuccess = function (event) {
+                console.log("NephcounterOffLineDB open succeeded in _getNutrientsOfInterestFromIndexedDbIfAvailable!");
+                db = event.target.result;
+                if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
+                    reject("nutrientsOfInterest object store has not been created yet to retrieve");
+                    console.warn("nutrientsOfInterest object store has not been created yet to retrieve", db.objectStoreNames);
+                    db.close();
+                    return;
+                }
+                var objectStore = db.transaction(["nutrientsOfInterest"], "readonly").objectStore("nutrientsOfInterest");
+                var request = objectStore.get(1);
+                request.onerror = function (event) {
+                    // assuming that 1 was not found so it needs to be added
+                    console.warn("Caught querying record 1 from nutrientsOfInterest from error in event: ", event);
+                    reject("Caught querying record 1 from nutrientsOfInterest; check for console warning for specifics");
+                    db.close();
+                };
+                request.onsuccess = function (event) {
+                    // Get the old value that we want to update
+                    var data = event.target.result;
+
+                    if (typeof data === "undefined") {  // Then there is no record yet .
+                        reject("there is no record yet in indexedDB");
+                        db.close();
+                        return;
+                    }
+
+                    resolve(data.allNutrientsOfInterestList);
+                    db.close();
+                };
+
+            }; // end of onsuccess
+
+            // This is done only if there is no database and one needs to be created before we read from it.
+            request.onupgradeneeded = function (event) {
+                console.warn("an upgrade is needed...");
+                var db = event.target.result;
+                if (!db.objectStoreNames.contains('nutrientsOfInterest')) {
+                    let nutrientsOfInterestObjectStore = db.createObjectStore("nutrientsOfInterest", { keyPath: "allNutrientsOfInterestListKey" });
+                }
+                if (!db.objectStoreNames.contains('eatenItemsQueue')) {
+                    let eatenItemsQueueObjectStore = db.createObjectStore("eatenItemsQueue", { autoIncrement: true });
+                }
+                reject("There is no offline database yet for nutrientsOfInterest");
+                db.close();
+            }; // end of onupgradeneeded
+        });
+    }
+
+    deleteDB() {
+        var thisWebComponent = this;
+        return new Promise((resolve, reject) => {
+            var DBDeleteRequest = window.indexedDB.deleteDatabase("NephcounterOffLineDB");
+
+            DBDeleteRequest.onerror = function (event) {
+                console.log("Error deleting database.");
+                reject();
+            };
+
+            DBDeleteRequest.onsuccess = function (event) {
+                console.log("Database deleted successfully");
+
+                console.log(event.result); // should be undefined
+                resolve();
+            };
+        });
+    }
+
+}

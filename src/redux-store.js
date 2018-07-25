@@ -1,0 +1,55 @@
+import 'polymer-redux/polymer-redux.js';
+const initialState = {
+  nutrients: [  ],
+  offline: navigator.onLine === false,
+  nutrientsOfInterest: [{name: "loading..."}],
+  nutrientsOfInterestIsEmpty: true,
+  nutrientsOfInterestCount: 0,
+  latestFoodList: [],
+  latestQueryBroughtBackNoFoodList: true,
+  latestFoodListQueryString: "",
+  foodNutrientsForCurrentlySelectedFood: {},
+  consumptionFormAlteredNutrients: {}
+};
+
+const reducer = (state, action) => {
+  if (!state) return initialState;
+  switch (action.type) {
+    // case 'ADD_NUTRIENT' :
+    //   const nutrients = state.nutrients.slice(0);
+    //   nutrients.push(action.nutrient);
+    //   return Object.assign({}, state, { nutrients: nutrients });
+    case 'LOAD_ALL_NUTRIENTS' :
+      return Object.assign({}, state, { nutrients: action.nutrients });
+    case 'GO_ONLINE' :
+      return Object.assign({}, state, { offline: false });
+    case 'GO_OFFLINE' :
+      return Object.assign({}, state, { offline: true });
+    case 'LOAD_ALL_NUTRIENTS_OF_INTEREST' :
+      return Object.assign({}, state, { 
+        nutrientsOfInterest: action.allNutrientsOfInterest,
+        nutrientsOfInterestIsEmpty: action.allNutrientsOfInterest.length === 0,
+        nutrientsOfInterestCount: action.allNutrientsOfInterest.length
+      });
+      case 'SAVE_FOOD_LIST' :
+      return Object.assign({}, state, { 
+        latestFoodList: action.latestFoodList,
+        latestQueryBroughtBackNoFoodList: action.latestQueryBroughtBackNoFoodList,
+        latestFoodListQueryString: action.latestFoodListQueryString 
+      });
+      case 'SAVE_FOOD_NUTRIENTS_FOR_CURRENTLY_SELECTED_FOOD' :
+      return Object.assign({}, state, { 
+        foodNutrientsForCurrentlySelectedFood: action.foodNutrientsForCurrentlySelectedFood
+      });
+      case 'SAVE_ALTERED_CONSUMPTION_FORM_FOOD_NUTRIENTS' :
+      return Object.assign({}, state, {
+        consumptionFormAlteredNutrients: action.consumptionFormAlteredNutrients
+      });
+    default :
+      console.warn("Invalid action type in redux store:", action.type);
+  }
+};
+
+const store = Redux.createStore(reducer);
+//const ReduxBehavior = PolymerRedux(store);
+const ReduxMixin = PolymerRedux(store);

@@ -1,16 +1,16 @@
-<link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="nephcounter-main.html">
-<link rel="import" href="nephcounter-login.html">
-<link rel="import" href="shared-styles.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
-<link rel="import" href="redux-store.html">
-<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
-<link rel="import" href="../bower_components/paper-button/paper-button.html">
-
-
-<dom-module id="my-app">
-  <template>
+import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import './nephcounter-main.js';
+import './nephcounter-login.js';
+import './shared-styles.js';
+import 'polymerfire/firebase-auth.js';
+import 'polymerfire/firebase-app.js';
+import './redux-store.js';
+import '@polymer/paper-toast/paper-toast.js';
+import '@polymer/paper-button/paper-button.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+class MyApp extends ReduxMixin(PolymerElement) {
+  static get template() {
+    return html`
     <style include="shared-styles">
       :host {
         --app-primary-color: blue;
@@ -112,13 +112,13 @@
       <paper-button on-tap="_closeToast" class="yellow-button">No.</paper-button>
     </paper-toast>
 
-    <div class="signin-view" id="signin" hidden>
+    <div class="signin-view" id="signin" hidden="">
       <div class="header">
         <div class="giant">Nephcounter</div>
         <p>A Nutrient Monitoring and Reporting App Specialized for the needs of Dialysis Patients</p>
         <br>
-        <nephcounter-login user="{{user}}" hidden$="[[offline]]"></nephcounter-login>
-        <div hidden$="[[!offline]]" class="offline">We can't log on right now because we are offline.</div>
+        <nephcounter-login user="{{user}}" hidden\$="[[offline]]"></nephcounter-login>
+        <div hidden\$="[[!offline]]" class="offline">We can't log on right now because we are offline.</div>
       </div>
 
       <p class="footer">Made with Google Polymer/2, Firebase, Redux, and the USDA nutrition database.&nbsp; Created by
@@ -128,79 +128,75 @@
     </div>
 
     <nephcounter-main id="nephcountid"></nephcounter-main>
-  </template>
+`;
+  }
 
-  <script>
-    class MyApp extends ReduxMixin(Polymer.Element) {
-      static get is() { return 'my-app'; }
-      static get properties() {
-        return {
-          offline: {
-            type: Boolean,
-            statePath: 'offline',
-          },
-          myServiceWorker: Object
-        };
+  static get is() { return 'my-app'; }
+  static get properties() {
+    return {
+      offline: {
+        type: Boolean,
+        statePath: 'offline',
+      },
+      myServiceWorker: Object
+    };
+  }
+  static get actions() {
+    return {
+      goOnline: () => { return { type: 'GO_ONLINE' } },
+      goOffline: () => { return { type: 'GO_OFFLINE' } },
+    };
+  }
+
+  static get observers() {
+    return [
+      '_myServiceWorkerChanged(myServiceWorker.*)'
+    ];
+  }
+
+
+  ready() {
+    super.ready();
+    this.setUpOfflineListeners();
+
+    this.$.auth.auth.onAuthStateChanged(function (user) {
+      if (!!user) {
+        //            this.importHref(this.resolveUrl('nephcount-main.html'), function() {
+        //this.$.nephcountid.user = user;
+        this.$.signin.hidden = true;
+        this.$.nephcountid.hidden = false;
+        // We went from hidden to visible, so app-layout needs to recompute its size.
+        this.$.nephcountid.resizeHeader();
+        //          });
+      } else {
+        this.$.signin.hidden = false;
+        this.$.nephcountid.hidden = true;
       }
-      static get actions() {
-        return {
-          goOnline: () => { return { type: 'GO_ONLINE' } },
-          goOffline: () => { return { type: 'GO_OFFLINE' } },
-        };
-      }
+    }.bind(this));
+  }
 
-      static get observers() {
-        return [
-          '_myServiceWorkerChanged(myServiceWorker.*)'
-        ];
-      }
+  _refreshSW() {
+    this._closeToast();
+    // could I just say navigator.serviceWorker ??
+    this.myServiceWorker.postMessage({ action: 'skipWaiting' });
+  }
 
+  _closeToast() {
+    this.$.swtoast.opened = false;
+  }
 
-      ready() {
-        super.ready();
-        this.setUpOfflineListeners();
+  setUpOfflineListeners() {
+    window.addEventListener('online', function () {
+      this.dispatch('goOnline');
+    }.bind(this));
+    window.addEventListener('offline', function () {
+      this.dispatch('goOffline');
+    }.bind(this));
+  }
 
-        this.$.auth.auth.onAuthStateChanged(function (user) {
-          if (!!user) {
-            //            this.importHref(this.resolveUrl('nephcount-main.html'), function() {
-            //this.$.nephcountid.user = user;
-            this.$.signin.hidden = true;
-            this.$.nephcountid.hidden = false;
-            // We went from hidden to visible, so app-layout needs to recompute its size.
-            this.$.nephcountid.resizeHeader();
-            //          });
-          } else {
-            this.$.signin.hidden = false;
-            this.$.nephcountid.hidden = true;
-          }
-        }.bind(this));
-      }
+  _myServiceWorkerChanged(myServiceWorkerObserved) {
+    this.$.swtoast.opened = true;
+  }
+}
 
-      _refreshSW() {
-        this._closeToast();
-        // could I just say navigator.serviceWorker ??
-        this.myServiceWorker.postMessage({ action: 'skipWaiting' });
-      }
-      
-      _closeToast() {
-        this.$.swtoast.opened = false;
-      }
-
-      setUpOfflineListeners() {
-        window.addEventListener('online', function () {
-          this.dispatch('goOnline');
-        }.bind(this));
-        window.addEventListener('offline', function () {
-          this.dispatch('goOffline');
-        }.bind(this));
-      }
-
-      _myServiceWorkerChanged(myServiceWorkerObserved) {
-        this.$.swtoast.opened = true;
-      }
-      
-    }
-
-    window.customElements.define(MyApp.is, MyApp);
-  </script>
-</dom-module>
+window.customElements.define(MyApp.is, MyApp);

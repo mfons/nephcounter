@@ -169,7 +169,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <!-- Built with love using Polymer Starter Kit -->
   <!-- Load and register pre-caching Service Worker -->
-  <script>
+  <script type="module">
+
+  import '/src/my-app.js';
 
     function _updateReady(worker) {
       console.log("there is a service worker update ready");
@@ -225,13 +227,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       });
     }
-  </script>
+</script>
 
+<script src="/node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
   <!-- Load webcomponents-loader.js to check and load any polyfills your browser needs -->
-  <script src="/bower_components/webcomponentsjs/webcomponents-loader.js"></script>
-  <script src="/node_modules/redux/dist/redux.js"></script>
-  <!-- Load your application shell -->
-  <link rel="import" href="/src/my-app.html">
+<script src="/node_modules/redux/dist/redux.js"></script>
+<!-- Load your application shell -->
+
 
 </body>
 

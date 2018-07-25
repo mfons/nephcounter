@@ -8,12 +8,9 @@
 
     <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
     <script src="../node_modules/redux/dist/redux.js"></script>
-    <script src="../bower_components/web-component-tester/browser.js"></script>
-
-    <!-- Import the element to test -->
-    <!-- <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+    <script src="../../@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>  <script src="../../wct-browser-legacy/browser.js"></script>ower_components/polymerfire/firebase-auth.html">
     <link rel="import" href="../bower_components/polymerfire/firebase-app.html"> -->
-    <link rel="import" href="../src/nc-nutrientsofinterest.html">
+    <script type="module" src="../src/nc-nutrientsofinterest.js"></script>
   </head>
   <body>
     <test-fixture id="BasicView">
@@ -32,10 +29,13 @@
       suite('nc-nutrientsofinterest tests', function() {
         test('circle should have a 1 in it.', function() {
           var ncNutrientsOfInterest = fixture('BasicView');
-          var circle = ncNutrientsOfInterest.shadowRoot.querySelector('.circle');
-          assert.equal(circle.textContent, '1');
-        });
-      });
-    </script>
-  </body>
-</html>
+    <script type="module">
+import '../src/nc-nutrientsofinterest.js';
+suite('nc-nutrientsofinterest tests', function() {
+  test('circle should have a 1 in it.', function() {
+    var ncNutrientsOfInterest = fixture('BasicView');
+    var circle = ncNutrientsOfInterest.shadowRoot.querySelector('.circle');
+    assert.equal(circle.textContent, '1');
+  });
+});
+</script>

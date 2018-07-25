@@ -1,10 +1,10 @@
-<link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="shared-styles.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
-<link rel="import" href="../bower_components/neon-animation/web-animations.html">
-<link rel="import" href="nc-consumption-form.html">
-<link rel="import" href="my-icons.html">
+<script type="module" src="../../@polymer/polymer/polymer-element.js"></script>
+<script type="module" src="./shared-styles.js"></script>
+<script type="module" src="../../@polymer/paper-icon-button/paper-icon-button.js"></script>
+<script type="module" src="../../@polymer/paper-tooltip/paper-tooltip.js"></script>
+<script type="module" src="../../@polymer/neon-animation/web-animations.js"></script>
+<script type="module" src="./nc-consumption-form.js"></script>
+<script type="module" src="./my-icons.js"></script>
 
 
 <dom-module id="nc-consumption">
@@ -85,5 +85,17 @@
     }
 
     window.customElements.define(NcConsumption.is, NcConsumption);
-  </script>
-</dom-module>
+  <script type="module">
+import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import './shared-styles.js';
+import '@polymer/paper-icon-button/paper-icon-button.js';
+import '@polymer/paper-tooltip/paper-tooltip.js';
+import '@polymer/neon-animation/web-animations.js';
+import './nc-consumption-form.js';
+import './my-icons.js';
+class NcConsumption extends PolymerElement {
+  static get is() { return 'nc-consumption'; }
+}
+
+window.customElements.define(NcConsumption.is, NcConsumption);
+</script>

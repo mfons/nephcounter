@@ -8,10 +8,10 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="shared-styles.html">
-<link rel="import" href="offlineStuffMixinForNutrientsOfInterest.html">
-<link rel="import" href="redux-store.html">
+<script type="module" src="../../@polymer/polymer/polymer-element.js"></script>
+<script type="module" src="./shared-styles.js"></script>
+<script type="module" src="./offlineStuffMixinForNutrientsOfInterest.js"></script>
+<script type="module" src="./redux-store.js"></script>
 
 
 <dom-module id="nc-offline-capabilities">
@@ -62,128 +62,137 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 ReduxMixin(
                     Polymer.Element
                 )
-            ) {
+    <script type="module">
+import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import './shared-styles.js';
+import './offlineStuffMixinForNutrientsOfInterest.js';
+import './redux-store.js';
+class NcOfflineCapabilities extends
+    OfflineStuffMixinForNutientsOfInterest(
+        ReduxMixin(
+            PolymerElement
+        )
+    ) {
 
-            static get is() { return 'nc-offline-capabilities'; }
+    static get is() { return 'nc-offline-capabilities'; }
 
-            static get properties() {
-                return {
-                    areNutrientsWeCareAboutAvailableOfflineString: {
-                        type: String,
-                        value: "ARE NOT"
-                    },
-                    isCompleteNutrientListAvailableOfflineString: {
-                        type: String,
-                        value: "IS NOT"
-                    },
-                    areAnyFoodSearchesAvailableOfflineString: {
-                        type: String,
-                        value: "ARE NOT"
-                    },
-                    availableFoodSearchesList: {
-                        type: Array,
-                        value: []
-                    },
-                    areAnyFoodNutrientListsAvailableOfflineString: {
-                        type: String,
-                        value: "ARE NOT"
-                    },
-                    availableFoodNutrientList: {
-                        type: Array,
-                        value: []
-                    },
-                }
-            }
-
-            _foodSearchesAreAvailableOffline(areAnyFoodSearchesAvailableOfflineString) {
-                return this.areAnyFoodSearchesAvailableOfflineString === 'ARE';
-            }
-
-            _foodNutrientListsAreAvailableOffline(areAnyFoodNutrientListsAvailableOfflineString) {
-                return this.areAnyFoodNutrientListsAvailableOfflineString === 'ARE';
-            }
-
-            _isCurrentPageControlledBySWYet() {
-                return navigator.serviceWorker.controller ? 'WILL' : 'WILL NOT YET';
-            }
-
-            ready() {
-                super.ready();
-                var thiswebcomponent = this;
-                this._getNutrientsOfInterestFromIndexedDbIfAvailable()
-                    .then((list) => {
-                        thiswebcomponent.areNutrientsWeCareAboutAvailableOfflineString = (list && list.length > 0) ? "ARE" : "ARE NOT";
-                    })
-                    .catch((errorText) => {
-                        console.warn("_getNutrientsOfInterestFromIndexedDbIfAvailable rejected with ", errorText);
-                        thiswebcomponent.areNutrientsWeCareAboutAvailableOfflineString = "ARE NOT";
-                    });
-                this._listVariousKindsOfCachedResponses();
-            }
-
-            _listVariousKindsOfCachedResponses() {
-                const thisWebComponent = this;
-                caches.keys()
-                    .then((cacheNames) => {
-                        return caches.open(cacheNames.find((cacheName) => { return cacheName.startsWith("$$$toolbox-cache$$$"); }));
-                    })
-                    .then((cache) => {
-                        return cache.keys();
-                    })
-                    .then((cacheNames) => {
-                        console.log("cacheNames", cacheNames);
-                        // check for cached list of all possible nutrients
-                        if (!cacheNames || !cacheNames.find((cacheName) => { return cacheName.url.search("ndb/list") > -1; })) {
-                            thisWebComponent.isCompleteNutrientListAvailableOfflineString = 'IS NOT';
-                        }
-                        else {
-                            thisWebComponent.isCompleteNutrientListAvailableOfflineString = 'IS';
-                        }
-                        // check for food and gather list of names if so
-                        if (!cacheNames || !cacheNames.find((cacheName) => { return cacheName.url.search("ndb/search") > -1; })) {
-                            thisWebComponent.areAnyFoodSearchesAvailableOfflineString = 'ARE NOT';
-                        }
-                        else {
-                            thisWebComponent.areAnyFoodSearchesAvailableOfflineString = 'ARE';
-                            cacheNames
-                                .filter((cacheName) => { return cacheName.url.search("ndb/search") > -1; })
-                                .forEach((cachedRequest) => {
-                                    caches.match(cachedRequest)
-                                        .then((cachedResponse) => {
-                                            // console.info("responses for food searches found: ", cachedResponse);
-                                            return cachedResponse.json();
-                                        })
-                                        .then((data) => {// TODO data.list.q
-                                            console.info("json response:", data);
-                                            thisWebComponent.push('availableFoodSearchesList', data.list.q);
-                                        });
-                                })
-                        }
-                        // check detailed food lists and list food names if so
-                        if (!cacheNames || !cacheNames.find((cacheName) => { return cacheName.url.search("ndb/nutrients") > -1; })) {
-                            thisWebComponent.areAnyFoodNutrientListsAvailableOfflineString = 'ARE NOT';
-                        }
-                        else {
-                            thisWebComponent.areAnyFoodNutrientListsAvailableOfflineString = 'ARE';
-                            cacheNames
-                                .filter((cacheName) => { return cacheName.url.search("ndb/nutrients") > -1; })
-                                .forEach((cachedRequest) => {
-                                    caches.match(cachedRequest)
-                                        .then((cachedResponse) => {
-                                            // console.info("responses for food searches found: ", cachedResponse);
-                                            return cachedResponse.json();
-                                        })
-                                        .then((data) => {// TODO data.list.q
-                                            console.info("json response:", data);
-                                            if (data.errors || !data.report.foods || data.report.foods.length === 0 || !data.report.foods[0].name) { return; }
-                                            thisWebComponent.push('availableFoodNutrientList', data.report.foods[0].name);
-                                        });
-                                })
-                        }
-                    });
-            }
+    static get properties() {
+        return {
+            areNutrientsWeCareAboutAvailableOfflineString: {
+                type: String,
+                value: "ARE NOT"
+            },
+            isCompleteNutrientListAvailableOfflineString: {
+                type: String,
+                value: "IS NOT"
+            },
+            areAnyFoodSearchesAvailableOfflineString: {
+                type: String,
+                value: "ARE NOT"
+            },
+            availableFoodSearchesList: {
+                type: Array,
+                value: []
+            },
+            areAnyFoodNutrientListsAvailableOfflineString: {
+                type: String,
+                value: "ARE NOT"
+            },
+            availableFoodNutrientList: {
+                type: Array,
+                value: []
+            },
         }
+    }
 
-        window.customElements.define(NcOfflineCapabilities.is, NcOfflineCapabilities);
-    </script>
-</dom-module>
+    _foodSearchesAreAvailableOffline(areAnyFoodSearchesAvailableOfflineString) {
+        return this.areAnyFoodSearchesAvailableOfflineString === 'ARE';
+    }
+
+    _foodNutrientListsAreAvailableOffline(areAnyFoodNutrientListsAvailableOfflineString) {
+        return this.areAnyFoodNutrientListsAvailableOfflineString === 'ARE';
+    }
+
+    _isCurrentPageControlledBySWYet() {
+        return navigator.serviceWorker.controller ? 'WILL' : 'WILL NOT YET';
+    }
+
+    ready() {
+        super.ready();
+        var thiswebcomponent = this;
+        this._getNutrientsOfInterestFromIndexedDbIfAvailable()
+            .then((list) => {
+                thiswebcomponent.areNutrientsWeCareAboutAvailableOfflineString = (list && list.length > 0) ? "ARE" : "ARE NOT";
+            })
+            .catch((errorText) => {
+                console.warn("_getNutrientsOfInterestFromIndexedDbIfAvailable rejected with ", errorText);
+                thiswebcomponent.areNutrientsWeCareAboutAvailableOfflineString = "ARE NOT";
+            });
+        this._listVariousKindsOfCachedResponses();
+    }
+
+    _listVariousKindsOfCachedResponses() {
+        const thisWebComponent = this;
+        caches.keys()
+            .then((cacheNames) => {
+                return caches.open(cacheNames.find((cacheName) => { return cacheName.startsWith("$$$toolbox-cache$$$"); }));
+            })
+            .then((cache) => {
+                return cache.keys();
+            })
+            .then((cacheNames) => {
+                console.log("cacheNames", cacheNames);
+                // check for cached list of all possible nutrients
+                if (!cacheNames || !cacheNames.find((cacheName) => { return cacheName.url.search("ndb/list") > -1; })) {
+                    thisWebComponent.isCompleteNutrientListAvailableOfflineString = 'IS NOT';
+                }
+                else {
+                    thisWebComponent.isCompleteNutrientListAvailableOfflineString = 'IS';
+                }
+                // check for food and gather list of names if so
+                if (!cacheNames || !cacheNames.find((cacheName) => { return cacheName.url.search("ndb/search") > -1; })) {
+                    thisWebComponent.areAnyFoodSearchesAvailableOfflineString = 'ARE NOT';
+                }
+                else {
+                    thisWebComponent.areAnyFoodSearchesAvailableOfflineString = 'ARE';
+                    cacheNames
+                        .filter((cacheName) => { return cacheName.url.search("ndb/search") > -1; })
+                        .forEach((cachedRequest) => {
+                            caches.match(cachedRequest)
+                                .then((cachedResponse) => {
+                                    // console.info("responses for food searches found: ", cachedResponse);
+                                    return cachedResponse.json();
+                                })
+                                .then((data) => {// TODO data.list.q
+                                    console.info("json response:", data);
+                                    thisWebComponent.push('availableFoodSearchesList', data.list.q);
+                                });
+                        })
+                }
+                // check detailed food lists and list food names if so
+                if (!cacheNames || !cacheNames.find((cacheName) => { return cacheName.url.search("ndb/nutrients") > -1; })) {
+                    thisWebComponent.areAnyFoodNutrientListsAvailableOfflineString = 'ARE NOT';
+                }
+                else {
+                    thisWebComponent.areAnyFoodNutrientListsAvailableOfflineString = 'ARE';
+                    cacheNames
+                        .filter((cacheName) => { return cacheName.url.search("ndb/nutrients") > -1; })
+                        .forEach((cachedRequest) => {
+                            caches.match(cachedRequest)
+                                .then((cachedResponse) => {
+                                    // console.info("responses for food searches found: ", cachedResponse);
+                                    return cachedResponse.json();
+                                })
+                                .then((data) => {// TODO data.list.q
+                                    console.info("json response:", data);
+                                    if (data.errors || !data.report.foods || data.report.foods.length === 0 || !data.report.foods[0].name) { return; }
+                                    thisWebComponent.push('availableFoodNutrientList', data.report.foods[0].name);
+                                });
+                        })
+                }
+            });
+    }
+}
+
+window.customElements.define(NcOfflineCapabilities.is, NcOfflineCapabilities);
+</script>
